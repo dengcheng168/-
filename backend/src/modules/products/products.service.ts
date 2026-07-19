@@ -120,7 +120,15 @@ export async function createProduct(prisma: PrismaClient, input: CreateProductIn
   return serializeProduct(product);
 }
 
+/**
+ * 更新前先确认产品仍然存在且未被软删除，避免并发场景下"复活"一个已经被删除的产品
+ * （Prisma update 本身不会检查 deletedAt，如果不加这层判断，编辑页面还开着时产品被删，
+ * 保存操作会直接把它悄悄改回未删除状态）。返回 null 交给 controller 转成 404。
+ */
 export async function updateProduct(prisma: PrismaClient, id: number, input: UpdateProductInput) {
+  const existing = await prisma.product.findFirst({ where: { id, deletedAt: null } });
+  if (!existing) return null;
+
   const product = await prisma.product.update({ where: { id }, data: toDbData(input) });
   return serializeProduct(product);
 }
