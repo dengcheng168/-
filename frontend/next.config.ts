@@ -5,26 +5,17 @@ const nextConfig: NextConfig = {
   // 不需要把完整 node_modules 打进最终镜像，显著减小生产镜像体积，适合小内存 VPS。
   output: 'standalone',
   images: {
-    // 生产环境图片经 Nginx 与前端同源提供（/uploads/...），无需在此配置。
-    // 本地开发时前端(3000)直接从后端(4000)拉取图片，属于跨源，需要显式允许。
-    remotePatterns: [
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '4000',
-        pathname: '/uploads/**',
-      },
-    ],
-    // Next.js 16 新增了"本地 IP 优化限制"：图片优化代理默认拒绝解析到本机/内网 IP 的地址，
-    // 而本地开发时前端(3000)正是通过 localhost:4000 跨源拉取后端图片，会被这条新规则挡掉
-    // （报错 "url" parameter is not allowed）。生产环境走 Nginx 同源代理不受影响，这里仅为
-    // 开发联调放开，属于预期内的本机网络场景。
-    dangerouslyAllowLocalIP: true,
-    // 占位图使用 SVG（public/images/placeholders/），Next.js 默认出于安全考虑禁止优化 SVG。
-    // 这些文件都是仓库内置的可信静态资源，非用户上传内容，允许并加沙箱 CSP 作为纵深防御。
-    dangerouslyAllowSVG: true,
-    contentDispositionType: 'attachment',
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // 关闭 Next.js 内置的图片优化代理（/_next/image）。
+    //
+    // 原因：生产环境是多容器部署，/uploads/** 由 Nginx（同源反代）和 backend 容器提供，
+    // frontend 容器自己的文件系统里并没有这些文件。Next.js 图片优化器对"本地相对路径"
+    // （不带协议/host 的 src，例如 /uploads/webp/xxx.webp）的处理方式是把它当成本应用自己
+    // 能提供的资源去请求，而不是转发给同源的 Nginx，所以在 frontend 容器里找不到文件，
+    // 返回 400，图片显示不出来（直接访问 /uploads/... 本身是 200，问题只出在优化代理这一步）。
+    //
+    // 而且后台上传时后端已经用 sharp 生成了 webp + 缩略图两种尺寸，本来就不需要 Next.js
+    // 再优化一遍，所以直接关闭最简单可靠，不用为每个 <Image> 单独加 unoptimized。
+    unoptimized: true,
   },
 };
 
