@@ -59,6 +59,7 @@ export const homepageSettingsSchema = z.object({
 export const footerSettingsSchema = z.object({
   footerText: z.string().optional(),
   footerColumns: z.array(z.unknown()).optional(),
+  footerCompanyIntro: z.string().optional(),
 });
 
 export const turnstileSettingsSchema = z.object({

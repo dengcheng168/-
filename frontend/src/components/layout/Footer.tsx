@@ -66,7 +66,9 @@ export async function Footer() {
           ) : (
             <div className="text-lg font-semibold text-white">{settings.companyName || 'Water Purifier Factory'}</div>
           )}
-          {settings.companyAddress && <p className="mt-3 text-sm leading-relaxed text-grey-200/80">{settings.companyAddress}</p>}
+          {settings.footerCompanyIntro && (
+            <p className="mt-3 text-sm leading-relaxed text-grey-200/80">{settings.footerCompanyIntro}</p>
+          )}
 
           {activeSocialLinks.length > 0 && (
             <div className="mt-5 flex flex-wrap items-center gap-2">

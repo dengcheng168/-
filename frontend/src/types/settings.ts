@@ -55,4 +55,5 @@ export interface PublicSiteSettings {
   partnerRegions: string[];
   footerText: string | null;
   footerColumns: FooterColumn[] | null;
+  footerCompanyIntro: string | null;
 }

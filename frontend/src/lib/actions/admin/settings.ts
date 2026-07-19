@@ -135,5 +135,6 @@ export async function changePasswordAction(_prevState: AdminFormState, formData:
 export async function updateFooterSettingsAction(_prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
   return patchSettings('footer', {
     footerText: textOrUndefined(formData, 'footerText'),
+    footerCompanyIntro: textOrUndefined(formData, 'footerCompanyIntro'),
   }, '/admin/footer');
 }

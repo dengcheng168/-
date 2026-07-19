@@ -37,6 +37,7 @@ const FALLBACK_SETTINGS: PublicSiteSettings = {
   partnerRegions: [],
   footerText: null,
   footerColumns: null,
+  footerCompanyIntro: null,
 };
 
 function resolveSettingsMedia(settings: PublicSiteSettings): PublicSiteSettings {

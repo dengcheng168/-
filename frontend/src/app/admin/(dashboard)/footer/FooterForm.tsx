@@ -6,6 +6,7 @@ import { updateFooterSettingsAction } from '@/lib/actions/admin/settings';
 
 interface Values {
   footerText: string | null;
+  footerCompanyIntro: string | null;
 }
 
 export function FooterForm({ initialValues }: { initialValues: Values }) {
@@ -13,6 +14,20 @@ export function FooterForm({ initialValues }: { initialValues: Values }) {
 
   return (
     <form action={formAction} className="max-w-xl space-y-4">
+      <FormField
+        label="页脚公司简介"
+        htmlFor="footerCompanyIntro"
+        hint="显示在页脚 Logo 下方，独立编写，不会自动带入网站基础设置里的公司地址"
+      >
+        <textarea
+          id="footerCompanyIntro"
+          name="footerCompanyIntro"
+          rows={4}
+          defaultValue={initialValues.footerCompanyIntro ?? ''}
+          className={fieldInputClasses}
+        />
+      </FormField>
+
       <FormField label="页脚版权文字" htmlFor="footerText" hint="留空则自动显示 © 年份 公司名称">
         <input id="footerText" name="footerText" defaultValue={initialValues.footerText ?? ''} className={fieldInputClasses} />
       </FormField>

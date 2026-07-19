@@ -309,6 +309,8 @@ model SiteSetting {
   partnerRegions        String   @default("[]") // JSON 字符串
   footerText            String?
   footerColumns         String? // JSON 字符串
+  // 页脚 Logo 下方的公司简介，独立于网站基础设置里的 companyAddress，管理员单独填写
+  footerCompanyIntro    String?
   updatedAt             DateTime @updatedAt
 
   @@map("site_settings")
