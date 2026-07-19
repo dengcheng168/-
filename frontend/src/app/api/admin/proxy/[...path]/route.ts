@@ -19,13 +19,17 @@ async function proxy(request: Request, path: string[]) {
   const { search } = new URL(request.url);
   const targetUrl = `${internalBase}/api/admin/${path.join('/')}${search}`;
 
+  const hasBody = !['GET', 'HEAD'].includes(request.method) ? await request.text() : undefined;
+
   const res = await fetch(targetUrl, {
     method: request.method,
     headers: {
-      'Content-Type': 'application/json',
       Cookie: `${ADMIN_COOKIE_NAME}=${token}`,
+      // 只有实际带 body 时才声明 JSON content-type——DELETE 等无 body 请求如果强行声明会被
+      // 后端 Fastify 判定为 "Content-Type: application/json 但 body 为空" 而报 400 错误。
+      ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
     },
-    body: ['GET', 'HEAD'].includes(request.method) ? undefined : await request.text(),
+    body: hasBody || undefined,
   });
 
   const body = await res.text();
