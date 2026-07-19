@@ -96,3 +96,17 @@ export async function deleteProductAction(formData: FormData): Promise<void> {
   await adminFetch(`/products/${id}`, { method: 'DELETE' });
   revalidatePath('/admin/products');
 }
+
+/**
+ * 供产品列表"发布/下架"按钮直接调用（不经过 <form action>），
+ * 复用后端已有的 PATCH /admin/products/:id/status，不新增接口。
+ */
+export async function setProductStatusAction(id: number, status: 'DRAFT' | 'PUBLISHED'): Promise<AdminFormState> {
+  try {
+    await adminFetch(`/products/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
+  } catch (err) {
+    return { success: false, message: err instanceof ApiError ? err.message : '操作失败' };
+  }
+  revalidatePath('/admin/products');
+  return { success: true, message: status === 'PUBLISHED' ? '已发布' : '已下架' };
+}
