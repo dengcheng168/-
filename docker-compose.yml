@@ -33,9 +33,10 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      # 构建期尽量让前端能连上后端一起做静态生成；即使连不上，各页面也有兜底逻辑不会构建失败
+      # 构建期前端连不上后端也没关系，各页面都有兜底逻辑不会构建失败
       # （见 frontend/src/lib/api/*.ts 中的 try/catch 说明）。
-      network: internal
+      # 注意：不要在这里加 network: internal ——较新的 docker compose 默认用 buildx bake 构建，
+      # 不支持给构建步骤挂自定义命名网络，会直接报错 "network mode ... not supported by buildkit"。
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-/api}
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
