@@ -70,7 +70,7 @@ export function AdminSidebar({ user, collapsed, onToggleCollapse, mobileOpen, on
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-[#E5E7EB] px-4">
         {!collapsed && (
           <Link href="/admin" className="truncate text-sm font-semibold text-[#111827]">
-            净水器工厂后台
+            鲤门科技独立站管理后台
           </Link>
         )}
         <button
