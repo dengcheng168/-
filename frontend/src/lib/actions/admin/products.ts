@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { updateTag } from 'next/cache';
 import { adminFetch } from '@/lib/api/admin-client';
 import { ApiError } from '@/lib/api/client';
 import type { AdminFormState } from './categories';
@@ -71,23 +72,30 @@ function buildPayload(formData: FormData) {
   };
 }
 
+/** 保存成功后统一刷新：后台列表页路由缓存 + 前台公开站点的 fetch 缓存标签（见 lib/api/products.ts 的 tags） */
+function revalidateProductCaches(slug?: string) {
+  revalidatePath('/admin/products');
+  updateTag('products');
+  if (slug) updateTag(`product:${slug}`);
+}
+
 export async function createProductAction(_prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
   try {
-    await adminFetch('/products', { method: 'POST', body: JSON.stringify(buildPayload(formData)) });
+    const { data } = await adminFetch<{ slug: string }>('/products', { method: 'POST', body: JSON.stringify(buildPayload(formData)) });
+    revalidateProductCaches(data.slug);
   } catch (err) {
     return { message: err instanceof ApiError ? err.message : '创建失败' };
   }
-  revalidatePath('/admin/products');
   redirect('/admin/products');
 }
 
 export async function updateProductAction(id: number, _prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
   try {
-    await adminFetch(`/products/${id}`, { method: 'PATCH', body: JSON.stringify(buildPayload(formData)) });
+    const { data } = await adminFetch<{ slug: string }>(`/products/${id}`, { method: 'PATCH', body: JSON.stringify(buildPayload(formData)) });
+    revalidateProductCaches(data.slug);
   } catch (err) {
     return { message: err instanceof ApiError ? err.message : '保存失败' };
   }
-  revalidatePath('/admin/products');
   redirect('/admin/products');
 }
 
@@ -95,6 +103,7 @@ export async function deleteProductAction(formData: FormData): Promise<void> {
   const id = formData.get('id');
   await adminFetch(`/products/${id}`, { method: 'DELETE' });
   revalidatePath('/admin/products');
+  updateTag('products');
 }
 
 /**
@@ -103,10 +112,10 @@ export async function deleteProductAction(formData: FormData): Promise<void> {
  */
 export async function setProductStatusAction(id: number, status: 'DRAFT' | 'PUBLISHED'): Promise<AdminFormState> {
   try {
-    await adminFetch(`/products/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
+    const { data } = await adminFetch<{ slug: string }>(`/products/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
+    revalidateProductCaches(data.slug);
   } catch (err) {
     return { success: false, message: err instanceof ApiError ? err.message : '操作失败' };
   }
-  revalidatePath('/admin/products');
   return { success: true, message: status === 'PUBLISHED' ? '已发布' : '已下架' };
 }

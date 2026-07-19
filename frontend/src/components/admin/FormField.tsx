@@ -1,5 +1,5 @@
 export const fieldInputClasses =
-  'w-full rounded-md border border-grey-200 px-3 py-2 text-sm text-navy-950 focus:border-water-500 focus:outline-none focus:ring-1 focus:ring-water-500';
+  'w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50';
 
 export function FormField({
   label,
@@ -7,20 +7,28 @@ export function FormField({
   required,
   children,
   hint,
+  error,
 }: {
   label: string;
   htmlFor: string;
   required?: boolean;
   children: React.ReactNode;
   hint?: string;
+  error?: string;
 }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="mb-1 block text-sm font-medium text-navy-950">
-        {label} {required && <span className="text-red-500">*</span>}
+      <label htmlFor={htmlFor} className="mb-1 block text-sm font-medium text-foreground">
+        {label} {required && <span className="text-destructive">*</span>}
       </label>
       {children}
-      {hint && <p className="mt-1 text-xs text-grey-500">{hint}</p>}
+      {error ? (
+        <p id={`${htmlFor}-error`} role="alert" className="mt-1 text-xs text-destructive">
+          {error}
+        </p>
+      ) : (
+        hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
+      )}
     </div>
   );
 }

@@ -82,7 +82,8 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { label: '管理员设置', href: '/admin/settings/account' },
       { label: '角色', href: '/admin/settings/roles', disabled: true },
       { label: '权限', href: '/admin/settings/permissions', disabled: true },
-      { label: '登录记录', href: '/admin/settings/login-logs', disabled: true },
+      { label: '登录记录', href: '/admin/settings/login-logs' },
+      { label: '操作日志', href: '/admin/settings/audit-logs' },
     ],
   },
 ];

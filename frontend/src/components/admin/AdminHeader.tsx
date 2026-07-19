@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { findActiveNav } from '@/lib/i18n/admin-strings';
 import { logoutAction } from '@/lib/actions/auth';
 import type { AdminUser } from '@/lib/auth/session';
+import { adminRoleLabel } from '@/lib/auth/roles';
 import { Breadcrumb } from './Breadcrumb';
 import { ThemeToggle } from './ThemeToggle';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
@@ -52,7 +53,7 @@ export function AdminHeader({ user, onOpenMobileMenu }: { user: AdminUser; onOpe
             <DropdownMenuLabel className="font-normal">
               <div className="truncate text-sm font-medium text-foreground">{user.name ?? user.email}</div>
               <div className="truncate text-xs text-muted-foreground">
-                {user.email} · {user.role === 'SUPER_ADMIN' ? '超级管理员' : '编辑'}
+                {user.email} · {adminRoleLabel(user.role)}
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
