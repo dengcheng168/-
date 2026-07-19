@@ -1,0 +1,32 @@
+import { notFound } from 'next/navigation';
+import { adminFetch } from '@/lib/api/admin-client';
+import { PageForm } from '../PageForm';
+import { updatePageAction } from '@/lib/actions/admin/pages';
+
+interface PageDetail {
+  slug: string;
+  title: string;
+  bodyHtml: string | null;
+  sections: unknown;
+  seoTitle: string | null;
+  seoDescription: string | null;
+}
+
+export default async function EditPagePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+
+  const result = await adminFetch<PageDetail>(`/pages/${slug}`).catch(() => null);
+  if (!result) notFound();
+  const page = result.data;
+
+  const boundAction = updatePageAction.bind(null, slug);
+
+  return (
+    <div>
+      <h1 className="text-2xl font-semibold text-navy-950">编辑页面：{page.title}</h1>
+      <div className="mt-6">
+        <PageForm action={boundAction} initialValues={page} />
+      </div>
+    </div>
+  );
+}

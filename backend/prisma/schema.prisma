@@ -1,0 +1,344 @@
+// 净水器工厂官网 数据模型
+// 说明：内容字段（name/description/title 等）均为英文文本，供英文前台展示；
+// 本文件本身及后台界面文案为中文，但不属于 Prisma schema 的一部分。
+// 数据库当前使用 SQLite，字段类型均选用 SQLite/PostgreSQL 通用类型，
+// 未来切换到 PostgreSQL 时只需更换 datasource 的 provider/url。
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 注意：SQLite 连接器不支持原生 enum 类型，以下"枚举"字段统一用 String 存储，
+// 允许的取值在应用层（zod schema）校验。迁移到 PostgreSQL 后可选择改回原生 enum。
+//
+// AdminRole:     "SUPER_ADMIN" | "EDITOR"
+// ProductStatus: "DRAFT" | "PUBLISHED"
+// PostStatus:    "DRAFT" | "PUBLISHED"
+// InquiryStatus: "NEW" | "CONTACTED" | "QUOTED" | "CLOSED" | "SPAM"
+
+model AdminUser {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String
+  name         String?
+  role         String    @default("SUPER_ADMIN")
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  mediaUploads Media[]
+
+  @@map("admin_users")
+}
+
+model ProductCategory {
+  id             Int       @id @default(autoincrement())
+  name           String
+  slug           String    @unique
+  description    String?
+  image          String?
+  sortOrder      Int       @default(0)
+  published      Boolean   @default(true)
+  seoTitle       String?
+  seoDescription String?
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  products       Product[]
+
+  @@index([published])
+  @@index([sortOrder])
+  @@map("product_categories")
+}
+
+model Product {
+  id               Int             @id @default(autoincrement())
+  name             String
+  slug             String          @unique
+  sku              String?         @unique
+  categoryId       Int
+  category         ProductCategory @relation(fields: [categoryId], references: [id])
+  shortDescription String?
+  description      String // 富文本 HTML，保存前会做 sanitize
+  mainImage        String
+  galleryImages    String          @default("[]") // JSON 字符串：[{url, alt}]（SQLite 无原生 Json 类型，应用层负责序列化）
+  specs            String          @default("[]") // JSON 字符串：[{label, value}]
+  features         String          @default("[]") // JSON 字符串：string[] 或 [{title, description}]
+  applications     String          @default("[]") // JSON 字符串：[{title, description, image}]
+  packagingInfo    String?
+  moq              String?
+  oemOdmSupport    Boolean         @default(true)
+  specSheetUrl     String?
+  status           String          @default("DRAFT")
+  featured         Boolean         @default(false)
+  sortOrder        Int             @default(0)
+  seoTitle         String?
+  seoDescription   String?
+  seoKeywords      String?
+  ogImage          String?
+  deletedAt        DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  inquiries        Inquiry[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([featured])
+  @@index([sortOrder])
+  @@map("products")
+}
+
+model BlogCategory {
+  id          Int        @id @default(autoincrement())
+  name        String
+  slug        String     @unique
+  description String?
+  sortOrder   Int        @default(0)
+  published   Boolean    @default(true)
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  posts       BlogPost[]
+
+  @@map("blog_categories")
+}
+
+model BlogTag {
+  id        Int           @id @default(autoincrement())
+  name      String
+  slug      String        @unique
+  createdAt DateTime      @default(now())
+  posts     BlogPostTag[]
+
+  @@map("blog_tags")
+}
+
+model BlogPost {
+  id             Int          @id @default(autoincrement())
+  title          String
+  slug           String       @unique
+  excerpt        String?
+  body           String // 富文本 HTML，保存前会做 sanitize
+  coverImage     String?
+  categoryId     Int
+  category       BlogCategory @relation(fields: [categoryId], references: [id])
+  authorName     String       @default("Admin")
+  status         String       @default("DRAFT")
+  publishedAt    DateTime?
+  seoTitle       String?
+  seoDescription String?
+  deletedAt      DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  tags           BlogPostTag[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([publishedAt])
+  @@map("blog_posts")
+}
+
+model BlogPostTag {
+  postId Int
+  tagId  Int
+  post   BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    BlogTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("blog_post_tags")
+}
+
+model Inquiry {
+  id          Int           @id @default(autoincrement())
+  name        String
+  company     String?
+  country     String?
+  email       String
+  phone       String?
+  whatsapp    String?
+  productId   Int?
+  product     Product?      @relation(fields: [productId], references: [id])
+  productName String? // 自由文本"感兴趣的产品"，产品未选中时的兜底
+  quantity    String?
+  message     String?
+  sourcePage  String?
+  status      String        @default("NEW")
+  adminNotes  String?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([email])
+  @@map("inquiries")
+}
+
+model Certificate {
+  id               Int       @id @default(autoincrement())
+  name             String
+  certType         String? // "CE" | "RoHS" | "ISO" | "CB" | "FCC" | "Other"，仅作为可配置示例
+  certNumber       String?
+  issuingAuthority String?
+  issueDate        DateTime?
+  expiryDate       DateTime?
+  imageUrl         String
+  pdfUrl           String?
+  description      String?
+  sortOrder        Int       @default(0)
+  published        Boolean   @default(true)
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([published])
+  @@map("certificates")
+}
+
+model Faq {
+  id        Int      @id @default(autoincrement())
+  question  String
+  answer    String
+  category  String?
+  sortOrder Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published])
+  @@map("faqs")
+}
+
+model Testimonial {
+  id          Int      @id @default(autoincrement())
+  authorName  String
+  authorTitle String?
+  companyName String?
+  country     String?
+  avatarUrl   String?
+  quote       String
+  rating      Int?
+  sortOrder   Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published])
+  @@map("testimonials")
+}
+
+model Media {
+  id           Int        @id @default(autoincrement())
+  filename     String // 磁盘上的安全文件名
+  originalName String
+  url          String
+  thumbnailUrl String?
+  webpUrl      String?
+  mimeType     String
+  size         Int
+  width        Int?
+  height       Int?
+  altText      String?
+  uploadedById Int?
+  uploadedBy   AdminUser? @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime   @default(now())
+
+  @@index([mimeType])
+  @@index([createdAt])
+  @@map("media")
+}
+
+model Page {
+  id             Int      @id @default(autoincrement())
+  slug           String   @unique // "about" | "factory" | "oem-odm" | "privacy-policy" | "terms-of-use" | "contact"
+  title          String
+  bodyHtml       String? // 叙述性正文（About/Privacy/Terms）
+  sections       String? // JSON 字符串：结构化区块（工厂数据、OEM流程步骤等，页面各异）
+  seoTitle       String?
+  seoDescription String?
+  ogImage        String?
+  updatedAt      DateTime @updatedAt
+
+  @@map("pages")
+}
+
+model NavigationItem {
+  id           Int              @id @default(autoincrement())
+  label        String
+  url          String
+  sortOrder    Int              @default(0)
+  visible      Boolean          @default(true)
+  openInNewTab Boolean          @default(false)
+  parentId     Int?
+  parent       NavigationItem?  @relation("NavChildren", fields: [parentId], references: [id])
+  children     NavigationItem[] @relation("NavChildren")
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([parentId])
+  @@index([sortOrder])
+  @@map("navigation_items")
+}
+
+/// 单例配置行（id 固定为 1），承载首页/全局可编辑内容
+model SiteSetting {
+  id                    Int      @id @default(1)
+  companyName           String   @default("")
+  companyLogoUrl        String?
+  companyAddress        String?
+  companyEmail          String?
+  companyPhone          String?
+  whatsappNumber        String?
+  whatsappLink          String?
+  // 社交媒体链接列表，JSON 字符串，元素形如 { platform, label, url, enabled }
+  // 每个平台可以单独开关显示，不是"填了链接就显示"，管理员可以先填链接但暂不启用
+  socialLinks           String   @default("[]")
+  smtpEnabled           Boolean  @default(false)
+  smtpHost              String?
+  smtpPort              Int?
+  smtpUser              String?
+  smtpPassword          String?
+  smtpFromEmail         String?
+  turnstileEnabled      Boolean  @default(false)
+  turnstileSiteKey      String?
+  turnstileSecretKey    String?
+  defaultSeoTitle       String?
+  defaultSeoDescription String?
+  defaultOgImage        String?
+  heroHeadline          String   @default("OEM & ODM Water Purifier Manufacturer")
+  heroSubheadline       String   @default("Reliable water purification solutions for global brands, distributors and commercial projects.")
+  heroButton1Text       String   @default("Get a Quote")
+  heroButton1Link       String   @default("/contact")
+  heroButton2Text       String   @default("View Products")
+  heroButton2Link       String   @default("/products")
+  heroDesktopImage      String?
+  heroMobileImage       String?
+  coreAdvantages        String   @default("[]") // JSON 字符串
+  stats                 String   @default("[]") // JSON 字符串
+  oemProcessSteps       String   @default("[]") // JSON 字符串
+  factoryStats          String   @default("[]") // JSON 字符串
+  factoryPhotos         String   @default("[]") // JSON 字符串
+  partnerRegions        String   @default("[]") // JSON 字符串
+  footerText            String?
+  footerColumns         String? // JSON 字符串
+  updatedAt             DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model Redirect {
+  id         Int      @id @default(autoincrement())
+  fromPath   String   @unique
+  toPath     String
+  statusCode Int      @default(301)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("redirects")
+}

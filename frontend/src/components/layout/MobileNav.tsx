@@ -1,0 +1,53 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
+import type { NavigationItem } from '@/types/navigation';
+
+export function MobileNav({ items }: { items: NavigationItem[] }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="md:hidden">
+      <button
+        type="button"
+        aria-label={open ? 'Close menu' : 'Open menu'}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="flex h-10 w-10 items-center justify-center rounded-md text-navy-900 hover:bg-grey-100"
+      >
+        {open ? (
+          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute inset-x-0 top-16 z-40 border-t border-grey-200 bg-white shadow-lg animate-fade-in">
+          <nav className="flex flex-col px-4 py-3">
+            {items.map((item) => (
+              <Link
+                key={item.id}
+                href={item.url}
+                target={item.openInNewTab ? '_blank' : undefined}
+                onClick={() => setOpen(false)}
+                className="border-b border-grey-100 py-3 text-sm font-medium text-navy-900 last:border-none"
+              >
+                {item.label}
+              </Link>
+            ))}
+            <Button href="/contact" onClick={() => setOpen(false)} className="mt-3">
+              Get a Quote
+            </Button>
+          </nav>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#eef1f4"/>
+  <g fill="none" stroke="#6b7684" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="110" y="90" width="180" height="220" rx="14"/>
+    <circle cx="200" cy="180" r="34"/>
+    <path d="M200 150 v60 M170 180 h60"/>
+    <path d="M140 270 h120"/>
+  </g>
+  <text x="200" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#6b7684">Replace with product photo</text>
+</svg>

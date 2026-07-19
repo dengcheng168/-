@@ -1,0 +1,89 @@
+import Fastify from 'fastify';
+import { logger } from './lib/logger.js';
+import { API_PREFIX, ADMIN_API_PREFIX } from './config/constants.js';
+import sensiblePlugin from './plugins/sensible.js';
+import corsPlugin from './plugins/cors.js';
+import errorHandlerPlugin from './plugins/error-handler.js';
+import requestLoggerPlugin from './middleware/request-logger.js';
+import prismaPlugin from './plugins/prisma.js';
+import rateLimitPlugin from './plugins/rate-limit.js';
+import authPlugin from './plugins/auth.js';
+import multipartPlugin from './plugins/multipart.js';
+import staticUploadsPlugin from './plugins/static-uploads.js';
+import healthRoutes from './modules/health/health.routes.js';
+import authRoutes from './modules/auth/auth.routes.js';
+import { publicCategoryRoutes, adminCategoryRoutes } from './modules/product-categories/categories.routes.js';
+import { publicProductRoutes, adminProductRoutes } from './modules/products/products.routes.js';
+import { publicBlogCategoryRoutes, adminBlogCategoryRoutes } from './modules/blog-categories/blog-categories.routes.js';
+import { publicBlogTagRoutes, adminBlogTagRoutes } from './modules/blog-tags/blog-tags.routes.js';
+import { publicBlogRoutes, adminBlogRoutes } from './modules/blog/blog.routes.js';
+import { publicCertificateRoutes, adminCertificateRoutes } from './modules/certificates/certificates.routes.js';
+import { publicFaqRoutes, adminFaqRoutes } from './modules/faqs/faqs.routes.js';
+import { publicTestimonialRoutes, adminTestimonialRoutes } from './modules/testimonials/testimonials.routes.js';
+import { adminMediaRoutes } from './modules/media/media.routes.js';
+import { publicPageRoutes, adminPageRoutes } from './modules/pages/pages.routes.js';
+import { publicNavigationRoutes, adminNavigationRoutes } from './modules/navigation/navigation.routes.js';
+import { publicSettingsRoutes, adminSettingsRoutes } from './modules/settings/settings.routes.js';
+import { adminRedirectRoutes } from './modules/redirects/redirects.routes.js';
+import { publicInquiryRoutes, adminInquiryRoutes } from './modules/inquiries/inquiries.routes.js';
+import { publicSearchRoutes } from './modules/search/search.routes.js';
+import { adminAccountRoutes } from './modules/account/account.routes.js';
+import { adminSystemRoutes } from './modules/system/system.routes.js';
+
+export async function buildApp() {
+  const app = Fastify({
+    loggerInstance: logger,
+    trustProxy: true,
+    // 关闭 Fastify 内置的每请求默认日志（incoming request / request completed 两行），
+    // 改用 middleware/request-logger.ts 输出的单行结构化日志。
+    // Fastify 5 中该选项仍可用（会打印 deprecation 提示），Fastify 6 移除后需改用 logController。
+    disableRequestLogging: true,
+  });
+
+  await app.register(sensiblePlugin);
+  await app.register(corsPlugin);
+  await app.register(errorHandlerPlugin);
+  await app.register(requestLoggerPlugin);
+  await app.register(prismaPlugin);
+  await app.register(rateLimitPlugin);
+  await app.register(authPlugin);
+  await app.register(multipartPlugin);
+  await app.register(staticUploadsPlugin);
+
+  await app.register(healthRoutes, { prefix: API_PREFIX });
+  await app.register(authRoutes, { prefix: `${API_PREFIX}/auth` });
+
+  await app.register(publicCategoryRoutes, { prefix: API_PREFIX });
+  await app.register(publicProductRoutes, { prefix: API_PREFIX });
+  await app.register(publicBlogCategoryRoutes, { prefix: API_PREFIX });
+  await app.register(publicBlogTagRoutes, { prefix: API_PREFIX });
+  await app.register(publicBlogRoutes, { prefix: API_PREFIX });
+  await app.register(publicCertificateRoutes, { prefix: API_PREFIX });
+  await app.register(publicFaqRoutes, { prefix: API_PREFIX });
+  await app.register(publicTestimonialRoutes, { prefix: API_PREFIX });
+  await app.register(publicPageRoutes, { prefix: API_PREFIX });
+  await app.register(publicNavigationRoutes, { prefix: API_PREFIX });
+  await app.register(publicSettingsRoutes, { prefix: API_PREFIX });
+  await app.register(publicInquiryRoutes, { prefix: API_PREFIX });
+  await app.register(publicSearchRoutes, { prefix: API_PREFIX });
+
+  await app.register(adminCategoryRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminProductRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminBlogCategoryRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminBlogTagRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminBlogRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminCertificateRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminFaqRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminTestimonialRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminMediaRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminPageRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminNavigationRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminSettingsRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminRedirectRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminInquiryRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminAccountRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminSystemRoutes, { prefix: ADMIN_API_PREFIX });
+
+  return app;
+}
+

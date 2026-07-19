@@ -1,0 +1,48 @@
+# 生产环境覆盖配置（与 docker-compose.yml 叠加使用）：
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# 生产环境要点（对应需求文档第二十一节）：
+#   - frontend 内存上限 512MB，backend 内存上限 512MB，nginx 内存上限 128MB
+#   - 仅 nginx 对外暴露 80/443，frontend/backend 不直接对外暴露端口
+#   - 数据库文件、上传目录、日志目录必须挂载持久化卷
+#
+# 注意：内存限制用的是 `mem_limit`（Compose v2 单机部署直接生效的写法），
+# 不是 `deploy.resources.limits`——后者只在 Docker Swarm 模式（`docker stack deploy`）下才会生效，
+# 普通的 `docker compose up` 会静默忽略它，这是一个常见的踩坑点。
+
+services:
+  backend:
+    environment:
+      - NODE_ENV=production
+    mem_limit: 512m
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+      - ./backend/logs:/app/logs
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  frontend:
+    environment:
+      - NODE_ENV=production
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx:
+    mem_limit: 128m
+    # 80 端口已经在 docker-compose.yml 里声明过了，这里只追加 443，
+    # 避免 Compose 合并多个文件的 ports 列表时出现重复映射。
+    ports:
+      - "${HTTPS_PORT:-443}:443"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

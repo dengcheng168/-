@@ -1,0 +1,80 @@
+@import 'tailwindcss';
+
+:root {
+  /* 深蓝 / 白 / 浅灰为主色，水蓝作强调色 —— 参见需求文档「五、官网视觉风格」 */
+  --color-navy-950: #0a2540;
+  --color-navy-900: #0d3059;
+  --color-navy-800: #123f70;
+  --color-navy-700: #1a5088;
+  --color-water-500: #1a9fd6;
+  --color-water-600: #1687b6;
+  --color-water-100: #e3f4fb;
+  --color-grey-50: #f6f8fa;
+  --color-grey-100: #eef1f4;
+  --color-grey-200: #e2e6ea;
+  --color-grey-500: #6b7684;
+  --color-grey-700: #3c4550;
+  --color-ink-900: #101820;
+
+  --background: #ffffff;
+  --foreground: var(--color-ink-900);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-navy-950: var(--color-navy-950);
+  --color-navy-900: var(--color-navy-900);
+  --color-navy-800: var(--color-navy-800);
+  --color-navy-700: var(--color-navy-700);
+  --color-water-500: var(--color-water-500);
+  --color-water-600: var(--color-water-600);
+  --color-water-100: var(--color-water-100);
+  --color-grey-50: var(--color-grey-50);
+  --color-grey-100: var(--color-grey-100);
+  --color-grey-200: var(--color-grey-200);
+  --color-grey-500: var(--color-grey-500);
+  --color-grey-700: var(--color-grey-700);
+  --color-ink-900: var(--color-ink-900);
+
+  /* 系统字体栈，避免额外加载字体文件（需求文档「五、官网视觉风格」） */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* 轻量动画：仅淡入 / 上移 / 数字滚动，禁止大型特效（需求文档「五、官网视觉风格」） */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out both;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s ease-out both;
+}
