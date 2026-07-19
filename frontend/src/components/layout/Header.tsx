@@ -14,7 +14,16 @@ export async function Header() {
       <Container className="relative flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-navy-950">
           {settings.companyLogoUrl ? (
-            <Image src={settings.companyLogoUrl} alt={settings.companyName || 'Water Purifier Factory'} width={160} height={40} className="h-9 w-auto object-contain" priority />
+            <span className="relative block h-9 w-40">
+              <Image
+                src={settings.companyLogoUrl}
+                alt={settings.companyName || 'Water Purifier Factory'}
+                fill
+                sizes="160px"
+                className="object-contain object-left"
+                priority
+              />
+            </span>
           ) : (
             settings.companyName || 'Water Purifier Factory'
           )}

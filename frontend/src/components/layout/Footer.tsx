@@ -54,13 +54,15 @@ export async function Footer() {
       <Container className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           {settings.companyLogoUrl ? (
-            <Image
-              src={settings.companyLogoUrl}
-              alt={settings.companyName || 'Water Purifier Factory'}
-              width={160}
-              height={40}
-              className="h-9 w-auto object-contain"
-            />
+            <span className="relative block h-9 w-40">
+              <Image
+                src={settings.companyLogoUrl}
+                alt={settings.companyName || 'Water Purifier Factory'}
+                fill
+                sizes="160px"
+                className="object-contain object-left"
+              />
+            </span>
           ) : (
             <div className="text-lg font-semibold text-white">{settings.companyName || 'Water Purifier Factory'}</div>
           )}
