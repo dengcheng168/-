@@ -16,7 +16,7 @@ datasource db {
 // 注意：SQLite 连接器不支持原生 enum 类型，以下"枚举"字段统一用 String 存储，
 // 允许的取值在应用层（zod schema）校验。迁移到 PostgreSQL 后可选择改回原生 enum。
 //
-// AdminRole:     "SUPER_ADMIN" | "EDITOR"
+// AdminRole:     "SUPER_ADMIN" | "CONTENT_ADMIN" | "SALES"（原 "EDITOR" 已通过迁移改名为 "CONTENT_ADMIN"）
 // ProductStatus: "DRAFT" | "PUBLISHED"
 // PostStatus:    "DRAFT" | "PUBLISHED"
 // InquiryStatus: "NEW" | "CONTACTED" | "QUOTED" | "CLOSED" | "SPAM"
@@ -32,8 +32,42 @@ model AdminUser {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   mediaUploads Media[]
+  auditLogs    AuditLog[]
 
   @@map("admin_users")
+}
+
+/// 登录尝试记录（成功和失败都记，用于登录失败次数限制与登录记录页面）；
+/// 不关联 AdminUser——输错邮箱本身也是一次要记录的尝试，此时没有对应的真实用户
+model LoginLog {
+  id        Int      @id @default(autoincrement())
+  email     String
+  success   Boolean
+  reason    String? // 失败原因，例如 "INVALID_CREDENTIALS" | "LOCKED" | "INACTIVE"
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+  @@map("login_logs")
+}
+
+/// 后台操作日志：记录谁在什么时间对哪个对象做了什么操作
+model AuditLog {
+  id           Int       @id @default(autoincrement())
+  adminUserId  Int?
+  adminUser    AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+  adminEmail   String // 冗余存一份邮箱，管理员账号被删除后日志仍可读
+  action       String // 例如 "product.create" / "product.publish" / "product.unpublish"
+  entityType   String // 例如 "product"
+  entityId     String? // 关联对象 id，字符串存储以兼容不同实体的主键类型
+  summary      String // 人类可读的一句话描述，例如 "创建产品 RO-500"
+  ipAddress    String?
+  createdAt    DateTime  @default(now())
+
+  @@index([createdAt])
+  @@index([adminUserId])
+  @@map("audit_logs")
 }
 
 model ProductCategory {

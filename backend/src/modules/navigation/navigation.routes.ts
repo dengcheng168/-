@@ -1,4 +1,6 @@
 import type { FastifyInstance } from 'fastify';
+import { requireRole } from '../../middleware/require-role.js';
+import { CONTENT_ROLES } from '../../config/roles.js';
 import {
   publicListHandler,
   adminListHandler,
@@ -14,6 +16,7 @@ export async function publicNavigationRoutes(app: FastifyInstance) {
 
 export async function adminNavigationRoutes(app: FastifyInstance) {
   app.addHook('preHandler', app.authenticate);
+  app.addHook('preHandler', requireRole(CONTENT_ROLES));
 
   app.get('/navigation', adminListHandler);
   app.post('/navigation', adminCreateHandler);

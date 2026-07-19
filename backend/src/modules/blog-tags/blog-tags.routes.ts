@@ -1,5 +1,7 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { ok } from '../../lib/api-response.js';
+import { requireRole } from '../../middleware/require-role.js';
+import { CONTENT_ROLES } from '../../config/roles.js';
 import { listBlogTags, createBlogTag, deleteBlogTag } from './blog-tags.service.js';
 import { createBlogTagSchema } from './blog-tags.schema.js';
 
@@ -9,6 +11,7 @@ export async function publicBlogTagRoutes(app: FastifyInstance) {
 
 export async function adminBlogTagRoutes(app: FastifyInstance) {
   app.addHook('preHandler', app.authenticate);
+  app.addHook('preHandler', requireRole(CONTENT_ROLES));
 
   app.get('/blog-tags', async (request) => ok(await listBlogTags(request.server.prisma)));
 
