@@ -4,6 +4,8 @@ import { adminFetch } from '@/lib/api/admin-client';
 import { AdminTable, AdminTableHead, AdminEmptyRow } from '@/components/admin/AdminTable';
 import { ConfirmSubmitButton } from '@/components/admin/ConfirmSubmitButton';
 import { StatusBadge } from '@/components/admin/StatusBadge';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { IconPlus } from '@/components/admin/icons';
 import { deleteProductAction } from '@/lib/actions/admin/products';
 import { resolveMediaUrl } from '@/lib/utils/media';
 
@@ -22,14 +24,21 @@ export default async function AdminProductsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-navy-950">产品管理</h1>
-        <Link href="/admin/products/new" className="rounded-md bg-water-500 px-4 py-2 text-sm font-medium text-white hover:bg-water-600">
-          + 新增产品
-        </Link>
-      </div>
+      <PageHeader
+        title="产品列表"
+        description="管理产品信息、图片与发布状态。"
+        action={
+          <Link
+            href="/admin/products/new"
+            className="flex items-center gap-1.5 rounded-md bg-[#0a2540] px-4 py-2 text-sm font-medium text-white hover:bg-[#0d3059]"
+          >
+            <IconPlus className="h-4 w-4" />
+            新增产品
+          </Link>
+        }
+      />
 
-      <div className="mt-6">
+      <div>
         <AdminTable>
           <AdminTableHead columns={['图片', '名称', '分类', '状态', '推荐', '操作']} />
           <tbody>

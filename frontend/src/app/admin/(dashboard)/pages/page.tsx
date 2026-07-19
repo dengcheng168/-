@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { adminFetch } from '@/lib/api/admin-client';
 import { AdminTable, AdminTableHead } from '@/components/admin/AdminTable';
+import { PageHeader } from '@/components/admin/PageHeader';
 
 interface Row {
   slug: string;
@@ -21,10 +22,9 @@ export default async function AdminPagesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-navy-950">页面文案管理</h1>
-      <p className="mt-1 text-sm text-grey-500">编辑各静态页面的标题、正文与 SEO 信息。</p>
+      <PageHeader title="页面文案" description="编辑各静态页面的标题、正文与 SEO 信息。" />
 
-      <div className="mt-6">
+      <div>
         <AdminTable>
           <AdminTableHead columns={['页面', 'Slug', '操作']} />
           <tbody>

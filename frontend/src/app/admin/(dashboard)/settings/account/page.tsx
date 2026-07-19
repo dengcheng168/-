@@ -1,4 +1,5 @@
 import { adminFetch } from '@/lib/api/admin-client';
+import { PageHeader } from '@/components/admin/PageHeader';
 import { ChangePasswordForm } from './ChangePasswordForm';
 
 interface Account {
@@ -13,9 +14,9 @@ export default async function AdminAccountSettingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-navy-950">管理员账号设置</h1>
+      <PageHeader title="管理员设置" description="查看当前登录账号信息，并修改登录密码。" />
 
-      <div className="mt-6 max-w-xl rounded-lg border border-grey-200 bg-white p-5 text-sm">
+      <div className="max-w-xl rounded-lg border border-grey-200 bg-white p-5 text-sm">
         <p>
           <span className="text-grey-500">邮箱：</span>
           {data.email}

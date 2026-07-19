@@ -19,7 +19,6 @@ import { publicBlogTagRoutes, adminBlogTagRoutes } from './modules/blog-tags/blo
 import { publicBlogRoutes, adminBlogRoutes } from './modules/blog/blog.routes.js';
 import { publicCertificateRoutes, adminCertificateRoutes } from './modules/certificates/certificates.routes.js';
 import { publicFaqRoutes, adminFaqRoutes } from './modules/faqs/faqs.routes.js';
-import { publicTestimonialRoutes, adminTestimonialRoutes } from './modules/testimonials/testimonials.routes.js';
 import { adminMediaRoutes } from './modules/media/media.routes.js';
 import { publicPageRoutes, adminPageRoutes } from './modules/pages/pages.routes.js';
 import { publicNavigationRoutes, adminNavigationRoutes } from './modules/navigation/navigation.routes.js';
@@ -60,7 +59,6 @@ export async function buildApp() {
   await app.register(publicBlogRoutes, { prefix: API_PREFIX });
   await app.register(publicCertificateRoutes, { prefix: API_PREFIX });
   await app.register(publicFaqRoutes, { prefix: API_PREFIX });
-  await app.register(publicTestimonialRoutes, { prefix: API_PREFIX });
   await app.register(publicPageRoutes, { prefix: API_PREFIX });
   await app.register(publicNavigationRoutes, { prefix: API_PREFIX });
   await app.register(publicSettingsRoutes, { prefix: API_PREFIX });
@@ -74,7 +72,6 @@ export async function buildApp() {
   await app.register(adminBlogRoutes, { prefix: ADMIN_API_PREFIX });
   await app.register(adminCertificateRoutes, { prefix: ADMIN_API_PREFIX });
   await app.register(adminFaqRoutes, { prefix: ADMIN_API_PREFIX });
-  await app.register(adminTestimonialRoutes, { prefix: ADMIN_API_PREFIX });
   await app.register(adminMediaRoutes, { prefix: ADMIN_API_PREFIX });
   await app.register(adminPageRoutes, { prefix: ADMIN_API_PREFIX });
   await app.register(adminNavigationRoutes, { prefix: ADMIN_API_PREFIX });

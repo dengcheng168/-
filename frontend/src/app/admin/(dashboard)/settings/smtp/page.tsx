@@ -1,4 +1,5 @@
 import { adminFetch } from '@/lib/api/admin-client';
+import { PageHeader } from '@/components/admin/PageHeader';
 import { SmtpSettingsForm } from './SmtpSettingsForm';
 
 interface Settings {
@@ -14,9 +15,8 @@ export default async function AdminSmtpSettingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-navy-950">SMTP 邮件设置</h1>
-      <p className="mt-1 text-sm text-grey-500">用于收到新询盘时发送邮件提醒，不配置则不启用。</p>
-      <div className="mt-6">
+      <PageHeader title="SMTP 邮件" description="用于收到新询盘时发送邮件提醒，不配置则不启用。" />
+      <div>
         <SmtpSettingsForm initialValues={data} />
       </div>
     </div>

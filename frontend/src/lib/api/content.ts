@@ -1,6 +1,6 @@
 import { apiFetch } from './client';
 import { resolveMediaUrl } from '@/lib/utils/media';
-import type { Certificate, Faq, Testimonial, Page } from '@/types/content';
+import type { Certificate, Faq, Page } from '@/types/content';
 
 function resolveCertificateMedia(cert: Certificate): Certificate {
   return {
@@ -8,10 +8,6 @@ function resolveCertificateMedia(cert: Certificate): Certificate {
     imageUrl: resolveMediaUrl(cert.imageUrl),
     pdfUrl: cert.pdfUrl ? resolveMediaUrl(cert.pdfUrl) : cert.pdfUrl,
   };
-}
-
-function resolveTestimonialMedia(t: Testimonial): Testimonial {
-  return { ...t, avatarUrl: t.avatarUrl ? resolveMediaUrl(t.avatarUrl) : t.avatarUrl };
 }
 
 function resolvePageMedia(page: Page): Page {
@@ -33,15 +29,6 @@ export async function listFaqs(): Promise<Faq[]> {
   try {
     const { data } = await apiFetch<Faq[]>('/faqs', { revalidate: 300, tags: ['faqs'] });
     return data;
-  } catch {
-    return [];
-  }
-}
-
-export async function listTestimonials(): Promise<Testimonial[]> {
-  try {
-    const { data } = await apiFetch<Testimonial[]>('/testimonials', { revalidate: 300, tags: ['testimonials'] });
-    return data.map(resolveTestimonialMedia);
   } catch {
     return [];
   }

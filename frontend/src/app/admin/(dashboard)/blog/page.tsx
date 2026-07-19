@@ -3,6 +3,8 @@ import { adminFetch } from '@/lib/api/admin-client';
 import { AdminTable, AdminTableHead, AdminEmptyRow } from '@/components/admin/AdminTable';
 import { ConfirmSubmitButton } from '@/components/admin/ConfirmSubmitButton';
 import { StatusBadge } from '@/components/admin/StatusBadge';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { IconPlus } from '@/components/admin/icons';
 import { deleteBlogPostAction } from '@/lib/actions/admin/blog';
 
 interface Row {
@@ -18,14 +20,21 @@ export default async function AdminBlogPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-navy-950">博客文章管理</h1>
-        <Link href="/admin/blog/new" className="rounded-md bg-water-500 px-4 py-2 text-sm font-medium text-white hover:bg-water-600">
-          + 新增文章
-        </Link>
-      </div>
+      <PageHeader
+        title="博客文章"
+        description="撰写和管理公司新闻、行业知识等博客内容。"
+        action={
+          <Link
+            href="/admin/blog/new"
+            className="flex items-center gap-1.5 rounded-md bg-[#0a2540] px-4 py-2 text-sm font-medium text-white hover:bg-[#0d3059]"
+          >
+            <IconPlus className="h-4 w-4" />
+            新增文章
+          </Link>
+        }
+      />
 
-      <div className="mt-6">
+      <div>
         <AdminTable>
           <AdminTableHead columns={['标题', '分类', '状态', '操作']} />
           <tbody>

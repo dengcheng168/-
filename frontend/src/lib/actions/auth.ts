@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { ADMIN_COOKIE_NAME } from '@/config/constants';
+import { ADMIN_COOKIE_NAME, ADMIN_LOGIN_PATH } from '@/config/constants';
 
 const COOKIE_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
 
@@ -60,5 +60,5 @@ export async function loginAction(_prevState: LoginFormState, formData: FormData
 export async function logoutAction(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(ADMIN_COOKIE_NAME);
-  redirect('/admin/login');
+  redirect(ADMIN_LOGIN_PATH);
 }

@@ -18,17 +18,6 @@ export interface Faq {
   category: string | null;
 }
 
-export interface Testimonial {
-  id: number;
-  authorName: string;
-  authorTitle: string | null;
-  companyName: string | null;
-  country: string | null;
-  avatarUrl: string | null;
-  quote: string;
-  rating: number | null;
-}
-
 export interface Page {
   id: number;
   slug: string;

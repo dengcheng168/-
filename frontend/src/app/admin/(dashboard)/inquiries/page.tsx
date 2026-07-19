@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { adminFetch } from '@/lib/api/admin-client';
 import { AdminTable, AdminTableHead, AdminEmptyRow } from '@/components/admin/AdminTable';
 import { StatusBadge } from '@/components/admin/StatusBadge';
+import { PageHeader } from '@/components/admin/PageHeader';
 
 interface Row {
   id: number;
@@ -32,17 +33,20 @@ export default async function AdminInquiriesPage({
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-navy-950">询盘管理</h1>
-        <a
-          href={`/api/admin/inquiries/export${status ? `?status=${status}` : ''}`}
-          className="rounded-md border border-grey-200 bg-white px-4 py-2 text-sm font-medium text-navy-950 hover:bg-grey-50"
-        >
-          导出 CSV
-        </a>
-      </div>
+      <PageHeader
+        title="询盘管理"
+        description="查看并跟进客户询盘，支持按状态筛选与导出。"
+        action={
+          <a
+            href={`/api/admin/inquiries/export${status ? `?status=${status}` : ''}`}
+            className="rounded-md border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F6F7F9]"
+          >
+            导出 CSV
+          </a>
+        }
+      />
 
-      <div className="mt-4 flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {STATUS_OPTIONS.map((opt) => (
           <Link
             key={opt.value}

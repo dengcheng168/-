@@ -2,8 +2,12 @@ import type { PrismaClient } from '@prisma/client';
 import { generateUniqueSlug } from '../../lib/slugify.js';
 import type { CreateBlogTagInput } from './blog-tags.schema.js';
 
-export function listBlogTags(prisma: PrismaClient) {
-  return prisma.blogTag.findMany({ orderBy: { name: 'asc' } });
+export async function listBlogTags(prisma: PrismaClient) {
+  const tags = await prisma.blogTag.findMany({
+    orderBy: { name: 'asc' },
+    include: { _count: { select: { posts: true } } },
+  });
+  return tags.map(({ _count, ...tag }) => ({ ...tag, postCount: _count.posts }));
 }
 
 export async function createBlogTag(prisma: PrismaClient, input: CreateBlogTagInput) {

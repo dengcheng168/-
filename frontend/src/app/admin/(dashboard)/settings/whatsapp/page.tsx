@@ -1,4 +1,5 @@
 import { adminFetch } from '@/lib/api/admin-client';
+import { PageHeader } from '@/components/admin/PageHeader';
 import { WhatsappSettingsForm } from './WhatsappSettingsForm';
 
 interface Settings {
@@ -11,8 +12,8 @@ export default async function AdminWhatsappSettingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-navy-950">WhatsApp 设置</h1>
-      <div className="mt-6">
+      <PageHeader title="WhatsApp" description="配置 WhatsApp 联系号码，用于网站悬浮按钮与产品咨询入口。" />
+      <div>
         <WhatsappSettingsForm initialValues={data} />
       </div>
     </div>

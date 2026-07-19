@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { adminFetch } from '@/lib/api/admin-client';
 import { resolveMediaUrl } from '@/lib/utils/media';
+import { PageHeader } from '@/components/admin/PageHeader';
 import { MediaUploadButton } from './MediaUploadButton';
 import { MediaDeleteButton } from './MediaDeleteButton';
 import { MediaAltForm } from './MediaAltForm';
@@ -21,12 +22,9 @@ export default async function AdminMediaPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-navy-950">媒体库</h1>
-        <MediaUploadButton />
-      </div>
+      <PageHeader title="媒体库" description="管理网站上传使用的图片与文件。" action={<MediaUploadButton />} />
 
-      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
         {data.length === 0 && <p className="text-grey-500">暂无媒体文件</p>}
         {data.map((item) => {
           const isImage = item.mimeType.startsWith('image/');

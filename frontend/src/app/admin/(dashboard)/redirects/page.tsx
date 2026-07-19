@@ -1,6 +1,7 @@
 import { adminFetch } from '@/lib/api/admin-client';
 import { AdminTable, AdminTableHead, AdminEmptyRow } from '@/components/admin/AdminTable';
 import { ConfirmSubmitButton } from '@/components/admin/ConfirmSubmitButton';
+import { PageHeader } from '@/components/admin/PageHeader';
 import { deleteRedirectAction } from '@/lib/actions/admin/redirects';
 import { NewRedirectForm } from './NewRedirectForm';
 
@@ -16,9 +17,9 @@ export default async function AdminRedirectsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-navy-950">301 重定向管理</h1>
+      <PageHeader title="301 重定向" description="配置旧链接到新链接的跳转规则，避免出现死链。" />
 
-      <div className="mt-6 rounded-lg border border-grey-200 bg-white p-5">
+      <div className="rounded-lg border border-grey-200 bg-white p-5">
         <NewRedirectForm />
       </div>
 

@@ -1,4 +1,5 @@
 import { adminFetch } from '@/lib/api/admin-client';
+import { PageHeader } from '@/components/admin/PageHeader';
 import { HomepageForm } from './HomepageForm';
 
 interface Settings {
@@ -23,9 +24,8 @@ export default async function AdminHomepagePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-navy-950">首页模块管理</h1>
-      <p className="mt-1 text-sm text-grey-500">编辑首页 Banner、核心优势、数据统计、OEM 流程、工厂数据与合作区域等模块内容。</p>
-      <div className="mt-6">
+      <PageHeader title="首页模块" description="编辑首页 Banner、核心优势、数据统计、OEM 流程、工厂数据与合作区域等模块内容。" />
+      <div>
         <HomepageForm initialValues={data} />
       </div>
     </div>

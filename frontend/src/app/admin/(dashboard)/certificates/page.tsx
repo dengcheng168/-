@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { adminFetch } from '@/lib/api/admin-client';
 import { AdminTable, AdminTableHead, AdminEmptyRow } from '@/components/admin/AdminTable';
 import { ConfirmSubmitButton } from '@/components/admin/ConfirmSubmitButton';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { IconPlus } from '@/components/admin/icons';
 import { deleteCertificateAction } from '@/lib/actions/admin/certificates';
 
 interface Row {
@@ -17,14 +19,21 @@ export default async function AdminCertificatesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-navy-950">证书管理</h1>
-        <Link href="/admin/certificates/new" className="rounded-md bg-water-500 px-4 py-2 text-sm font-medium text-white hover:bg-water-600">
-          + 新增证书
-        </Link>
-      </div>
+      <PageHeader
+        title="证书管理"
+        description="管理产品认证证书，展示在前台“认证证书”版块。"
+        action={
+          <Link
+            href="/admin/certificates/new"
+            className="flex items-center gap-1.5 rounded-md bg-[#0a2540] px-4 py-2 text-sm font-medium text-white hover:bg-[#0d3059]"
+          >
+            <IconPlus className="h-4 w-4" />
+            新增证书
+          </Link>
+        }
+      />
 
-      <div className="mt-6">
+      <div>
         <AdminTable>
           <AdminTableHead columns={['名称', '类型', '排序', '状态', '操作']} />
           <tbody>

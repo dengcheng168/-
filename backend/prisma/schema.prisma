@@ -215,24 +215,6 @@ model Faq {
   @@map("faqs")
 }
 
-model Testimonial {
-  id          Int      @id @default(autoincrement())
-  authorName  String
-  authorTitle String?
-  companyName String?
-  country     String?
-  avatarUrl   String?
-  quote       String
-  rating      Int?
-  sortOrder   Int      @default(0)
-  published   Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([published])
-  @@map("testimonials")
-}
-
 model Media {
   id           Int        @id @default(autoincrement())
   filename     String // 磁盘上的安全文件名

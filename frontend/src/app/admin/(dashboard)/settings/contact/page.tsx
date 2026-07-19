@@ -1,4 +1,5 @@
 import { adminFetch } from '@/lib/api/admin-client';
+import { PageHeader } from '@/components/admin/PageHeader';
 import { ContactSettingsForm } from './ContactSettingsForm';
 
 interface Settings {
@@ -14,8 +15,8 @@ export default async function AdminContactSettingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-navy-950">联系方式设置</h1>
-      <div className="mt-6">
+      <PageHeader title="网站基础设置" description="配置公司名称、Logo 与联系方式，展示在网站页头、页脚与联系页面。" />
+      <div>
         <ContactSettingsForm initialValues={data} />
       </div>
     </div>

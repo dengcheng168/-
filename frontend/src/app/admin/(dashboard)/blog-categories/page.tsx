@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { adminFetch } from '@/lib/api/admin-client';
 import { AdminTable, AdminTableHead, AdminEmptyRow } from '@/components/admin/AdminTable';
 import { ConfirmSubmitButton } from '@/components/admin/ConfirmSubmitButton';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { IconPlus } from '@/components/admin/icons';
 import { deleteBlogCategoryAction } from '@/lib/actions/admin/blog-categories';
 
 interface Row {
@@ -17,14 +19,21 @@ export default async function AdminBlogCategoriesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-navy-950">博客分类管理</h1>
-        <Link href="/admin/blog-categories/new" className="rounded-md bg-water-500 px-4 py-2 text-sm font-medium text-white hover:bg-water-600">
-          + 新增分类
-        </Link>
-      </div>
+      <PageHeader
+        title="博客分类"
+        description="管理博客文章的分类，方便访客按主题浏览文章。"
+        action={
+          <Link
+            href="/admin/blog-categories/new"
+            className="flex items-center gap-1.5 rounded-md bg-[#0a2540] px-4 py-2 text-sm font-medium text-white hover:bg-[#0d3059]"
+          >
+            <IconPlus className="h-4 w-4" />
+            新增分类
+          </Link>
+        }
+      />
 
-      <div className="mt-6">
+      <div>
         <AdminTable>
           <AdminTableHead columns={['名称', 'Slug', '排序', '状态', '操作']} />
           <tbody>

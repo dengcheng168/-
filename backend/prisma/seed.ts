@@ -230,17 +230,6 @@ async function main() {
     if (!existing) await prisma.certificate.create({ data: c });
   }
 
-  // ---- 客户评价（3条）----
-  const testimonials = [
-    { authorName: 'John Smith', authorTitle: 'Purchasing Manager', companyName: 'Placeholder Distribution Co.', country: 'United States', quote: 'Placeholder testimonial text — replace with a real customer quote.', rating: 5, sortOrder: 1 },
-    { authorName: 'Maria Garcia', authorTitle: 'Operations Director', companyName: 'Placeholder Trading Ltd.', country: 'Spain', quote: 'Placeholder testimonial text — replace with a real customer quote.', rating: 5, sortOrder: 2 },
-    { authorName: 'Ahmed Hassan', authorTitle: 'General Manager', companyName: 'Placeholder Import Group', country: 'UAE', quote: 'Placeholder testimonial text — replace with a real customer quote.', rating: 5, sortOrder: 3 },
-  ];
-  for (const t of testimonials) {
-    const existing = await prisma.testimonial.findFirst({ where: { authorName: t.authorName, companyName: t.companyName } });
-    if (!existing) await prisma.testimonial.create({ data: t });
-  }
-
   // ---- 导航菜单 ----
   const navItems = [
     { label: 'Home', url: '/', sortOrder: 1 },

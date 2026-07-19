@@ -1,4 +1,5 @@
 import { adminFetch } from '@/lib/api/admin-client';
+import { PageHeader } from '@/components/admin/PageHeader';
 import { SeoSettingsForm } from './SeoSettingsForm';
 
 interface Settings {
@@ -12,8 +13,8 @@ export default async function AdminSeoSettingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-navy-950">SEO 设置</h1>
-      <div className="mt-6">
+      <PageHeader title="SEO 设置" description="配置全站默认的搜索引擎标题、描述与分享图片。" />
+      <div>
         <SeoSettingsForm initialValues={data} />
       </div>
     </div>

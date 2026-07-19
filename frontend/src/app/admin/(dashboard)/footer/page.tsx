@@ -1,4 +1,5 @@
 import { adminFetch } from '@/lib/api/admin-client';
+import { PageHeader } from '@/components/admin/PageHeader';
 import { FooterForm } from './FooterForm';
 
 interface Settings {
@@ -10,11 +11,11 @@ export default async function AdminFooterPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-navy-950">页脚设置</h1>
-      <p className="mt-1 text-sm text-slate-500">
-        页脚的"Quick Navigation"栏目会自动跟随"导航菜单"设置，"Categories"栏目会自动跟随产品分类，无需在这里单独配置。
-      </p>
-      <div className="mt-6">
+      <PageHeader
+        title="页脚设置"
+        description='页脚的"Quick Navigation"栏目会自动跟随"导航菜单"设置，"Categories"栏目会自动跟随产品分类，无需在这里单独配置。'
+      />
+      <div>
         <FooterForm initialValues={data} />
       </div>
     </div>
