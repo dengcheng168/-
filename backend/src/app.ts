@@ -28,6 +28,7 @@ import { publicInquiryRoutes, adminInquiryRoutes } from './modules/inquiries/inq
 import { publicSearchRoutes } from './modules/search/search.routes.js';
 import { adminAccountRoutes } from './modules/account/account.routes.js';
 import { adminSystemRoutes } from './modules/system/system.routes.js';
+import { adminAuditRoutes } from './modules/audit/audit.routes.js';
 
 export async function buildApp() {
   const app = Fastify({
@@ -80,6 +81,7 @@ export async function buildApp() {
   await app.register(adminInquiryRoutes, { prefix: ADMIN_API_PREFIX });
   await app.register(adminAccountRoutes, { prefix: ADMIN_API_PREFIX });
   await app.register(adminSystemRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminAuditRoutes, { prefix: ADMIN_API_PREFIX });
 
   return app;
 }
