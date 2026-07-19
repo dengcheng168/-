@@ -10,9 +10,9 @@ export async function Header() {
   const [items, settings] = await Promise.all([getNavigation(), getPublicSettings()]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-grey-200 bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-50 bg-navy-950">
       <Container className="relative flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-navy-950">
+        <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-white">
           {settings.companyLogoUrl ? (
             <span className="relative block h-9 w-40">
               <Image
@@ -35,7 +35,7 @@ export async function Header() {
               key={item.id}
               href={item.url}
               target={item.openInNewTab ? '_blank' : undefined}
-              className="text-sm font-medium text-grey-700 transition-colors hover:text-navy-950"
+              className="text-sm font-medium text-grey-200 transition-colors hover:text-white"
             >
               {item.label}
             </Link>

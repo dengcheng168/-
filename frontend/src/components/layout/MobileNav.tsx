@@ -15,7 +15,7 @@ export function MobileNav({ items }: { items: NavigationItem[] }) {
         aria-label={open ? 'Close menu' : 'Open menu'}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-10 w-10 items-center justify-center rounded-md text-navy-900 hover:bg-grey-100"
+        className="flex h-10 w-10 items-center justify-center rounded-md text-white hover:bg-white/10"
       >
         {open ? (
           <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2}>
