@@ -27,4 +27,7 @@ export const ALLOWED_UPLOAD_MIME_TYPES: Record<string, string> = {
 
 export const RASTER_IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
 
+// 批量上传页面一次最多接受的文件数——不是接口层面的分页限制，是防止一次表单提交塞几百个文件把请求撑爆
+export const MAX_BATCH_UPLOAD_FILES = 10;
+
 export const THUMBNAIL_SIZE = 400;

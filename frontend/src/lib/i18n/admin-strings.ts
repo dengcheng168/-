@@ -58,8 +58,8 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     icon: 'image',
     items: [
       { label: '全部媒体', href: '/admin/media' },
-      { label: '图片上传', href: '/admin/media/upload', disabled: true },
-      { label: '未使用媒体', href: '/admin/media/unused', disabled: true },
+      { label: '图片上传', href: '/admin/media/upload' },
+      { label: '未使用媒体', href: '/admin/media/unused' },
     ],
   },
   {

@@ -111,6 +111,9 @@ export async function findMediaUsage(prisma: PrismaClient, url: string) {
         { ogImage: url },
         { specSheetUrl: url },
         { galleryImages: { contains: url } },
+        // 富文本正文里手动插入的图片（不是通过主图/相册字段选的）也算在用，
+        // 否则"未使用媒体"会误判成可以安全删除，实际删了会导致正文里出现失效图片
+        { description: { contains: url } },
       ],
     },
     select: { id: true, name: true },
@@ -124,7 +127,7 @@ export async function findMediaUsage(prisma: PrismaClient, url: string) {
   usages.push(...categories.map((c) => ({ type: 'product-category', id: c.id, name: c.name })));
 
   const posts = await prisma.blogPost.findMany({
-    where: { coverImage: url },
+    where: { OR: [{ coverImage: url }, { body: { contains: url } }] },
     select: { id: true, title: true },
   });
   usages.push(...posts.map((p) => ({ type: 'blog-post', id: p.id, name: p.title })));
@@ -134,6 +137,14 @@ export async function findMediaUsage(prisma: PrismaClient, url: string) {
     select: { id: true, name: true },
   });
   usages.push(...certs.map((c) => ({ type: 'certificate', id: c.id, name: c.name })));
+
+  const pages = await prisma.page.findMany({
+    where: {
+      OR: [{ ogImage: url }, { bodyHtml: { contains: url } }, { sections: { contains: url } }],
+    },
+    select: { id: true, title: true },
+  });
+  usages.push(...pages.map((p) => ({ type: 'page', id: p.id, name: p.title })));
 
   const settings = await prisma.siteSetting.findFirst({
     where: {
@@ -149,6 +160,21 @@ export async function findMediaUsage(prisma: PrismaClient, url: string) {
   if (settings) usages.push({ type: 'site-setting', id: settings.id, name: '首页/全局设置' });
 
   return usages;
+}
+
+/**
+ * 逐个媒体文件复用 findMediaUsage 判断是否被引用——当前媒体库规模（几十到几百个文件）下，
+ * N 次简单查询远比维护一张形式化的关联表划算，也保证跟"删除前检查"用的是同一套判断逻辑，
+ * 不会出现"未使用媒体页面说没人用，点删除却报错被占用"这种自相矛盾的情况。
+ */
+export async function listUnusedMedia(prisma: PrismaClient) {
+  const allMedia = await prisma.media.findMany({ orderBy: { createdAt: 'desc' } });
+  const unused = [];
+  for (const media of allMedia) {
+    const usages = await findMediaUsage(prisma, media.url);
+    if (usages.length === 0) unused.push(media);
+  }
+  return unused;
 }
 
 export async function deleteMedia(prisma: PrismaClient, id: number) {

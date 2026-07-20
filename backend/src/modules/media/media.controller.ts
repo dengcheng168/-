@@ -8,6 +8,7 @@ import {
   getMediaById,
   updateMediaAltText,
   findMediaUsage,
+  listUnusedMedia,
   deleteMedia,
   UnsupportedFileTypeError,
   MediaInUseError,
@@ -31,6 +32,13 @@ export async function adminUploadHandler(request: FastifyRequest, reply: Fastify
       uploadedById: request.user.sub,
       altText,
     });
+    await auditLogFromRequest(request.server.prisma, request, {
+      action: 'media.upload',
+      resourceType: 'media',
+      resourceId: media.id,
+      summary: `上传媒体文件 ${media.originalName}`,
+      after: { originalName: media.originalName, mimeType: media.mimeType, size: media.size },
+    });
     return ok(media);
   } catch (err) {
     if (err instanceof UnsupportedFileTypeError) {
@@ -38,6 +46,43 @@ export async function adminUploadHandler(request: FastifyRequest, reply: Fastify
     }
     throw err;
   }
+}
+
+export async function adminBatchUploadHandler(request: FastifyRequest, reply: FastifyReply) {
+  const uploaded: Awaited<ReturnType<typeof saveUpload>>[] = [];
+  const errors: { filename: string; message: string }[] = [];
+  let fileCount = 0;
+
+  for await (const file of request.files()) {
+    fileCount += 1;
+    const buffer = await file.toBuffer();
+    try {
+      const media = await saveUpload(request.server.prisma, {
+        buffer,
+        originalName: file.filename,
+        mimeType: file.mimetype,
+        uploadedById: request.user.sub,
+      });
+      uploaded.push(media);
+    } catch (err) {
+      errors.push({ filename: file.filename, message: err instanceof UnsupportedFileTypeError ? err.message : '上传失败' });
+    }
+  }
+
+  if (fileCount === 0) {
+    return reply.status(400).send(fail('未收到上传文件', 'NO_FILE'));
+  }
+
+  if (uploaded.length > 0) {
+    await auditLogFromRequest(request.server.prisma, request, {
+      action: 'media.batch_upload',
+      resourceType: 'media',
+      summary: `批量上传 ${uploaded.length} 个文件${errors.length > 0 ? `，${errors.length} 个失败` : ''}`,
+      metadata: { uploadedIds: uploaded.map((m) => m.id), failedFilenames: errors.map((e) => e.filename) },
+    });
+  }
+
+  return ok({ uploaded, errors });
 }
 
 export async function adminListHandler(request: FastifyRequest<{ Querystring: { mimeType?: string } }>) {
@@ -65,6 +110,10 @@ export async function adminUpdateHandler(
     after: { altText: updated.altText },
   });
   return ok(updated);
+}
+
+export async function adminUnusedListHandler(request: FastifyRequest) {
+  return ok(await listUnusedMedia(request.server.prisma));
 }
 
 export async function adminUsageHandler(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
