@@ -17,8 +17,10 @@ import { InquirySection } from '@/components/home/InquirySection';
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicSettings();
   return {
-    title: settings.defaultSeoTitle ?? undefined,
-    description: settings.defaultSeoDescription ?? undefined,
+    // title/description 显式设为 undefined 也会被 Next.js 当作"本段落定义了该字段"，
+    // 从而盖掉根 layout 的 title.default 变成空标题，所以未配置时要整个 key 都不传
+    ...(settings.defaultSeoTitle ? { title: settings.defaultSeoTitle } : {}),
+    ...(settings.defaultSeoDescription ? { description: settings.defaultSeoDescription } : {}),
     alternates: { canonical: '/' },
   };
 }

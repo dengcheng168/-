@@ -38,6 +38,10 @@ export async function updateContactSettingsAction(_prevState: AdminFormState, fo
   return patchSettings('contact', {
     companyName: textOrUndefined(formData, 'companyName'),
     companyLogoUrl: textOrUndefined(formData, 'companyLogoUrl'),
+    // 用 ?? undefined 而不是 textOrUndefined：后者把"移除图片后保存"的空字符串也当成
+    // "没填"直接跳过，导致清空操作在后台悄悄失效（数据库里还是旧值）。这里只保留 null
+    // （字段整个没提交）才转成 undefined，空字符串会正常传下去清空数据库字段
+    faviconUrl: formData.get('faviconUrl') ?? undefined,
     companyAddress: textOrUndefined(formData, 'companyAddress'),
     companyEmail: textOrUndefined(formData, 'companyEmail'),
     companyPhone: textOrUndefined(formData, 'companyPhone'),

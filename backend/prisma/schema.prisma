@@ -324,6 +324,7 @@ model SiteSetting {
   id                    Int      @id @default(1)
   companyName           String   @default("")
   companyLogoUrl        String?
+  faviconUrl            String?
   companyAddress        String?
   companyEmail          String?
   companyPhone          String?

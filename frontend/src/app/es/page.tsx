@@ -20,8 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const [settings, translations] = await Promise.all([getPublicSettings(), getTranslationMap('es')]);
   const localized = localizeHero(settings, translations);
   return {
-    title: settings.defaultSeoTitle ?? undefined,
-    description: settings.defaultSeoDescription ?? undefined,
+    ...(settings.defaultSeoTitle ? { title: settings.defaultSeoTitle } : {}),
+    ...(settings.defaultSeoDescription ? { description: settings.defaultSeoDescription } : {}),
     alternates: { canonical: '/es', languages: { en: '/', es: '/es' } },
     openGraph: { title: localized.heroHeadline },
   };

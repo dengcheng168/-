@@ -10,6 +10,7 @@ import type { PublicSiteSettings } from '@/types/settings';
 const FALLBACK_SETTINGS: PublicSiteSettings = {
   companyName: 'Water Purifier Factory',
   companyLogoUrl: null,
+  faviconUrl: null,
   companyAddress: null,
   companyEmail: null,
   companyPhone: null,
@@ -47,6 +48,7 @@ function resolveSettingsMedia(settings: PublicSiteSettings): PublicSiteSettings 
   return {
     ...settings,
     companyLogoUrl: settings.companyLogoUrl ? resolveMediaUrl(settings.companyLogoUrl) : settings.companyLogoUrl,
+    faviconUrl: settings.faviconUrl ? resolveMediaUrl(settings.faviconUrl) : settings.faviconUrl,
     heroDesktopImage: settings.heroDesktopImage ? resolveMediaUrl(settings.heroDesktopImage) : settings.heroDesktopImage,
     heroMobileImage: settings.heroMobileImage ? resolveMediaUrl(settings.heroMobileImage) : settings.heroMobileImage,
     defaultOgImage: settings.defaultOgImage ? resolveMediaUrl(settings.defaultOgImage) : settings.defaultOgImage,

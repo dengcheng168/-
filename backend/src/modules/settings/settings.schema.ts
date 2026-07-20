@@ -9,6 +9,7 @@ export const seoSettingsSchema = z.object({
 export const contactSettingsSchema = z.object({
   companyName: z.string().optional(),
   companyLogoUrl: z.string().optional(),
+  faviconUrl: z.string().optional(),
   companyAddress: z.string().optional(),
   companyEmail: z.string().optional(),
   companyPhone: z.string().optional(),
