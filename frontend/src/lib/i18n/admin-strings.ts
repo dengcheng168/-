@@ -71,8 +71,8 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { label: '社交媒体', href: '/admin/settings/social' },
       { label: 'WhatsApp', href: '/admin/settings/whatsapp' },
       { label: 'SMTP 邮件', href: '/admin/settings/smtp' },
-      { label: '缓存管理', href: '/admin/settings/cache', disabled: true },
-      { label: '多语言设置', href: '/admin/settings/i18n', disabled: true },
+      { label: '缓存管理', href: '/admin/settings/cache' },
+      { label: '多语言设置', href: '/admin/settings/i18n' },
     ],
   },
   {
@@ -81,8 +81,6 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { label: '管理员设置', href: '/admin/settings/account' },
       { label: '管理员管理', href: '/admin/settings/admin-users' },
-      { label: '角色', href: '/admin/settings/roles', disabled: true },
-      { label: '权限', href: '/admin/settings/permissions', disabled: true },
       { label: '登录记录', href: '/admin/settings/login-logs' },
       { label: '操作日志', href: '/admin/settings/audit-logs' },
     ],

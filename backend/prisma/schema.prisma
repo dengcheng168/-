@@ -365,6 +365,21 @@ model SiteSetting {
   @@map("site_settings")
 }
 
+/// 多语言译文：只存"非英文"覆盖，英文内容仍然是各自内容表里的原始字段。
+/// key 是带命名空间的字符串（如 "settings.heroHeadline" / "nav.3.label" / "faq.5.question"），
+/// value 为空字符串等同于"清除译文、回退显示英文原文"，不会真的插入一行空值。
+model Translation {
+  id        Int      @id @default(autoincrement())
+  locale    String // 目前只有 "es"，预留其它语言时直接扩展取值，无需改表结构
+  key       String
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@unique([locale, key])
+  @@index([locale])
+  @@map("translations")
+}
+
 model Redirect {
   id         Int      @id @default(autoincrement())
   fromPath   String   @unique

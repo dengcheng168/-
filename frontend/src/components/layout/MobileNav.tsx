@@ -3,9 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
+import { t } from '@/lib/i18n/site-strings';
+import type { Locale } from '@/lib/i18n/locales';
 import type { NavigationItem } from '@/types/navigation';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
-export function MobileNav({ items }: { items: NavigationItem[] }) {
+export function MobileNav({ items, locale = 'en' }: { items: NavigationItem[]; locale?: Locale }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -42,8 +45,11 @@ export function MobileNav({ items }: { items: NavigationItem[] }) {
                 {item.label}
               </Link>
             ))}
+            <div className="border-b border-grey-100 py-3">
+              <LanguageSwitcher locale={locale} />
+            </div>
             <Button href="/contact" onClick={() => setOpen(false)} className="mt-3">
-              Get a Quote
+              {t(locale, 'headerCta')}
             </Button>
           </nav>
         </div>

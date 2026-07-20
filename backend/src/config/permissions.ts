@@ -20,6 +20,7 @@ export type Resource =
   | 'redirects'
   | 'homepage'
   | 'footer'
+  | 'translations' // 多语言译文（目前仅西班牙语）
   | 'settings' // 一般站点设置：联系方式/SEO/社交/WhatsApp
   | 'settingsSensitive' // SMTP 凭据、Turnstile 密钥
   | 'inquiries'
@@ -43,6 +44,7 @@ const CONTENT_RESOURCES: Resource[] = [
   'redirects',
   'homepage',
   'footer',
+  'translations',
 ];
 
 const RW = ['read', 'write'] as const;
