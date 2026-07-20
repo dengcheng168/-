@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ok, fail } from '../../lib/api-response.js';
 import { paginationQuerySchema } from '../../lib/pagination.js';
+import { auditLogFromRequest } from '../../lib/audit-log.js';
 import {
   createInquiry,
   listAdminInquiries,
@@ -46,7 +47,18 @@ export async function adminDetailHandler(request: FastifyRequest<{ Params: { id:
 
 export async function adminUpdateHandler(request: FastifyRequest<{ Params: { id: string } }>) {
   const input = updateInquirySchema.parse(request.body);
-  return ok(await updateInquiry(request.server.prisma, Number(request.params.id), input));
+  const inquiry = await updateInquiry(request.server.prisma, Number(request.params.id), input);
+  // 该模型没有负责人/指派字段，只在状态确实发生变更时记录审计日志（备注更新不属于本次要求的必审范围）
+  if (input.status !== undefined) {
+    await auditLogFromRequest(request.server.prisma, request, {
+      action: 'inquiry.status_change',
+      resourceType: 'inquiry',
+      resourceId: inquiry.id,
+      summary: `更新询盘 #${inquiry.id} 状态为 ${inquiry.status}`,
+      after: { status: inquiry.status },
+    });
+  }
+  return ok(inquiry);
 }
 
 export async function adminDeleteHandler(request: FastifyRequest<{ Params: { id: string } }>) {

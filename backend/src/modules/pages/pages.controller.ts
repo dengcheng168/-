@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ok, fail } from '../../lib/api-response.js';
+import { auditLogFromRequest } from '../../lib/audit-log.js';
 import { listPages, getPageBySlug, updatePage } from './pages.service.js';
 import { updatePageSchema } from './pages.schema.js';
 
@@ -21,5 +22,13 @@ export async function adminDetailHandler(request: FastifyRequest<{ Params: { slu
 
 export async function adminUpdateHandler(request: FastifyRequest<{ Params: { slug: string } }>) {
   const input = updatePageSchema.parse(request.body);
-  return ok(await updatePage(request.server.prisma, request.params.slug, input));
+  const page = await updatePage(request.server.prisma, request.params.slug, input);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'page.update',
+    resourceType: 'page',
+    resourceId: page.slug,
+    summary: `更新页面 ${page.title}`,
+    after: { title: page.title, seoTitle: page.seoTitle },
+  });
+  return ok(page);
 }

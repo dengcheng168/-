@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ok, fail } from '../../lib/api-response.js';
+import { auditLogFromRequest } from '../../lib/audit-log.js';
 import { getFullSettings, getPublicSettings, patchSettings } from './settings.service.js';
 import { verifySmtpConnection } from '../../lib/mailer.js';
 import {
@@ -21,21 +22,56 @@ export async function adminGetSettingsHandler(request: FastifyRequest) {
   return ok(await getFullSettings(request.server.prisma));
 }
 
-function makePatchHandler(schema: { parse: (input: unknown) => Record<string, unknown> }) {
+function makePatchHandler(
+  schema: { parse: (input: unknown) => Record<string, unknown> },
+  action: string,
+  summary: string,
+  buildAfter: (input: Record<string, unknown>) => Record<string, unknown> = (input) => input,
+) {
   return async (request: FastifyRequest) => {
     const input = schema.parse(request.body);
-    return ok(await patchSettings(request.server.prisma, input));
+    const settings = await patchSettings(request.server.prisma, input);
+    await auditLogFromRequest(request.server.prisma, request, {
+      action,
+      resourceType: 'settings',
+      resourceId: 1,
+      summary,
+      after: buildAfter(input),
+    });
+    return ok(settings);
   };
 }
 
-export const adminPatchSeoHandler = makePatchHandler(seoSettingsSchema);
-export const adminPatchContactHandler = makePatchHandler(contactSettingsSchema);
-export const adminPatchSocialHandler = makePatchHandler(socialSettingsSchema);
-export const adminPatchWhatsappHandler = makePatchHandler(whatsappSettingsSchema);
-export const adminPatchSmtpHandler = makePatchHandler(smtpSettingsSchema);
-export const adminPatchHomepageHandler = makePatchHandler(homepageSettingsSchema);
-export const adminPatchFooterHandler = makePatchHandler(footerSettingsSchema);
-export const adminPatchTurnstileHandler = makePatchHandler(turnstileSettingsSchema);
+/** SMTP 密码绝不能出现在日志里，即使 audit-log 底层也会做敏感字段过滤，这里仍然显式剔除，双重保险 */
+function omitSmtpPassword(input: Record<string, unknown>): Record<string, unknown> {
+  const { smtpPassword: _smtpPassword, ...rest } = input;
+  return rest;
+}
+
+/** Turnstile secret key 同理，绝不写入日志 */
+function omitTurnstileSecretKey(input: Record<string, unknown>): Record<string, unknown> {
+  const { turnstileSecretKey: _turnstileSecretKey, ...rest } = input;
+  return rest;
+}
+
+export const adminPatchSeoHandler = makePatchHandler(seoSettingsSchema, 'settings.seo_update', '更新 SEO 设置');
+export const adminPatchContactHandler = makePatchHandler(contactSettingsSchema, 'settings.contact_update', '更新联系方式设置');
+export const adminPatchSocialHandler = makePatchHandler(socialSettingsSchema, 'settings.social_update', '更新社交媒体设置');
+export const adminPatchWhatsappHandler = makePatchHandler(whatsappSettingsSchema, 'settings.whatsapp_update', '更新 WhatsApp 设置');
+export const adminPatchSmtpHandler = makePatchHandler(
+  smtpSettingsSchema,
+  'settings.smtp_update',
+  '更新 SMTP 设置',
+  omitSmtpPassword,
+);
+export const adminPatchHomepageHandler = makePatchHandler(homepageSettingsSchema, 'settings.homepage_update', '更新首页设置');
+export const adminPatchFooterHandler = makePatchHandler(footerSettingsSchema, 'settings.footer_update', '更新页脚设置');
+export const adminPatchTurnstileHandler = makePatchHandler(
+  turnstileSettingsSchema,
+  'settings.turnstile_update',
+  '更新 Turnstile 人机验证设置',
+  omitTurnstileSecretKey,
+);
 
 export async function adminTestSmtpHandler(request: FastifyRequest, reply: FastifyReply) {
   const settings = await getFullSettings(request.server.prisma);

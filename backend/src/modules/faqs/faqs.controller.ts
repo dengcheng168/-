@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ok, fail } from '../../lib/api-response.js';
 import { paginationQuerySchema } from '../../lib/pagination.js';
+import { auditLogFromRequest } from '../../lib/audit-log.js';
 import { listPublishedFaqs, listAdminFaqs, getFaqById, createFaq, updateFaq, deleteFaq, reorderFaqs } from './faqs.service.js';
 import { createFaqSchema, updateFaqSchema, reorderSchema } from './faqs.schema.js';
 
@@ -21,16 +22,39 @@ export async function adminDetailHandler(request: FastifyRequest<{ Params: { id:
 }
 
 export async function adminCreateHandler(request: FastifyRequest) {
-  return ok(await createFaq(request.server.prisma, createFaqSchema.parse(request.body)));
+  const faq = await createFaq(request.server.prisma, createFaqSchema.parse(request.body));
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'faq.create',
+    resourceType: 'faq',
+    resourceId: faq.id,
+    summary: `创建 FAQ ${faq.question}`,
+    after: { question: faq.question, category: faq.category, published: faq.published },
+  });
+  return ok(faq);
 }
 
 export async function adminUpdateHandler(request: FastifyRequest<{ Params: { id: string } }>) {
   const input = updateFaqSchema.parse(request.body);
-  return ok(await updateFaq(request.server.prisma, Number(request.params.id), input));
+  const faq = await updateFaq(request.server.prisma, Number(request.params.id), input);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'faq.update',
+    resourceType: 'faq',
+    resourceId: faq.id,
+    summary: `更新 FAQ ${faq.question}`,
+    after: { question: faq.question, category: faq.category, published: faq.published },
+  });
+  return ok(faq);
 }
 
 export async function adminDeleteHandler(request: FastifyRequest<{ Params: { id: string } }>) {
-  await deleteFaq(request.server.prisma, Number(request.params.id));
+  const id = Number(request.params.id);
+  await deleteFaq(request.server.prisma, id);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'faq.delete',
+    resourceType: 'faq',
+    resourceId: id,
+    summary: `删除 FAQ #${id}`,
+  });
   return ok({ deleted: true });
 }
 

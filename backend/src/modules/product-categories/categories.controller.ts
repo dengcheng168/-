@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ok, fail } from '../../lib/api-response.js';
 import { paginationQuerySchema } from '../../lib/pagination.js';
+import { auditLogFromRequest } from '../../lib/audit-log.js';
 import {
   listPublishedCategories,
   getPublishedCategoryBySlug,
@@ -59,6 +60,13 @@ export async function adminDetailHandler(
 export async function adminCreateHandler(request: FastifyRequest) {
   const input = createCategorySchema.parse(request.body);
   const category = await createCategory(request.server.prisma, input);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'product_category.create',
+    resourceType: 'product_category',
+    resourceId: category.id,
+    summary: `创建产品分类 ${category.name}`,
+    after: { name: category.name, slug: category.slug, published: category.published },
+  });
   return ok(category);
 }
 
@@ -67,11 +75,25 @@ export async function adminUpdateHandler(
 ) {
   const input = updateCategorySchema.parse(request.body);
   const category = await updateCategory(request.server.prisma, Number(request.params.id), input);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'product_category.update',
+    resourceType: 'product_category',
+    resourceId: category.id,
+    summary: `更新产品分类 ${category.name}`,
+    after: { name: category.name, slug: category.slug, published: category.published },
+  });
   return ok(category);
 }
 
 export async function adminDeleteHandler(request: FastifyRequest<{ Params: { id: string } }>) {
-  await softDeleteCategory(request.server.prisma, Number(request.params.id));
+  const id = Number(request.params.id);
+  await softDeleteCategory(request.server.prisma, id);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'product_category.delete',
+    resourceType: 'product_category',
+    resourceId: id,
+    summary: `删除产品分类 #${id}`,
+  });
   return ok({ deleted: true });
 }
 

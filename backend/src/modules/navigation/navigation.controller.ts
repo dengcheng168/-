@@ -1,5 +1,6 @@
 import type { FastifyRequest } from 'fastify';
 import { ok } from '../../lib/api-response.js';
+import { auditLogFromRequest } from '../../lib/audit-log.js';
 import {
   listVisibleNavigation,
   listAllNavigation,
@@ -19,16 +20,39 @@ export async function adminListHandler(request: FastifyRequest) {
 }
 
 export async function adminCreateHandler(request: FastifyRequest) {
-  return ok(await createNavItem(request.server.prisma, createNavItemSchema.parse(request.body)));
+  const item = await createNavItem(request.server.prisma, createNavItemSchema.parse(request.body));
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'navigation_item.create',
+    resourceType: 'navigation_item',
+    resourceId: item.id,
+    summary: `创建导航项 ${item.label}`,
+    after: { label: item.label, url: item.url, visible: item.visible },
+  });
+  return ok(item);
 }
 
 export async function adminUpdateHandler(request: FastifyRequest<{ Params: { id: string } }>) {
   const input = updateNavItemSchema.parse(request.body);
-  return ok(await updateNavItem(request.server.prisma, Number(request.params.id), input));
+  const item = await updateNavItem(request.server.prisma, Number(request.params.id), input);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'navigation_item.update',
+    resourceType: 'navigation_item',
+    resourceId: item.id,
+    summary: `更新导航项 ${item.label}`,
+    after: { label: item.label, url: item.url, visible: item.visible },
+  });
+  return ok(item);
 }
 
 export async function adminDeleteHandler(request: FastifyRequest<{ Params: { id: string } }>) {
-  await deleteNavItem(request.server.prisma, Number(request.params.id));
+  const id = Number(request.params.id);
+  await deleteNavItem(request.server.prisma, id);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'navigation_item.delete',
+    resourceType: 'navigation_item',
+    resourceId: id,
+    summary: `删除导航项 #${id}`,
+  });
   return ok({ deleted: true });
 }
 

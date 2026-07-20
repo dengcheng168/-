@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { requireRole } from '../../middleware/require-role.js';
-import { CONTENT_ROLES } from '../../config/roles.js';
+import { CONTENT_ROLES, SETTINGS_SENSITIVE_ROLES } from '../../config/roles.js';
 import {
   publicSettingsHandler,
   adminGetSettingsHandler,
@@ -30,9 +30,9 @@ export async function adminSettingsRoutes(app: FastifyInstance) {
   app.patch('/settings/contact', adminPatchContactHandler);
   app.patch('/settings/social', adminPatchSocialHandler);
   app.patch('/settings/whatsapp', adminPatchWhatsappHandler);
-  app.patch('/settings/smtp', { preHandler: requireRole(['SUPER_ADMIN']) }, adminPatchSmtpHandler);
+  app.patch('/settings/smtp', { preHandler: requireRole(SETTINGS_SENSITIVE_ROLES) }, adminPatchSmtpHandler);
   app.patch('/settings/homepage', adminPatchHomepageHandler);
   app.patch('/settings/footer', adminPatchFooterHandler);
-  app.patch('/settings/turnstile', { preHandler: requireRole(['SUPER_ADMIN']) }, adminPatchTurnstileHandler);
-  app.post('/settings/smtp/test', { preHandler: requireRole(['SUPER_ADMIN']) }, adminTestSmtpHandler);
+  app.patch('/settings/turnstile', { preHandler: requireRole(SETTINGS_SENSITIVE_ROLES) }, adminPatchTurnstileHandler);
+  app.post('/settings/smtp/test', { preHandler: requireRole(SETTINGS_SENSITIVE_ROLES) }, adminTestSmtpHandler);
 }

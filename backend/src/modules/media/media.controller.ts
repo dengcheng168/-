@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ok, fail } from '../../lib/api-response.js';
 import { paginationQuerySchema } from '../../lib/pagination.js';
+import { auditLogFromRequest } from '../../lib/audit-log.js';
 import {
   saveUpload,
   listAdminMedia,
@@ -55,6 +56,14 @@ export async function adminUpdateHandler(
   if (!media) return reply.status(404).send(fail('媒体文件不存在', 'NOT_FOUND'));
 
   const updated = await updateMediaAltText(request.server.prisma, media.id, request.body.altText ?? '');
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'media.update',
+    resourceType: 'media',
+    resourceId: updated.id,
+    summary: `更新媒体文件描述 ${updated.originalName ?? updated.id}`,
+    before: { altText: media.altText },
+    after: { altText: updated.altText },
+  });
   return ok(updated);
 }
 
@@ -67,8 +76,15 @@ export async function adminUsageHandler(request: FastifyRequest<{ Params: { id: 
 }
 
 export async function adminDeleteHandler(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+  const id = Number(request.params.id);
   try {
-    await deleteMedia(request.server.prisma, Number(request.params.id));
+    await deleteMedia(request.server.prisma, id);
+    await auditLogFromRequest(request.server.prisma, request, {
+      action: 'media.delete',
+      resourceType: 'media',
+      resourceId: id,
+      summary: `删除媒体文件 #${id}`,
+    });
     return ok({ deleted: true });
   } catch (err) {
     if (err instanceof MediaInUseError) {
