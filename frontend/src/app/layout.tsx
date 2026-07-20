@@ -11,8 +11,12 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description:
       'Reliable water purification solutions for global brands, distributors and commercial projects.',
-    // 不设置就不传 icons 字段，Next.js 会回退到 app/favicon.ico 静态文件约定
-    ...(settings.faviconUrl ? { icons: { icon: settings.faviconUrl } } : {}),
+    // 必须显式传 icons，不能依赖 app/favicon.ico 的文件约定兜底：Next.js 文档明确说文件约定
+    // 的图标优先级高于 metadata/generateMetadata 里配置的 icons，两者会同时输出成两个
+    // <link rel="icon">，而浏览器实测会优先选中文件约定那个，导致后台传了新图标也不生效。
+    // 所以把默认图标挪到 public/favicon.ico（普通静态文件，不触发文件约定），这里始终只输出
+    // 一个 icons.icon，未设置自定义图标时兜底指向它
+    icons: { icon: settings.faviconUrl || '/favicon.ico' },
   };
 }
 
