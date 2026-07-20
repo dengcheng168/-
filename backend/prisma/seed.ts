@@ -294,6 +294,11 @@ async function main() {
       title: 'Contact Us',
       bodyHtml: '<p>Placeholder contact page introduction text.</p>',
     },
+    // certificates/blog 原本没有对应的 Page 行（这两个页面的标题/简介一直是写死在 page.tsx
+    // 里的），这里只补一条空壳记录，好让后台"页面文案"能管理它们的顶部背景图；
+    // 标题/正文仍然维持写死，不在这里改动，避免影响这两个页面已经在用的既有文案
+    { slug: 'certificates', title: 'Certificates' },
+    { slug: 'blog', title: 'Blog' },
   ];
   for (const p of pages) {
     await prisma.page.upsert({ where: { slug: p.slug }, update: {}, create: p });

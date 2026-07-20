@@ -15,6 +15,8 @@ const PAGE_LABELS: Record<string, string> = {
   'privacy-policy': '隐私政策',
   'terms-of-use': '使用条款',
   contact: '联系我们',
+  certificates: '证书页',
+  blog: '博客列表',
 };
 
 export default async function AdminPagesPage() {

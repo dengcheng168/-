@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import { Container } from '@/components/ui/Container';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { InquiryForm } from '@/components/forms/InquiryForm';
+import { PageHeroBanner } from '@/components/site/PageHeroBanner';
 import { getPageBySlug } from '@/lib/api/content';
 import { getPublicSettings } from '@/lib/api/settings';
 
@@ -22,19 +22,14 @@ export default async function ContactPage() {
   return (
     <>
       {hasHero && (
-        <div className="relative isolate flex min-h-[280px] items-center overflow-hidden bg-navy-950">
-          <Image src={page!.heroImage!} alt="" fill priority sizes="100vw" className="object-cover" />
-          <div className="absolute inset-0 bg-navy-950/70" />
-          <Container className="relative z-10 py-16">
-            <h1 className="text-3xl font-semibold text-white">{page?.title ?? 'Contact Us'}</h1>
-            {page?.bodyHtml && (
-              <div
-                className="prose prose-sm prose-invert mt-4 max-w-2xl text-grey-100/90"
-                dangerouslySetInnerHTML={{ __html: page.bodyHtml }}
-              />
-            )}
-          </Container>
-        </div>
+        <PageHeroBanner image={page!.heroImage!} title={page?.title ?? 'Contact Us'}>
+          {page?.bodyHtml && (
+            <div
+              className="prose prose-sm prose-invert mt-4 max-w-2xl text-grey-100/90"
+              dangerouslySetInnerHTML={{ __html: page.bodyHtml }}
+            />
+          )}
+        </PageHeroBanner>
       )}
 
       <Container className="py-12">
