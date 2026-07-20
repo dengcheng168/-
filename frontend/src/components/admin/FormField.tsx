@@ -9,7 +9,7 @@ export function FormField({
   hint,
   error,
 }: {
-  label: string;
+  label: React.ReactNode;
   htmlFor: string;
   required?: boolean;
   children: React.ReactNode;
