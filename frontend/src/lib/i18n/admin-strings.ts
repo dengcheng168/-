@@ -25,11 +25,17 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { label: '产品列表', href: '/admin/products' },
       { label: '产品分类', href: '/admin/product-categories' },
+      { label: 'FAQ 管理', href: '/admin/faqs' },
+      { label: '页面文案', href: '/admin/pages' },
+    ],
+  },
+  {
+    title: '博客管理',
+    icon: 'file-text',
+    items: [
       { label: '博客文章', href: '/admin/blog' },
       { label: '博客分类', href: '/admin/blog-categories' },
       { label: '博客标签', href: '/admin/blog-tags' },
-      { label: 'FAQ 管理', href: '/admin/faqs' },
-      { label: '页面文案', href: '/admin/pages' },
     ],
   },
   {
@@ -92,7 +98,9 @@ export function findActiveNav(pathname: string): { group: AdminNavGroup; item: A
   for (const group of ADMIN_NAV) {
     for (const item of group.items) {
       if (item.disabled) continue;
-      const active = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
+      // 前缀匹配必须带上尾部斜杠再比较，否则 /admin/blog-tags 会被 href 为 /admin/blog 的
+      // "博客文章"提前匹配走（字符串前缀重合但不是真的子路径）
+      const active = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(`${item.href}/`));
       if (active) return { group, item };
     }
   }
