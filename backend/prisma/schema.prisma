@@ -22,17 +22,23 @@ datasource db {
 // InquiryStatus: "NEW" | "CONTACTED" | "QUOTED" | "CLOSED" | "SPAM"
 
 model AdminUser {
-  id           Int       @id @default(autoincrement())
-  email        String    @unique
-  passwordHash String
-  name         String?
-  role         String    @default("SUPER_ADMIN")
-  isActive     Boolean   @default(true)
-  lastLoginAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  mediaUploads Media[]
-  auditLogs    AuditLog[]
+  id             Int        @id @default(autoincrement())
+  email          String     @unique
+  passwordHash   String
+  name           String?
+  role           String     @default("SUPER_ADMIN")
+  isActive       Boolean    @default(true)
+  lastLoginAt    DateTime?
+  // 手动解除锁定的时间戳：isLoginLocked() 只统计这个时间之后的失败记录，
+  // 不需要改写/删除 LoginLog 历史（审计记录要保持真实完整）
+  unlockedAt     DateTime?
+  // "强制使已有 Session 失效"：超级管理员点一下就把这个数字加一，
+  // 旧 JWT 里签发时记录的 sessionVersion 跟数据库里当前值对不上就会被 requireAuth 拒绝
+  sessionVersion Int        @default(1)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  mediaUploads   Media[]
+  auditLogs      AuditLog[]
 
   @@map("admin_users")
 }
@@ -43,30 +49,39 @@ model LoginLog {
   id        Int      @id @default(autoincrement())
   email     String
   success   Boolean
-  reason    String? // 失败原因，例如 "INVALID_CREDENTIALS" | "LOCKED" | "INACTIVE"
+  reason    String? // 失败原因，例如 "INVALID_CREDENTIALS" | "LOCKED" | "INACTIVE"，绝不存密码
   ipAddress String?
   userAgent String?
   createdAt DateTime @default(now())
 
   @@index([email, createdAt])
+  @@index([ipAddress, createdAt])
+  @@index([email, ipAddress, createdAt])
   @@map("login_logs")
 }
 
-/// 后台操作日志：记录谁在什么时间对哪个对象做了什么操作
+/// 后台操作日志：记录谁在什么时间对哪个对象做了什么操作，全站统一通过 lib/audit-log.ts 的 auditLog() 写入
 model AuditLog {
-  id           Int       @id @default(autoincrement())
-  adminUserId  Int?
-  adminUser    AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
-  adminEmail   String // 冗余存一份邮箱，管理员账号被删除后日志仍可读
-  action       String // 例如 "product.create" / "product.publish" / "product.unpublish"
-  entityType   String // 例如 "product"
-  entityId     String? // 关联对象 id，字符串存储以兼容不同实体的主键类型
-  summary      String // 人类可读的一句话描述，例如 "创建产品 RO-500"
-  ipAddress    String?
-  createdAt    DateTime  @default(now())
+  id          Int        @id @default(autoincrement())
+  adminUserId Int?
+  adminUser   AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+  adminEmail  String // 冗余存一份邮箱，管理员账号被删除后日志仍可读
+  actorRole   String? // 操作时的角色快照
+  action      String // 例如 "product.create" / "admin_user.role_change"
+  entityType  String // 例如 "product" / "admin_user"
+  entityId    String? // 关联对象 id，字符串存储以兼容不同实体的主键类型
+  summary     String // 人类可读的一句话描述
+  result      String     @default("SUCCESS") // "SUCCESS" | "FAILURE"
+  beforeData  String? // JSON 字符串，已过滤敏感字段+截断
+  afterData   String? // JSON 字符串，已过滤敏感字段+截断
+  metadata    String? // JSON 字符串，额外上下文（不含敏感信息）
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime   @default(now())
 
   @@index([createdAt])
   @@index([adminUserId])
+  @@index([action])
   @@map("audit_logs")
 }
 

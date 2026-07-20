@@ -5,6 +5,13 @@ export const COOKIE_NAME = 'wp_session';
 // 与默认 JWT_EXPIRES_IN=7d 对应；如修改该环境变量，请同步调整这里
 export const COOKIE_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
 
+/**
+ * 权限模型版本号：每次角色/权限体系发生不兼容变化（比如这次的二档角色扩展成三档）时手动加一。
+ * 登录时把这个数字签进 JWT 的 pv 字段，requireAuth 校验时如果 JWT 里的 pv 跟当前常量不一致，
+ * 直接拒绝并要求重新登录——保证旧 Session 不会因为角色名对不上或权限模型变了而拿到不该有的权限。
+ */
+export const PERMISSION_VERSION = 2;
+
 export const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 100;
 

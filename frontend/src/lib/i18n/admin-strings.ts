@@ -80,6 +80,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     icon: 'shield',
     items: [
       { label: '管理员设置', href: '/admin/settings/account' },
+      { label: '管理员管理', href: '/admin/settings/admin-users' },
       { label: '角色', href: '/admin/settings/roles', disabled: true },
       { label: '权限', href: '/admin/settings/permissions', disabled: true },
       { label: '登录记录', href: '/admin/settings/login-logs' },
