@@ -68,10 +68,9 @@ export const turnstileSettingsSchema = z.object({
   turnstileSecretKey: z.string().optional(),
 });
 
-/** 仅保存像素 ID，本批次不在前台注入任何追踪脚本 */
+/** Meta / TikTok / Google 三个像素填了 ID 会真实在前台注入追踪脚本，见各平台组件 */
 export const pixelSettingsSchema = z.object({
   metaPixelId: z.string().optional(),
   tiktokPixelId: z.string().optional(),
-  twitterPixelId: z.string().optional(),
   googlePixelId: z.string().optional(),
 });

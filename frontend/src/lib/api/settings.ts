@@ -40,7 +40,6 @@ const FALLBACK_SETTINGS: PublicSiteSettings = {
   footerCompanyIntro: null,
   metaPixelId: null,
   tiktokPixelId: null,
-  twitterPixelId: null,
   googlePixelId: null,
 };
 

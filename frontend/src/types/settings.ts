@@ -58,6 +58,5 @@ export interface PublicSiteSettings {
   footerCompanyIntro: string | null;
   metaPixelId: string | null;
   tiktokPixelId: string | null;
-  twitterPixelId: string | null;
   googlePixelId: string | null;
 }
