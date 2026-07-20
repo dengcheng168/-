@@ -138,3 +138,12 @@ export async function updateFooterSettingsAction(_prevState: AdminFormState, for
     footerCompanyIntro: textOrUndefined(formData, 'footerCompanyIntro'),
   }, '/admin/footer');
 }
+
+export async function updatePixelSettingsAction(_prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
+  return patchSettings('pixels', {
+    metaPixelId: textOrUndefined(formData, 'metaPixelId'),
+    tiktokPixelId: textOrUndefined(formData, 'tiktokPixelId'),
+    twitterPixelId: textOrUndefined(formData, 'twitterPixelId'),
+    googlePixelId: textOrUndefined(formData, 'googlePixelId'),
+  });
+}

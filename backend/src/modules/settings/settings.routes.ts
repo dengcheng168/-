@@ -12,6 +12,7 @@ import {
   adminPatchHomepageHandler,
   adminPatchFooterHandler,
   adminPatchTurnstileHandler,
+  adminPatchPixelsHandler,
   adminTestSmtpHandler,
 } from './settings.controller.js';
 
@@ -35,4 +36,5 @@ export async function adminSettingsRoutes(app: FastifyInstance) {
   app.patch('/settings/footer', adminPatchFooterHandler);
   app.patch('/settings/turnstile', { preHandler: requireRole(SETTINGS_SENSITIVE_ROLES) }, adminPatchTurnstileHandler);
   app.post('/settings/smtp/test', { preHandler: requireRole(SETTINGS_SENSITIVE_ROLES) }, adminTestSmtpHandler);
+  app.patch('/settings/pixels', adminPatchPixelsHandler);
 }

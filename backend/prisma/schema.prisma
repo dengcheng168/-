@@ -360,6 +360,12 @@ model SiteSetting {
   footerColumns         String? // JSON 字符串
   // 页脚 Logo 下方的公司简介，独立于网站基础设置里的 companyAddress，管理员单独填写
   footerCompanyIntro    String?
+  // 营销像素 ID：本批次只做后台保存，不在前台注入任何追踪脚本、不处理 Cookie Consent——
+  // 这两项是本项目明确排除的范围，真正接入需要单独确认
+  metaPixelId           String?
+  tiktokPixelId         String?
+  twitterPixelId        String?
+  googlePixelId         String?
   updatedAt             DateTime @updatedAt
 
   @@map("site_settings")

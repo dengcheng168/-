@@ -74,6 +74,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { label: '网站基础设置', href: '/admin/settings/contact' },
       { label: 'SEO 与追踪', href: '/admin/settings/seo' },
+      { label: '像素设置', href: '/admin/settings/pixels' },
       { label: '社交媒体', href: '/admin/settings/social' },
       { label: 'WhatsApp', href: '/admin/settings/whatsapp' },
       { label: 'SMTP 邮件', href: '/admin/settings/smtp' },

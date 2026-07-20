@@ -12,6 +12,7 @@ import {
   homepageSettingsSchema,
   footerSettingsSchema,
   turnstileSettingsSchema,
+  pixelSettingsSchema,
 } from './settings.schema.js';
 
 export async function publicSettingsHandler(request: FastifyRequest) {
@@ -72,6 +73,7 @@ export const adminPatchTurnstileHandler = makePatchHandler(
   '更新 Turnstile 人机验证设置',
   omitTurnstileSecretKey,
 );
+export const adminPatchPixelsHandler = makePatchHandler(pixelSettingsSchema, 'settings.pixels_update', '更新营销像素 ID 设置');
 
 export async function adminTestSmtpHandler(request: FastifyRequest, reply: FastifyReply) {
   const settings = await getFullSettings(request.server.prisma);
