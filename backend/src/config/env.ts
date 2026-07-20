@@ -9,6 +9,15 @@ const envSchema = z.object({
 
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
 
+  /**
+   * 决定 request.ip（限流/登录锁定/操作日志用的客户端 IP）信任哪些来源的 X-Forwarded-For。
+   * 默认只信任回环地址和私网地址段（loopback + uniquelocal，对应 Docker 内部网络/宿主机反代
+   * 这种"前面就是自己人的反向代理"部署方式）。如果不做这层限制，公网请求可以直接伪造
+   * X-Forwarded-For 头绕过按 IP 的限流和登录锁定。逗号分隔，支持 proxy-addr 的预设名
+   * （loopback/linklocal/uniquelocal）和具体 IP/CIDR。
+   */
+  TRUST_PROXY: z.string().default('loopback, uniquelocal'),
+
   DATABASE_URL: z.string().default('file:./dev.db'),
 
   JWT_SECRET: z.string().min(1).default('dev-secret-change-me'),
