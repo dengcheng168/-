@@ -120,7 +120,7 @@ export async function adminUsageHandler(request: FastifyRequest<{ Params: { id: 
   const media = await getMediaById(request.server.prisma, Number(request.params.id));
   if (!media) return reply.status(404).send(fail('媒体文件不存在', 'NOT_FOUND'));
 
-  const usages = await findMediaUsage(request.server.prisma, media.url);
+  const usages = await findMediaUsage(request.server.prisma, media);
   return ok({ inUse: usages.length > 0, usages });
 }
 
