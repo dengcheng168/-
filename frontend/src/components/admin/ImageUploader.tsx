@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { resolveMediaUrl } from '@/lib/utils/media';
 import { ImageCropper } from './ImageCropper';
 
 const RASTER_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
@@ -72,7 +73,7 @@ export function ImageUploader({
       <div className="flex items-center gap-4">
         {url ? (
           <div className="relative h-20 w-20 overflow-hidden rounded-md border border-grey-200 bg-grey-50">
-            <Image src={url} alt="" fill sizes="80px" className="object-cover" />
+            <Image src={resolveMediaUrl(url)} alt="" fill sizes="80px" className="object-cover" />
           </div>
         ) : (
           <div className="flex h-20 w-20 items-center justify-center rounded-md border border-dashed border-grey-200 text-xs text-grey-500">

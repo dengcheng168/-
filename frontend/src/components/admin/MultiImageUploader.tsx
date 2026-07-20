@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { resolveMediaUrl } from '@/lib/utils/media';
 import { ImageCropper } from './ImageCropper';
 
 const RASTER_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
@@ -73,7 +74,7 @@ export function MultiImageUploader({
       <div className="flex flex-wrap gap-3">
         {images.map((img, i) => (
           <div key={`${img.url}-${i}`} className="relative h-20 w-20 overflow-hidden rounded-md border border-grey-200 bg-grey-50">
-            <Image src={img.url} alt="" fill sizes="80px" className="object-cover" />
+            <Image src={resolveMediaUrl(img.url)} alt="" fill sizes="80px" className="object-cover" />
             <button
               type="button"
               onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
