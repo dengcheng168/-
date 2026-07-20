@@ -53,10 +53,13 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     title: '客户中心',
     icon: 'inbox',
     items: [
+      // 询盘来源/导出记录必须排在询盘管理前面：findActiveNav 按数组顺序取第一个前缀匹配，
+      // '/admin/inquiries/sources' 也能匹配上 '/admin/inquiries' 这个更短的前缀，
+      // 顺序反了会导致这两个子页面的侧边栏高亮和面包屑都错误地显示成"询盘管理"
+      { label: '询盘来源', href: '/admin/inquiries/sources' },
+      { label: '导出记录', href: '/admin/inquiries/exports' },
       { label: '询盘管理', href: '/admin/inquiries' },
-      { label: '客户管理', href: '/admin/customers', disabled: true },
-      { label: '询盘来源', href: '/admin/inquiries/sources', disabled: true },
-      { label: '导出记录', href: '/admin/inquiries/exports', disabled: true },
+      { label: '客户管理', href: '/admin/customers' },
     ],
   },
   {

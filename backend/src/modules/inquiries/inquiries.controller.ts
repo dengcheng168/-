@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ok, fail } from '../../lib/api-response.js';
-import { paginationQuerySchema } from '../../lib/pagination.js';
+import { paginationQuerySchema, toSkipTake, buildPaginationMeta } from '../../lib/pagination.js';
 import { auditLogFromRequest } from '../../lib/audit-log.js';
 import {
   createInquiry,
@@ -9,6 +9,8 @@ import {
   updateInquiry,
   deleteInquiry,
   exportInquiriesCsv,
+  listCustomers,
+  getInquirySourceStats,
   TurnstileVerificationError,
 } from './inquiries.service.js';
 import { createInquirySchema, updateInquirySchema, inquiryListQuerySchema } from './inquiries.schema.js';
@@ -70,8 +72,34 @@ export async function adminExportCsvHandler(
   request: FastifyRequest<{ Querystring: { status?: string } }>,
   reply: FastifyReply,
 ) {
-  const csv = await exportInquiriesCsv(request.server.prisma, { status: request.query.status });
+  const { csv, count } = await exportInquiriesCsv(request.server.prisma, { status: request.query.status });
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'inquiry.export',
+    resourceType: 'inquiry',
+    summary: `导出询盘 CSV（状态：${request.query.status ?? '全部'}，共 ${count} 条）`,
+    metadata: { status: request.query.status ?? null, count },
+  });
   reply.header('Content-Type', 'text/csv; charset=utf-8');
   reply.header('Content-Disposition', 'attachment; filename="inquiries.csv"');
   return reply.send(csv);
+}
+
+export async function adminCustomersHandler(request: FastifyRequest<{ Querystring: { q?: string } }>) {
+  const customers = await listCustomers(request.server.prisma, { q: request.query.q });
+  return ok(customers);
+}
+
+export async function adminSourceStatsHandler(request: FastifyRequest) {
+  const stats = await getInquirySourceStats(request.server.prisma);
+  return ok(stats);
+}
+
+export async function adminExportLogsHandler(request: FastifyRequest) {
+  const query = paginationQuerySchema.parse(request.query);
+  const where = { entityType: 'inquiry', action: 'inquiry.export' };
+  const [items, total] = await Promise.all([
+    request.server.prisma.auditLog.findMany({ where, orderBy: { createdAt: 'desc' }, ...toSkipTake(query) }),
+    request.server.prisma.auditLog.count({ where }),
+  ]);
+  return ok(items, buildPaginationMeta(query, total));
 }

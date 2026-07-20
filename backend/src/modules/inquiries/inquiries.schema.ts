@@ -25,6 +25,7 @@ export const updateInquirySchema = z.object({
 export const inquiryListQuerySchema = z.object({
   status: z.enum(['NEW', 'CONTACTED', 'QUOTED', 'CLOSED', 'SPAM']).optional(),
   q: z.string().optional(),
+  sourcePage: z.string().optional(),
 });
 
 export type CreateInquiryInput = z.infer<typeof createInquirySchema>;

@@ -25,17 +25,17 @@ const STATUS_OPTIONS = [
 export default async function AdminInquiriesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; sourcePage?: string }>;
 }) {
-  const { status } = await searchParams;
-  const qs = status ? `&status=${status}` : '';
+  const { status, sourcePage } = await searchParams;
+  const qs = (status ? `&status=${encodeURIComponent(status)}` : '') + (sourcePage ? `&sourcePage=${encodeURIComponent(sourcePage)}` : '');
   const { data } = await adminFetch<Row[]>(`/inquiries?pageSize=100${qs}`);
 
   return (
     <div>
       <PageHeader
         title="询盘管理"
-        description="查看并跟进客户询盘，支持按状态筛选与导出。"
+        description={sourcePage ? `来源页面「${sourcePage}」的询盘，共 ${data.length} 条。` : '查看并跟进客户询盘，支持按状态筛选与导出。'}
         action={
           <a
             href={`/api/admin/inquiries/export${status ? `?status=${status}` : ''}`}

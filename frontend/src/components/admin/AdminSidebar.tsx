@@ -151,7 +151,10 @@ export function AdminSidebar({ user, collapsed, onToggleCollapse, mobileOpen, on
                       );
                     }
 
-                    const itemActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
+                    // 复用 findActiveNav 算出的唯一匹配项，不要在这里另外用 pathname.startsWith(item.href)
+                    // 独立判断——之前这么写漏了尾部斜杠，'/admin/inquiries/sources' 也会把
+                    // '/admin/inquiries'（询盘管理）一起判定成 active，导致两个菜单项同时高亮
+                    const itemActive = active?.item.href === item.href;
                     return (
                       <Link
                         key={item.href}
