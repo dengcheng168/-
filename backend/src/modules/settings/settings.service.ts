@@ -42,12 +42,6 @@ export async function getPublicSettings(prisma: PrismaClient) {
     smtpPassword: _smtpPassword,
     smtpFromEmail: _smtpFromEmail,
     turnstileSecretKey: _turnstileSecretKey,
-    // 像素 ID 本批次只做后台保存，前台还没有实际注入追踪脚本的代码，
-    // 没有理由通过公开接口提前暴露，等真正接入时再一起放开
-    metaPixelId: _metaPixelId,
-    tiktokPixelId: _tiktokPixelId,
-    twitterPixelId: _twitterPixelId,
-    googlePixelId: _googlePixelId,
     ...publicSafe
   } = full as Record<string, unknown>;
   return publicSafe;

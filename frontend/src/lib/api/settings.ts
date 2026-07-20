@@ -38,6 +38,10 @@ const FALLBACK_SETTINGS: PublicSiteSettings = {
   footerText: null,
   footerColumns: null,
   footerCompanyIntro: null,
+  metaPixelId: null,
+  tiktokPixelId: null,
+  twitterPixelId: null,
+  googlePixelId: null,
 };
 
 function resolveSettingsMedia(settings: PublicSiteSettings): PublicSiteSettings {
