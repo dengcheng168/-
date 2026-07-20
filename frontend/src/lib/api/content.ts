@@ -11,7 +11,11 @@ function resolveCertificateMedia(cert: Certificate): Certificate {
 }
 
 function resolvePageMedia(page: Page): Page {
-  return { ...page, ogImage: page.ogImage ? resolveMediaUrl(page.ogImage) : page.ogImage };
+  return {
+    ...page,
+    ogImage: page.ogImage ? resolveMediaUrl(page.ogImage) : page.ogImage,
+    heroImage: page.heroImage ? resolveMediaUrl(page.heroImage) : page.heroImage,
+  };
 }
 
 // 构建期后端不可达时的兜底空值：见 lib/api/settings.ts 顶部注释

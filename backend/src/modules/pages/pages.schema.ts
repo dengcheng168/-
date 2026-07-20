@@ -7,6 +7,7 @@ export const updatePageSchema = z.object({
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
   ogImage: z.string().optional(),
+  heroImage: z.string().optional(),
 });
 
 export type UpdatePageInput = z.infer<typeof updatePageSchema>;

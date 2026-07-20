@@ -294,6 +294,8 @@ model Page {
   seoTitle       String?
   seoDescription String?
   ogImage        String?
+  // 页面顶部（面包屑+标题+简介区域）的背景图，可选；不设置时该区域保持原来的纯白背景
+  heroImage      String?
   updatedAt      DateTime @updatedAt
 
   @@map("pages")

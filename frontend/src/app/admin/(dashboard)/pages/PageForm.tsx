@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import { FormField, fieldInputClasses } from '@/components/admin/FormField';
+import { ImageUploader } from '@/components/admin/ImageUploader';
 import type { AdminFormState } from '@/lib/actions/admin/categories';
 
 interface FormValues {
@@ -10,6 +11,7 @@ interface FormValues {
   sections?: unknown;
   seoTitle?: string | null;
   seoDescription?: string | null;
+  heroImage?: string | null;
 }
 
 export function PageForm({
@@ -31,6 +33,14 @@ export function PageForm({
       <FormField label="正文内容（HTML）" htmlFor="bodyHtml" hint="支持 HTML 标签">
         <textarea id="bodyHtml" name="bodyHtml" rows={10} defaultValue={initialValues?.bodyHtml ?? ''} className={fieldInputClasses} />
       </FormField>
+
+      <ImageUploader
+        name="heroImage"
+        label="顶部背景图"
+        defaultValue={initialValues?.heroImage}
+        recommendedSize="建议 1920×480px（宽幅横幅），不设置则该区域保持纯白背景"
+        aspectRatio={4}
+      />
 
       {initialValues?.sections !== undefined && (
         <FormField label="结构化区块（JSON，谨慎编辑）" htmlFor="sectionsJson" hint="仅特定页面使用，例如工厂数据、OEM 流程步骤">
