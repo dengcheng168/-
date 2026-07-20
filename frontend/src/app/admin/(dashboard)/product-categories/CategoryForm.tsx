@@ -31,7 +31,13 @@ export function CategoryForm({
         <textarea id="description" name="description" rows={3} defaultValue={initialValues?.description ?? ''} className={fieldInputClasses} />
       </FormField>
 
-      <ImageUploader name="image" label="分类图片" defaultValue={initialValues?.image} />
+      <ImageUploader
+        name="image"
+        label="分类图片"
+        defaultValue={initialValues?.image}
+        recommendedSize="建议 800×600px"
+        aspectRatio={4 / 3}
+      />
 
       <div className="flex items-center gap-2">
         <input id="published" name="published" type="checkbox" defaultChecked={initialValues?.published ?? true} />

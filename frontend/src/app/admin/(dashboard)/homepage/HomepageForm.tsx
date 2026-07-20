@@ -53,8 +53,20 @@ export function HomepageForm({ initialValues }: { initialValues: Values }) {
             <input id="heroButton2Link" name="heroButton2Link" defaultValue={initialValues.heroButton2Link} className={fieldInputClasses} />
           </FormField>
         </div>
-        <ImageUploader name="heroDesktopImage" label="桌面端 Banner 图片" defaultValue={initialValues.heroDesktopImage} />
-        <ImageUploader name="heroMobileImage" label="移动端 Banner 图片" defaultValue={initialValues.heroMobileImage} />
+        <ImageUploader
+          name="heroDesktopImage"
+          label="桌面端 Banner 图片"
+          defaultValue={initialValues.heroDesktopImage}
+          recommendedSize="建议 1920×1080px（宽屏横幅）"
+          aspectRatio={16 / 9}
+        />
+        <ImageUploader
+          name="heroMobileImage"
+          label="移动端 Banner 图片"
+          defaultValue={initialValues.heroMobileImage}
+          recommendedSize="建议 1080×1350px（竖版）"
+          aspectRatio={4 / 5}
+        />
       </section>
 
       <section className="space-y-4 rounded-lg border border-grey-200 bg-white p-5">

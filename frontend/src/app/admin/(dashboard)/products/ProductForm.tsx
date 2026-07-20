@@ -85,8 +85,20 @@ export function ProductForm({
         <textarea id="description" name="description" rows={6} defaultValue={initialValues?.description} required className={fieldInputClasses} />
       </FormField>
 
-      <ImageUploader name="mainImage" label="主图" defaultValue={initialValues?.mainImage} />
-      <MultiImageUploader name="galleryImages" label="详情图片（多张）" defaultValue={initialValues?.galleryImages} />
+      <ImageUploader
+        name="mainImage"
+        label="主图"
+        defaultValue={initialValues?.mainImage}
+        recommendedSize="建议 1000×1000px（正方形）"
+        aspectRatio={1}
+      />
+      <MultiImageUploader
+        name="galleryImages"
+        label="详情图片（多张）"
+        defaultValue={initialValues?.galleryImages}
+        recommendedSize="建议 1000×1000px（正方形），可上传多张"
+        aspectRatio={1}
+      />
 
       <FormField label="参数表" htmlFor="specsText" hint="每行一条，格式：标签: 值，例如 Daily Output: 50 GPD">
         <textarea id="specsText" name="specsText" rows={4} defaultValue={specsToText(initialValues?.specs)} className={fieldInputClasses} />

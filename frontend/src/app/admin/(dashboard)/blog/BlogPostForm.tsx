@@ -52,7 +52,13 @@ export function BlogPostForm({
         <input id="excerpt" name="excerpt" defaultValue={initialValues?.excerpt ?? ''} className={fieldInputClasses} />
       </FormField>
 
-      <ImageUploader name="coverImage" label="封面图" defaultValue={initialValues?.coverImage} />
+      <ImageUploader
+        name="coverImage"
+        label="封面图"
+        defaultValue={initialValues?.coverImage}
+        recommendedSize="建议 1200×675px（16:9）"
+        aspectRatio={16 / 9}
+      />
 
       <FormField label="正文（HTML）" htmlFor="body" required hint="支持 HTML 标签，如 <h2> <p> <ul><li>">
         <textarea id="body" name="body" rows={10} defaultValue={initialValues?.body} required className={fieldInputClasses} />

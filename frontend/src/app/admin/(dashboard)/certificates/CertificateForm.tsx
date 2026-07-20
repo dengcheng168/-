@@ -60,7 +60,13 @@ export function CertificateForm({
         </FormField>
       </div>
 
-      <ImageUploader name="imageUrl" label="证书图片" defaultValue={initialValues?.imageUrl} />
+      <ImageUploader
+        name="imageUrl"
+        label="证书图片"
+        defaultValue={initialValues?.imageUrl}
+        recommendedSize="建议 800×800px（正方形）"
+        aspectRatio={1}
+      />
 
       <FormField label="PDF 文件地址（可选）" htmlFor="pdfUrl" hint="可先在媒体库上传后粘贴地址">
         <input id="pdfUrl" name="pdfUrl" defaultValue={initialValues?.pdfUrl ?? ''} className={fieldInputClasses} />
