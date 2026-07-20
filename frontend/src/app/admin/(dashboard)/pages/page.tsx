@@ -17,6 +17,7 @@ const PAGE_LABELS: Record<string, string> = {
   contact: '联系我们',
   certificates: '证书页',
   blog: '博客列表',
+  products: '产品列表',
 };
 
 export default async function AdminPagesPage() {
