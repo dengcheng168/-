@@ -86,54 +86,75 @@ model AuditLog {
 }
 
 model ProductCategory {
-  id             Int       @id @default(autoincrement())
+  id             Int                          @id @default(autoincrement())
   name           String
-  slug           String    @unique
+  slug           String                       @unique
   description    String?
   image          String?
-  sortOrder      Int       @default(0)
-  published      Boolean   @default(true)
+  sortOrder      Int                          @default(0)
+  published      Boolean                      @default(true)
   seoTitle       String?
   seoDescription String?
   deletedAt      DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt      DateTime                     @default(now())
+  updatedAt      DateTime                     @updatedAt
   products       Product[]
+  translations   ProductCategoryTranslation[]
 
   @@index([published])
   @@index([sortOrder])
   @@map("product_categories")
 }
 
+model ProductCategoryTranslation {
+  id                Int             @id @default(autoincrement())
+  categoryId        Int
+  category          ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  locale            String
+  name              String?
+  description       String?
+  seoTitle          String?
+  seoDescription    String?
+  translationStatus String          @default("DRAFT")
+  updatedBy         Int?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([categoryId, locale])
+  @@index([locale])
+  @@map("product_category_translations")
+}
+
 model Product {
-  id               Int             @id @default(autoincrement())
+  id               Int                  @id @default(autoincrement())
   name             String
-  slug             String          @unique
-  sku              String?         @unique
+  slug             String               @unique
+  sku              String?              @unique
   categoryId       Int
-  category         ProductCategory @relation(fields: [categoryId], references: [id])
+  category         ProductCategory      @relation(fields: [categoryId], references: [id])
   shortDescription String?
   description      String // 富文本 HTML，保存前会做 sanitize
   mainImage        String
-  galleryImages    String          @default("[]") // JSON 字符串：[{url, alt}]（SQLite 无原生 Json 类型，应用层负责序列化）
-  specs            String          @default("[]") // JSON 字符串：[{label, value}]
-  features         String          @default("[]") // JSON 字符串：string[] 或 [{title, description}]
-  applications     String          @default("[]") // JSON 字符串：[{title, description, image}]
+  galleryImages    String               @default("[]") // JSON 字符串：[{url, alt}]（SQLite 无原生 Json 类型，应用层负责序列化）
+  specs            String               @default("[]") // JSON 字符串：[{label, value}]
+  features         String               @default("[]") // JSON 字符串：string[] 或 [{title, description}]
+  applications     String               @default("[]") // JSON 字符串：[{title, description, image}]
   packagingInfo    String?
   moq              String?
-  oemOdmSupport    Boolean         @default(true)
+  oemOdmSupport    Boolean              @default(true)
   specSheetUrl     String?
-  status           String          @default("DRAFT")
-  featured         Boolean         @default(false)
-  sortOrder        Int             @default(0)
+  status           String               @default("DRAFT")
+  featured         Boolean              @default(false)
+  sortOrder        Int                  @default(0)
   seoTitle         String?
   seoDescription   String?
   seoKeywords      String?
   ogImage          String?
   deletedAt        DateTime?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
   inquiries        Inquiry[]
+  translations     ProductTranslation[]
 
   @@index([categoryId])
   @@index([status])
@@ -142,19 +163,65 @@ model Product {
   @@map("products")
 }
 
+/// 产品的非英语翻译覆盖，只存文字字段——SKU/图片/数值/关联关系继续共用 Product 主记录。
+/// locale='es' 是当前唯一取值，value 为空视同"没有译文"，前台按 resolveLocalizedEntity 回退英文。
+model ProductTranslation {
+  id                Int      @id @default(autoincrement())
+  productId         Int
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  locale            String
+  name              String?
+  shortDescription  String?
+  description       String?
+  features          String? // JSON 字符串，结构同 Product.features
+  specs             String? // JSON 字符串，结构同 Product.specs（数值本身不译，只译 label）
+  applications      String? // JSON 字符串，结构同 Product.applications
+  packagingInfo     String?
+  moq               String?
+  seoTitle          String?
+  seoDescription    String?
+  seoKeywords       String?
+  translationStatus String   @default("DRAFT") // "DRAFT" | "PUBLISHED"，只有 PUBLISHED 会出现在公开接口
+  updatedBy         Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([productId, locale])
+  @@index([locale])
+  @@map("product_translations")
+}
+
 model BlogCategory {
-  id          Int        @id @default(autoincrement())
-  name        String
-  slug        String     @unique
-  description String?
-  sortOrder   Int        @default(0)
-  published   Boolean    @default(true)
-  deletedAt   DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  posts       BlogPost[]
+  id           Int                       @id @default(autoincrement())
+  name         String
+  slug         String                    @unique
+  description  String?
+  sortOrder    Int                       @default(0)
+  published    Boolean                   @default(true)
+  deletedAt    DateTime?
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  posts        BlogPost[]
+  translations BlogCategoryTranslation[]
 
   @@map("blog_categories")
+}
+
+model BlogCategoryTranslation {
+  id                Int          @id @default(autoincrement())
+  categoryId        Int
+  category          BlogCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  locale            String
+  name              String?
+  description       String?
+  translationStatus String       @default("DRAFT")
+  updatedBy         Int?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@unique([categoryId, locale])
+  @@index([locale])
+  @@map("blog_category_translations")
 }
 
 model BlogTag {
@@ -168,28 +235,50 @@ model BlogTag {
 }
 
 model BlogPost {
-  id             Int          @id @default(autoincrement())
+  id             Int                   @id @default(autoincrement())
   title          String
-  slug           String       @unique
+  slug           String                @unique
   excerpt        String?
   body           String // 富文本 HTML，保存前会做 sanitize
   coverImage     String?
   categoryId     Int
-  category       BlogCategory @relation(fields: [categoryId], references: [id])
-  authorName     String       @default("Admin")
-  status         String       @default("DRAFT")
+  category       BlogCategory          @relation(fields: [categoryId], references: [id])
+  authorName     String                @default("Admin")
+  status         String                @default("DRAFT")
   publishedAt    DateTime?
   seoTitle       String?
   seoDescription String?
   deletedAt      DateTime?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
   tags           BlogPostTag[]
+  translations   BlogPostTranslation[]
 
   @@index([categoryId])
   @@index([status])
   @@index([publishedAt])
   @@map("blog_posts")
+}
+
+/// 对应用户规范里的 "ArticleTranslation"——本项目文章模型叫 BlogPost，命名跟随现有模型
+model BlogPostTranslation {
+  id                Int      @id @default(autoincrement())
+  postId            Int
+  post              BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  locale            String
+  title             String?
+  excerpt           String?
+  body              String?
+  seoTitle          String?
+  seoDescription    String?
+  translationStatus String   @default("DRAFT")
+  updatedBy         Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([postId, locale])
+  @@index([locale])
+  @@map("blog_post_translations")
 }
 
 model BlogPostTag {
@@ -203,7 +292,7 @@ model BlogPostTag {
 }
 
 model Inquiry {
-  id          Int           @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   company     String?
   country     String?
@@ -211,17 +300,17 @@ model Inquiry {
   phone       String?
   whatsapp    String?
   productId   Int?
-  product     Product?      @relation(fields: [productId], references: [id])
+  product     Product? @relation(fields: [productId], references: [id])
   productName String? // 自由文本"感兴趣的产品"，产品未选中时的兜底
   quantity    String?
   message     String?
   sourcePage  String?
-  status      String        @default("NEW")
+  status      String   @default("NEW")
   adminNotes  String?
   ipAddress   String?
   userAgent   String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([status])
   @@index([createdAt])
@@ -230,7 +319,7 @@ model Inquiry {
 }
 
 model Certificate {
-  id               Int       @id @default(autoincrement())
+  id               Int                      @id @default(autoincrement())
   name             String
   certType         String? // "CE" | "RoHS" | "ISO" | "CB" | "FCC" | "Other"，仅作为可配置示例
   certNumber       String?
@@ -240,28 +329,68 @@ model Certificate {
   imageUrl         String
   pdfUrl           String?
   description      String?
-  sortOrder        Int       @default(0)
-  published        Boolean   @default(true)
+  sortOrder        Int                      @default(0)
+  published        Boolean                  @default(true)
   deletedAt        DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  translations     CertificateTranslation[]
 
   @@index([published])
   @@map("certificates")
 }
 
+/// certType/certNumber/issuingAuthority 是官方名称/编号，不翻译，只留 name/description
+model CertificateTranslation {
+  id                Int         @id @default(autoincrement())
+  certificateId     Int
+  certificate       Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  locale            String
+  name              String?
+  description       String?
+  translationStatus String      @default("DRAFT")
+  updatedBy         Int?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@unique([certificateId, locale])
+  @@index([locale])
+  @@map("certificate_translations")
+}
+
 model Faq {
-  id        Int      @id @default(autoincrement())
-  question  String
-  answer    String
-  category  String?
-  sortOrder Int      @default(0)
-  published Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int              @id @default(autoincrement())
+  question     String
+  answer       String
+  category     String?
+  sortOrder    Int              @default(0)
+  published    Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  translations FaqTranslation[]
 
   @@index([published])
   @@map("faqs")
+}
+
+/// 新增于 i18n 二期：之前 /es/faq 是靠通用 Translation 表的 faq.{id}.question/answer key 拼出来的，
+/// 现在跟其它实体统一走"后台 Español 标签页编辑同一条记录"的模式，改读这张表；
+/// 旧的 faq.* Translation 行不删除（不再被读取，但数据保留，零风险）
+model FaqTranslation {
+  id                Int      @id @default(autoincrement())
+  faqId             Int
+  faq               Faq      @relation(fields: [faqId], references: [id], onDelete: Cascade)
+  locale            String
+  question          String?
+  answer            String?
+  translationStatus String   @default("DRAFT")
+  updatedBy         Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([faqId, locale])
+  @@index([locale])
+  @@map("faq_translations")
 }
 
 model Media {
@@ -286,21 +415,44 @@ model Media {
 }
 
 model Page {
-  id             Int      @id @default(autoincrement())
-  slug           String   @unique // "about" | "factory" | "oem-odm" | "privacy-policy" | "terms-of-use" | "contact"
-  title          String
-  bodyHtml       String? // 叙述性正文（About/Privacy/Terms）
-  sections       String? // JSON 字符串：结构化区块（工厂数据、OEM流程步骤等，页面各异）
-  seoTitle       String?
-  seoDescription String?
-  ogImage        String?
+  id              Int               @id @default(autoincrement())
+  slug            String            @unique // "about" | "factory" | "oem-odm" | "privacy-policy" | "terms-of-use" | "contact"
+  title           String
+  bodyHtml        String? // 叙述性正文（About/Privacy/Terms）
+  sections        String? // JSON 字符串：结构化区块（工厂数据、OEM流程步骤等，页面各异）
+  seoTitle        String?
+  seoDescription  String?
+  ogImage         String?
   // 页面顶部（面包屑+标题+简介区域）的背景图，可选；不设置时该区域保持原来的纯白背景
-  heroImage      String?
+  heroImage       String?
   // 同一区域的手机端专用背景图，可选；不设置则手机端也用 heroImage 兜底（跟首页 Banner 逻辑一致）
   heroImageMobile String?
-  updatedAt      DateTime @updatedAt
+  updatedAt       DateTime          @updatedAt
+  translations    PageTranslation[]
 
   @@map("pages")
+}
+
+/// sections 是整段 JSON 覆盖（工厂数据/OEM 流程步骤等结构因页面而异，不逐字段拆分翻译）；
+/// heroImage/heroImageMobile 继续共用英文 Page 主记录，不设西语专属图
+model PageTranslation {
+  id                Int      @id @default(autoincrement())
+  pageId            Int
+  page              Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  locale            String
+  title             String?
+  bodyHtml          String?
+  sections          String? // JSON 字符串，结构同 Page.sections，整段覆盖
+  seoTitle          String?
+  seoDescription    String?
+  translationStatus String   @default("DRAFT")
+  updatedBy         Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([pageId, locale])
+  @@index([locale])
+  @@map("page_translations")
 }
 
 model NavigationItem {
