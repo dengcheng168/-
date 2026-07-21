@@ -296,6 +296,8 @@ model Page {
   ogImage        String?
   // 页面顶部（面包屑+标题+简介区域）的背景图，可选；不设置时该区域保持原来的纯白背景
   heroImage      String?
+  // 同一区域的手机端专用背景图，可选；不设置则手机端也用 heroImage 兜底（跟首页 Banner 逻辑一致）
+  heroImageMobile String?
   updatedAt      DateTime @updatedAt
 
   @@map("pages")

@@ -28,11 +28,11 @@ export default async function BlogListPage({
     listBlogTags(),
     getPageBySlug('blog'),
   ]);
-  const hasHero = Boolean(pageContent?.heroImage);
+  const hasHero = Boolean(pageContent?.heroImage || pageContent?.heroImageMobile);
 
   return (
     <>
-      {hasHero && <PageHeroBanner image={pageContent!.heroImage!} title="Blog" />}
+      {hasHero && <PageHeroBanner image={pageContent?.heroImage} imageMobile={pageContent?.heroImageMobile} title="Blog" />}
 
       <Container className="py-12">
         <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Blog' }]} />

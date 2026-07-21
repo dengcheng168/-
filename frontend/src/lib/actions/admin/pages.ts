@@ -34,6 +34,7 @@ export async function updatePageAction(slug: string, _prevState: AdminFormState,
         // 用 ?? 而不是 textOrUndefined：图片字段允许清空成空字符串（移除背景图），
         // textOrUndefined 会把空字符串也变成 undefined，导致"移除图片"点了也保存不掉
         heroImage: formData.get('heroImage') ?? undefined,
+        heroImageMobile: formData.get('heroImageMobile') ?? undefined,
       }),
     });
   } catch (err) {

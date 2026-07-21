@@ -15,12 +15,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AboutPage() {
   const page = await getPageBySlug('about');
-  const hasHero = Boolean(page?.heroImage);
+  const hasHero = Boolean(page?.heroImage || page?.heroImageMobile);
 
   return (
     <>
       {hasHero && (
-        <PageHeroBanner image={page!.heroImage!} title={page?.title ?? 'About Us'}>
+        <PageHeroBanner image={page?.heroImage} imageMobile={page?.heroImageMobile} title={page?.title ?? 'About Us'}>
           {page?.bodyHtml && (
             <div
               className="prose prose-sm prose-invert mt-4 max-w-3xl text-grey-100/90"

@@ -15,6 +15,7 @@ function resolvePageMedia(page: Page): Page {
     ...page,
     ogImage: page.ogImage ? resolveMediaUrl(page.ogImage) : page.ogImage,
     heroImage: page.heroImage ? resolveMediaUrl(page.heroImage) : page.heroImage,
+    heroImageMobile: page.heroImageMobile ? resolveMediaUrl(page.heroImageMobile) : page.heroImageMobile,
   };
 }
 

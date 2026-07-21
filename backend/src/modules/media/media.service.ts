@@ -164,6 +164,7 @@ export async function findMediaUsage(prisma: PrismaClient, media: MediaUrls) {
       OR: [
         { ogImage: { in: urls } },
         { heroImage: { in: urls } },
+        { heroImageMobile: { in: urls } },
         ...urls.flatMap((u) => [{ bodyHtml: { contains: u } }, { sections: { contains: u } }]),
       ],
     },

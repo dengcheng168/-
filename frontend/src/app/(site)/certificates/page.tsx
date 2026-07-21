@@ -20,12 +20,12 @@ const INTRO_TEXT = 'We maintain compliance with relevant international quality a
 
 export default async function CertificatesPage() {
   const [certificates, page] = await Promise.all([listCertificates(), getPageBySlug('certificates')]);
-  const hasHero = Boolean(page?.heroImage);
+  const hasHero = Boolean(page?.heroImage || page?.heroImageMobile);
 
   return (
     <>
       {hasHero && (
-        <PageHeroBanner image={page!.heroImage!} title="Certificates">
+        <PageHeroBanner image={page?.heroImage} imageMobile={page?.heroImageMobile} title="Certificates">
           <p className="mt-3 max-w-2xl text-grey-100/90">{INTRO_TEXT}</p>
         </PageHeroBanner>
       )}

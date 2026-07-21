@@ -12,6 +12,7 @@ interface FormValues {
   seoTitle?: string | null;
   seoDescription?: string | null;
   heroImage?: string | null;
+  heroImageMobile?: string | null;
 }
 
 export function PageForm({
@@ -40,6 +41,13 @@ export function PageForm({
         defaultValue={initialValues?.heroImage}
         recommendedSize="建议 1920×480px（宽幅横幅），不设置则该区域保持纯白背景"
         aspectRatio={4}
+      />
+      <ImageUploader
+        name="heroImageMobile"
+        label="顶部背景图（手机端）"
+        defaultValue={initialValues?.heroImageMobile}
+        recommendedSize="建议 1080×1350px（竖版），不设置则手机端用上面的桌面图裁切显示"
+        aspectRatio={0.8}
       />
 
       {initialValues?.sections !== undefined && (
