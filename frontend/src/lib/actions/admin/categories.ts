@@ -4,6 +4,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { adminFetch } from '@/lib/api/admin-client';
 import { ApiError } from '@/lib/api/client';
+import { saveTranslation, localeCacheTags, translationStatusFromForm } from './translations-shared';
+import type { TranslationFormState } from './translations-shared';
+import type { Locale } from '@/lib/i18n/locales';
 
 export interface AdminFormState {
   message?: string;
@@ -59,4 +62,21 @@ export async function deleteCategoryAction(formData: FormData): Promise<void> {
   const id = formData.get('id');
   await adminFetch(`/product-categories/${id}`, { method: 'DELETE' });
   revalidatePath('/admin/product-categories');
+}
+
+export async function updateCategoryTranslationAction(
+  id: number,
+  locale: Locale,
+  _prevState: TranslationFormState,
+  formData: FormData,
+): Promise<TranslationFormState> {
+  const payload = {
+    name: textOrUndefined(formData, 'name'),
+    description: textOrUndefined(formData, 'description'),
+    seoTitle: textOrUndefined(formData, 'seoTitle'),
+    seoDescription: textOrUndefined(formData, 'seoDescription'),
+    translationStatus: translationStatusFromForm(formData),
+  };
+  const tags = localeCacheTags('product-categories', locale);
+  return saveTranslation(`/product-categories/${id}/translations/${locale}`, payload, tags);
 }

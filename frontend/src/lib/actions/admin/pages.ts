@@ -5,6 +5,9 @@ import { redirect } from 'next/navigation';
 import { adminFetch } from '@/lib/api/admin-client';
 import { ApiError } from '@/lib/api/client';
 import type { AdminFormState } from './categories';
+import { saveTranslation, localeCacheTags, translationStatusFromForm } from './translations-shared';
+import type { TranslationFormState } from './translations-shared';
+import type { Locale } from '@/lib/i18n/locales';
 
 function textOrUndefined(formData: FormData, key: string): string | undefined {
   const v = formData.get(key);
@@ -46,4 +49,32 @@ export async function updatePageAction(slug: string, _prevState: AdminFormState,
   updateTag('pages');
   updateTag(`page:${slug}`);
   redirect('/admin/pages');
+}
+
+export async function updatePageTranslationAction(
+  slug: string,
+  locale: Locale,
+  _prevState: TranslationFormState,
+  formData: FormData,
+): Promise<TranslationFormState> {
+  const sectionsRaw = textOrUndefined(formData, 'sectionsJson');
+  let sections: unknown;
+  if (sectionsRaw) {
+    try {
+      sections = JSON.parse(sectionsRaw);
+    } catch {
+      return { message: '结构化区块内容不是合法的 JSON 格式' };
+    }
+  }
+
+  const payload = {
+    title: textOrUndefined(formData, 'title'),
+    bodyHtml: textOrUndefined(formData, 'bodyHtml'),
+    sections,
+    seoTitle: textOrUndefined(formData, 'seoTitle'),
+    seoDescription: textOrUndefined(formData, 'seoDescription'),
+    translationStatus: translationStatusFromForm(formData),
+  };
+  const tags = [...localeCacheTags('pages', locale), ...localeCacheTags(`page:${slug}`, locale)];
+  return saveTranslation(`/pages/${slug}/translations/${locale}`, payload, tags);
 }

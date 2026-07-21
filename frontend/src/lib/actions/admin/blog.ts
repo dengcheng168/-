@@ -5,6 +5,9 @@ import { redirect } from 'next/navigation';
 import { adminFetch } from '@/lib/api/admin-client';
 import { ApiError } from '@/lib/api/client';
 import type { AdminFormState } from './categories';
+import { saveTranslation, localeCacheTags, translationStatusFromForm } from './translations-shared';
+import type { TranslationFormState } from './translations-shared';
+import type { Locale } from '@/lib/i18n/locales';
 
 function textOrUndefined(formData: FormData, key: string): string | undefined {
   const v = formData.get(key);
@@ -51,4 +54,23 @@ export async function deleteBlogPostAction(formData: FormData): Promise<void> {
   const id = formData.get('id');
   await adminFetch(`/blog/${id}`, { method: 'DELETE' });
   revalidatePath('/admin/blog');
+}
+
+export async function updateBlogPostTranslationAction(
+  id: number,
+  locale: Locale,
+  slug: string | undefined,
+  _prevState: TranslationFormState,
+  formData: FormData,
+): Promise<TranslationFormState> {
+  const payload = {
+    title: textOrUndefined(formData, 'title'),
+    excerpt: textOrUndefined(formData, 'excerpt'),
+    body: textOrUndefined(formData, 'body'),
+    seoTitle: textOrUndefined(formData, 'seoTitle'),
+    seoDescription: textOrUndefined(formData, 'seoDescription'),
+    translationStatus: translationStatusFromForm(formData),
+  };
+  const tags = [...localeCacheTags('blog', locale), ...(slug ? localeCacheTags(`blog:${slug}`, locale) : [])];
+  return saveTranslation(`/blog/${id}/translations/${locale}`, payload, tags);
 }

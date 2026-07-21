@@ -6,6 +6,9 @@ import { updateTag } from 'next/cache';
 import { adminFetch } from '@/lib/api/admin-client';
 import { ApiError } from '@/lib/api/client';
 import type { AdminFormState } from './categories';
+import { saveTranslation, localeCacheTags, translationStatusFromForm } from './translations-shared';
+import type { TranslationFormState } from './translations-shared';
+import type { Locale } from '@/lib/i18n/locales';
 
 function textOrUndefined(formData: FormData, key: string): string | undefined {
   const v = formData.get(key);
@@ -118,4 +121,32 @@ export async function setProductStatusAction(id: number, status: 'DRAFT' | 'PUBL
     return { success: false, message: err instanceof ApiError ? err.message : '操作失败' };
   }
   return { success: true, message: status === 'PUBLISHED' ? '已发布' : '已下架' };
+}
+
+function buildTranslationPayload(formData: FormData) {
+  return {
+    name: textOrUndefined(formData, 'name'),
+    shortDescription: textOrUndefined(formData, 'shortDescription'),
+    description: textOrUndefined(formData, 'description'),
+    specs: formData.get('specsText') ? parseSpecs(String(formData.get('specsText'))) : undefined,
+    features: formData.get('featuresText') ? parseFeatures(String(formData.get('featuresText'))) : undefined,
+    applications: formData.get('applicationsText') ? parseApplications(String(formData.get('applicationsText'))) : undefined,
+    packagingInfo: textOrUndefined(formData, 'packagingInfo'),
+    moq: textOrUndefined(formData, 'moq'),
+    seoTitle: textOrUndefined(formData, 'seoTitle'),
+    seoDescription: textOrUndefined(formData, 'seoDescription'),
+    seoKeywords: textOrUndefined(formData, 'seoKeywords'),
+    translationStatus: translationStatusFromForm(formData),
+  };
+}
+
+export async function updateProductTranslationAction(
+  id: number,
+  locale: Locale,
+  slug: string | undefined,
+  _prevState: TranslationFormState,
+  formData: FormData,
+): Promise<TranslationFormState> {
+  const tags = [...localeCacheTags('products', locale), ...(slug ? localeCacheTags(`product:${slug}`, locale) : [])];
+  return saveTranslation(`/products/${id}/translations/${locale}`, buildTranslationPayload(formData), tags);
 }

@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import { adminFetch } from '@/lib/api/admin-client';
 import { CertificateForm } from '../CertificateForm';
-import { updateCertificateAction } from '@/lib/actions/admin/certificates';
+import { updateCertificateAction, updateCertificateTranslationAction } from '@/lib/actions/admin/certificates';
+import { fetchTranslation } from '@/lib/actions/admin/translations-shared';
 
 interface Detail {
   id: number;
@@ -25,12 +26,21 @@ export default async function EditCertificatePage({ params }: { params: Promise<
   const cert = result.data;
 
   const boundAction = updateCertificateAction.bind(null, Number(id));
+  const boundTranslationAction = updateCertificateTranslationAction.bind(null, Number(id), 'es');
+  const translation = await fetchTranslation<{ name: string | null; description: string | null }>(
+    `/certificates/${id}/translations/es`,
+  ).catch(() => null);
 
   return (
     <div>
       <h1 className="text-2xl font-semibold text-navy-950">编辑证书</h1>
       <div className="mt-6">
-        <CertificateForm action={boundAction} initialValues={cert} />
+        <CertificateForm
+          action={boundAction}
+          initialValues={cert}
+          translationAction={boundTranslationAction}
+          translation={translation}
+        />
       </div>
     </div>
   );

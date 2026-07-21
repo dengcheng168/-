@@ -5,6 +5,9 @@ import { redirect } from 'next/navigation';
 import { adminFetch } from '@/lib/api/admin-client';
 import { ApiError } from '@/lib/api/client';
 import type { AdminFormState } from './categories';
+import { saveTranslation, localeCacheTags, translationStatusFromForm } from './translations-shared';
+import type { TranslationFormState } from './translations-shared';
+import type { Locale } from '@/lib/i18n/locales';
 
 function textOrUndefined(formData: FormData, key: string): string | undefined {
   const v = formData.get(key);
@@ -51,4 +54,19 @@ export async function deleteFaqAction(formData: FormData): Promise<void> {
   const id = formData.get('id');
   await adminFetch(`/faqs/${id}`, { method: 'DELETE' });
   revalidatePath('/admin/faqs');
+}
+
+export async function updateFaqTranslationAction(
+  id: number,
+  locale: Locale,
+  _prevState: TranslationFormState,
+  formData: FormData,
+): Promise<TranslationFormState> {
+  const payload = {
+    question: textOrUndefined(formData, 'question'),
+    answer: textOrUndefined(formData, 'answer'),
+    translationStatus: translationStatusFromForm(formData),
+  };
+  const tags = localeCacheTags('faqs', locale);
+  return saveTranslation(`/faqs/${id}/translations/${locale}`, payload, tags);
 }
