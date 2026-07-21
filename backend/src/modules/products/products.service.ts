@@ -28,7 +28,7 @@ export function serializeProductTranslation(translation: ProductTranslation) {
  * 批量把一批产品各自的西语翻译贴到序列化结果的 translation 字段上——只在真的传了 locale 才查，
  * 不传 locale（英文默认路径）完全不碰 ProductTranslation 表，一次额外查询都不会有。
  */
-async function attachTranslations<T extends { id: number }>(
+export async function attachProductTranslations<T extends { id: number }>(
   prisma: PrismaClient,
   items: T[],
   locale: string | undefined,
@@ -77,7 +77,7 @@ export async function listPublicProducts(
   ]);
 
   return {
-    items: await attachTranslations(prisma, items.map(serializeProduct), filters.locale),
+    items: await attachProductTranslations(prisma, items.map(serializeProduct), filters.locale),
     meta: buildPaginationMeta(query, total),
   };
 }
@@ -100,10 +100,10 @@ export async function getPublicProductBySlug(prisma: PrismaClient, slug: string,
     take: 4,
   });
 
-  const [localizedProduct] = await attachTranslations(prisma, [serializeProduct(product)], locale);
+  const [localizedProduct] = await attachProductTranslations(prisma, [serializeProduct(product)], locale);
   return {
     product: localizedProduct,
-    related: await attachTranslations(prisma, related.map(serializeProduct), locale),
+    related: await attachProductTranslations(prisma, related.map(serializeProduct), locale),
   };
 }
 

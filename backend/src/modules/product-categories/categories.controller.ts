@@ -22,6 +22,7 @@ import {
   upsertCategoryTranslationSchema,
 } from './categories.schema.js';
 import { localeParamSchema } from '../translations/translations.schema.js';
+import { attachProductTranslations, serializeProduct } from '../products/products.service.js';
 import { DEFAULT_PAGE_SIZE } from '../../config/constants.js';
 
 export async function publicListHandler(request: FastifyRequest<{ Querystring: { locale?: string } }>) {
@@ -42,10 +43,11 @@ export async function publicDetailHandler(
   const { skip, take } = { skip: (query.page - 1) * query.pageSize, take: query.pageSize };
   const where = { categoryId: category.id, status: 'PUBLISHED', deletedAt: null };
 
-  const [products, total] = await Promise.all([
+  const [rawProducts, total] = await Promise.all([
     request.server.prisma.product.findMany({ where, orderBy: { sortOrder: 'asc' }, skip, take }),
     request.server.prisma.product.count({ where }),
   ]);
+  const products = await attachProductTranslations(request.server.prisma, rawProducts.map(serializeProduct), locale);
 
   return ok(
     { category, products },
