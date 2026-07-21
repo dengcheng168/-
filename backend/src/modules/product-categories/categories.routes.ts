@@ -10,6 +10,8 @@ import {
   adminUpdateHandler,
   adminDeleteHandler,
   adminReorderHandler,
+  adminGetTranslationHandler,
+  adminUpsertTranslationHandler,
 } from './categories.controller.js';
 
 export async function publicCategoryRoutes(app: FastifyInstance) {
@@ -27,4 +29,6 @@ export async function adminCategoryRoutes(app: FastifyInstance) {
   app.patch('/product-categories/:id', adminUpdateHandler);
   app.delete('/product-categories/:id', adminDeleteHandler);
   app.post('/product-categories/reorder', adminReorderHandler);
+  app.get('/product-categories/:id/translations/:locale', adminGetTranslationHandler);
+  app.patch('/product-categories/:id/translations/:locale', adminUpsertTranslationHandler);
 }

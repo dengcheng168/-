@@ -11,12 +11,22 @@ import {
   updateCategory,
   softDeleteCategory,
   reorderCategories,
+  getCategoryTranslation,
+  upsertCategoryTranslation,
 } from './categories.service.js';
-import { createCategorySchema, updateCategorySchema, reorderSchema } from './categories.schema.js';
+import {
+  createCategorySchema,
+  updateCategorySchema,
+  reorderSchema,
+  categoryDetailQuerySchema,
+  upsertCategoryTranslationSchema,
+} from './categories.schema.js';
+import { localeParamSchema } from '../translations/translations.schema.js';
 import { DEFAULT_PAGE_SIZE } from '../../config/constants.js';
 
-export async function publicListHandler(request: FastifyRequest) {
-  const items = await listPublishedCategories(request.server.prisma);
+export async function publicListHandler(request: FastifyRequest<{ Querystring: { locale?: string } }>) {
+  const { locale } = categoryDetailQuerySchema.parse(request.query);
+  const items = await listPublishedCategories(request.server.prisma, locale);
   return ok(items);
 }
 
@@ -24,7 +34,8 @@ export async function publicDetailHandler(
   request: FastifyRequest<{ Params: { slug: string }; Querystring: Record<string, string> }>,
   reply: FastifyReply,
 ) {
-  const category = await getPublishedCategoryBySlug(request.server.prisma, request.params.slug);
+  const { locale } = categoryDetailQuerySchema.parse(request.query);
+  const category = await getPublishedCategoryBySlug(request.server.prisma, request.params.slug, locale);
   if (!category) return reply.status(404).send(fail('分类不存在', 'NOT_FOUND'));
 
   const query = paginationQuerySchema.parse(request.query);
@@ -101,4 +112,29 @@ export async function adminReorderHandler(request: FastifyRequest) {
   const { items } = reorderSchema.parse(request.body);
   await reorderCategories(request.server.prisma, items);
   return ok({ reordered: true });
+}
+
+export async function adminGetTranslationHandler(
+  request: FastifyRequest<{ Params: { id: string; locale: string } }>,
+) {
+  const { locale } = localeParamSchema.parse({ locale: request.params.locale });
+  const translation = await getCategoryTranslation(request.server.prisma, Number(request.params.id), locale);
+  return ok(translation);
+}
+
+export async function adminUpsertTranslationHandler(
+  request: FastifyRequest<{ Params: { id: string; locale: string } }>,
+) {
+  const { locale } = localeParamSchema.parse({ locale: request.params.locale });
+  const input = upsertCategoryTranslationSchema.parse(request.body);
+  const categoryId = Number(request.params.id);
+  const translation = await upsertCategoryTranslation(request.server.prisma, categoryId, locale, input, request.user.sub);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'product_category.translation_update',
+    resourceType: 'product_category',
+    resourceId: categoryId,
+    summary: `更新产品分类 #${categoryId} 的 ${locale} 翻译（状态：${translation.translationStatus}）`,
+    after: { locale, translationStatus: translation.translationStatus },
+  });
+  return ok(translation);
 }

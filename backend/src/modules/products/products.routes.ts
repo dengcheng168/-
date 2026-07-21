@@ -13,6 +13,8 @@ import {
   adminToggleFeaturedHandler,
   adminReorderHandler,
   adminBulkStatusHandler,
+  adminGetTranslationHandler,
+  adminUpsertTranslationHandler,
 } from './products.controller.js';
 
 export async function publicProductRoutes(app: FastifyInstance) {
@@ -33,4 +35,6 @@ export async function adminProductRoutes(app: FastifyInstance) {
   app.patch('/products/:id/featured', adminToggleFeaturedHandler);
   app.post('/products/reorder', adminReorderHandler);
   app.post('/products/bulk-status', adminBulkStatusHandler);
+  app.get('/products/:id/translations/:locale', adminGetTranslationHandler);
+  app.patch('/products/:id/translations/:locale', adminUpsertTranslationHandler);
 }

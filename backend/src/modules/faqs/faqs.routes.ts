@@ -9,6 +9,8 @@ import {
   adminUpdateHandler,
   adminDeleteHandler,
   adminReorderHandler,
+  adminGetTranslationHandler,
+  adminUpsertTranslationHandler,
 } from './faqs.controller.js';
 
 export async function publicFaqRoutes(app: FastifyInstance) {
@@ -25,4 +27,6 @@ export async function adminFaqRoutes(app: FastifyInstance) {
   app.patch('/faqs/:id', adminUpdateHandler);
   app.delete('/faqs/:id', adminDeleteHandler);
   app.post('/faqs/reorder', adminReorderHandler);
+  app.get('/faqs/:id/translations/:locale', adminGetTranslationHandler);
+  app.patch('/faqs/:id/translations/:locale', adminUpsertTranslationHandler);
 }

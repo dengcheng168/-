@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SUPPORTED_LOCALES } from '../translations/translations.schema.js';
 
 export const createCertificateSchema = z.object({
   name: z.string().min(1, '证书名称不能为空'),
@@ -20,5 +21,16 @@ export const reorderSchema = z.object({
   items: z.array(z.object({ id: z.number().int(), sortOrder: z.number().int() })),
 });
 
+export const certificateListQuerySchema = z.object({
+  locale: z.enum(SUPPORTED_LOCALES).optional(),
+});
+
+export const upsertCertificateTranslationSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  translationStatus: z.enum(['DRAFT', 'PUBLISHED']).optional(),
+});
+
 export type CreateCertificateInput = z.infer<typeof createCertificateSchema>;
 export type UpdateCertificateInput = z.infer<typeof updateCertificateSchema>;
+export type UpsertCertificateTranslationInput = z.infer<typeof upsertCertificateTranslationSchema>;

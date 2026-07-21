@@ -14,6 +14,8 @@ import {
   toggleProductFeatured,
   reorderProducts,
   bulkUpdateProductStatus,
+  getProductTranslation,
+  upsertProductTranslation,
 } from './products.service.js';
 import {
   createProductSchema,
@@ -21,7 +23,10 @@ import {
   reorderSchema,
   bulkStatusSchema,
   productListQuerySchema,
+  productDetailQuerySchema,
+  upsertProductTranslationSchema,
 } from './products.schema.js';
+import { localeParamSchema } from '../translations/translations.schema.js';
 
 export async function publicListHandler(request: FastifyRequest) {
   const query = paginationQuerySchema.parse(request.query);
@@ -30,15 +35,17 @@ export async function publicListHandler(request: FastifyRequest) {
     categorySlug: filters.category,
     featured: filters.featured,
     q: filters.q,
+    locale: filters.locale,
   });
   return ok(items, meta);
 }
 
 export async function publicDetailHandler(
-  request: FastifyRequest<{ Params: { slug: string } }>,
+  request: FastifyRequest<{ Params: { slug: string }; Querystring: { locale?: string } }>,
   reply: FastifyReply,
 ) {
-  const result = await getPublicProductBySlug(request.server.prisma, request.params.slug);
+  const { locale } = productDetailQuerySchema.parse(request.query);
+  const result = await getPublicProductBySlug(request.server.prisma, request.params.slug, locale);
   if (!result) return reply.status(404).send(fail('产品不存在', 'NOT_FOUND'));
   return ok(result);
 }
@@ -135,4 +142,29 @@ export async function adminBulkStatusHandler(request: FastifyRequest) {
   const { ids, status } = bulkStatusSchema.parse(request.body);
   await bulkUpdateProductStatus(request.server.prisma, ids, status);
   return ok({ updated: ids.length });
+}
+
+export async function adminGetTranslationHandler(
+  request: FastifyRequest<{ Params: { id: string; locale: string } }>,
+) {
+  const { locale } = localeParamSchema.parse({ locale: request.params.locale });
+  const translation = await getProductTranslation(request.server.prisma, Number(request.params.id), locale);
+  return ok(translation);
+}
+
+export async function adminUpsertTranslationHandler(
+  request: FastifyRequest<{ Params: { id: string; locale: string } }>,
+) {
+  const { locale } = localeParamSchema.parse({ locale: request.params.locale });
+  const input = upsertProductTranslationSchema.parse(request.body);
+  const productId = Number(request.params.id);
+  const translation = await upsertProductTranslation(request.server.prisma, productId, locale, input, request.user.sub);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'product.translation_update',
+    resourceType: 'product',
+    resourceId: productId,
+    summary: `更新产品 #${productId} 的 ${locale} 翻译（状态：${translation.translationStatus}）`,
+    after: { locale, translationStatus: translation.translationStatus },
+  });
+  return ok(translation);
 }

@@ -10,6 +10,8 @@ import {
   adminUpdateHandler,
   adminDeleteHandler,
   adminUpdateStatusHandler,
+  adminGetTranslationHandler,
+  adminUpsertTranslationHandler,
 } from './blog.controller.js';
 
 export async function publicBlogRoutes(app: FastifyInstance) {
@@ -27,4 +29,6 @@ export async function adminBlogRoutes(app: FastifyInstance) {
   app.patch('/blog/:id', adminUpdateHandler);
   app.delete('/blog/:id', adminDeleteHandler);
   app.patch('/blog/:id/status', adminUpdateStatusHandler);
+  app.get('/blog/:id/translations/:locale', adminGetTranslationHandler);
+  app.patch('/blog/:id/translations/:locale', adminUpsertTranslationHandler);
 }

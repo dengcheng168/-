@@ -11,8 +11,17 @@ import {
   updatePost,
   softDeletePost,
   updatePostStatus,
+  getPostTranslation,
+  upsertPostTranslation,
 } from './blog.service.js';
-import { createBlogPostSchema, updateBlogPostSchema, blogListQuerySchema } from './blog.schema.js';
+import {
+  createBlogPostSchema,
+  updateBlogPostSchema,
+  blogListQuerySchema,
+  blogDetailQuerySchema,
+  upsertBlogPostTranslationSchema,
+} from './blog.schema.js';
+import { localeParamSchema } from '../translations/translations.schema.js';
 
 export async function publicListHandler(request: FastifyRequest) {
   const query = paginationQuerySchema.parse(request.query);
@@ -21,12 +30,17 @@ export async function publicListHandler(request: FastifyRequest) {
     categorySlug: filters.category,
     tagSlug: filters.tag,
     q: filters.q,
+    locale: filters.locale,
   });
   return ok(items, meta);
 }
 
-export async function publicDetailHandler(request: FastifyRequest<{ Params: { slug: string } }>, reply: FastifyReply) {
-  const result = await getPublicPostBySlug(request.server.prisma, request.params.slug);
+export async function publicDetailHandler(
+  request: FastifyRequest<{ Params: { slug: string }; Querystring: { locale?: string } }>,
+  reply: FastifyReply,
+) {
+  const { locale } = blogDetailQuerySchema.parse(request.query);
+  const result = await getPublicPostBySlug(request.server.prisma, request.params.slug, locale);
   if (!result) return reply.status(404).send(fail('文章不存在', 'NOT_FOUND'));
   return ok(result);
 }
@@ -95,4 +109,29 @@ export async function adminUpdateStatusHandler(request: FastifyRequest<{ Params:
     after: { status: post.status },
   });
   return ok(post);
+}
+
+export async function adminGetTranslationHandler(
+  request: FastifyRequest<{ Params: { id: string; locale: string } }>,
+) {
+  const { locale } = localeParamSchema.parse({ locale: request.params.locale });
+  const translation = await getPostTranslation(request.server.prisma, Number(request.params.id), locale);
+  return ok(translation);
+}
+
+export async function adminUpsertTranslationHandler(
+  request: FastifyRequest<{ Params: { id: string; locale: string } }>,
+) {
+  const { locale } = localeParamSchema.parse({ locale: request.params.locale });
+  const input = upsertBlogPostTranslationSchema.parse(request.body);
+  const postId = Number(request.params.id);
+  const translation = await upsertPostTranslation(request.server.prisma, postId, locale, input, request.user.sub);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'blog_post.translation_update',
+    resourceType: 'blog_post',
+    resourceId: postId,
+    summary: `更新文章 #${postId} 的 ${locale} 翻译（状态：${translation.translationStatus}）`,
+    after: { locale, translationStatus: translation.translationStatus },
+  });
+  return ok(translation);
 }

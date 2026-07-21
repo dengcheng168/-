@@ -8,6 +8,8 @@ import {
   adminCreateHandler,
   adminUpdateHandler,
   adminDeleteHandler,
+  adminGetTranslationHandler,
+  adminUpsertTranslationHandler,
 } from './blog-categories.controller.js';
 
 export async function publicBlogCategoryRoutes(app: FastifyInstance) {
@@ -23,4 +25,6 @@ export async function adminBlogCategoryRoutes(app: FastifyInstance) {
   app.get('/blog-categories/:id', adminDetailHandler);
   app.patch('/blog-categories/:id', adminUpdateHandler);
   app.delete('/blog-categories/:id', adminDeleteHandler);
+  app.get('/blog-categories/:id/translations/:locale', adminGetTranslationHandler);
+  app.patch('/blog-categories/:id/translations/:locale', adminUpsertTranslationHandler);
 }

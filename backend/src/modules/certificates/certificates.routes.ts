@@ -9,6 +9,8 @@ import {
   adminUpdateHandler,
   adminDeleteHandler,
   adminReorderHandler,
+  adminGetTranslationHandler,
+  adminUpsertTranslationHandler,
 } from './certificates.controller.js';
 
 export async function publicCertificateRoutes(app: FastifyInstance) {
@@ -25,4 +27,6 @@ export async function adminCertificateRoutes(app: FastifyInstance) {
   app.patch('/certificates/:id', adminUpdateHandler);
   app.delete('/certificates/:id', adminDeleteHandler);
   app.post('/certificates/reorder', adminReorderHandler);
+  app.get('/certificates/:id/translations/:locale', adminGetTranslationHandler);
+  app.patch('/certificates/:id/translations/:locale', adminUpsertTranslationHandler);
 }

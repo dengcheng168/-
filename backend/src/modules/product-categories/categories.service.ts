@@ -1,19 +1,37 @@
 import type { PrismaClient } from '@prisma/client';
 import { generateUniqueSlug } from '../../lib/slugify.js';
 import { toSkipTake, buildPaginationMeta, type PaginationQuery } from '../../lib/pagination.js';
-import type { CreateCategoryInput, UpdateCategoryInput } from './categories.schema.js';
+import type { CreateCategoryInput, UpdateCategoryInput, UpsertCategoryTranslationInput } from './categories.schema.js';
 
-export function listPublishedCategories(prisma: PrismaClient) {
-  return prisma.productCategory.findMany({
+/** 同 products 模块的 attachTranslations——只在传了 locale 才查一次批量翻译，不传时零额外开销 */
+async function attachCategoryTranslations<T extends { id: number }>(
+  prisma: PrismaClient,
+  items: T[],
+  locale: string | undefined,
+) {
+  if (!locale || items.length === 0) return items;
+  const rows = await prisma.productCategoryTranslation.findMany({
+    where: { categoryId: { in: items.map((i) => i.id) }, locale, translationStatus: 'PUBLISHED' },
+  });
+  const byId = new Map(rows.map((r) => [r.categoryId, r]));
+  return items.map((item) => ({ ...item, translation: byId.get(item.id) ?? null }));
+}
+
+export async function listPublishedCategories(prisma: PrismaClient, locale?: string) {
+  const categories = await prisma.productCategory.findMany({
     where: { published: true, deletedAt: null },
     orderBy: { sortOrder: 'asc' },
   });
+  return attachCategoryTranslations(prisma, categories, locale);
 }
 
-export function getPublishedCategoryBySlug(prisma: PrismaClient, slug: string) {
-  return prisma.productCategory.findFirst({
+export async function getPublishedCategoryBySlug(prisma: PrismaClient, slug: string, locale?: string) {
+  const category = await prisma.productCategory.findFirst({
     where: { slug, published: true, deletedAt: null },
   });
+  if (!category) return null;
+  const [localized] = await attachCategoryTranslations(prisma, [category], locale);
+  return localized;
 }
 
 export async function listAdminCategories(
@@ -70,4 +88,23 @@ export async function reorderCategories(
       prisma.productCategory.update({ where: { id: item.id }, data: { sortOrder: item.sortOrder } }),
     ),
   );
+}
+
+export function getCategoryTranslation(prisma: PrismaClient, categoryId: number, locale: string) {
+  return prisma.productCategoryTranslation.findUnique({ where: { categoryId_locale: { categoryId, locale } } });
+}
+
+export function upsertCategoryTranslation(
+  prisma: PrismaClient,
+  categoryId: number,
+  locale: string,
+  input: UpsertCategoryTranslationInput,
+  updatedBy?: number,
+) {
+  const data = { ...input, updatedBy };
+  return prisma.productCategoryTranslation.upsert({
+    where: { categoryId_locale: { categoryId, locale } },
+    create: { categoryId, locale, ...data },
+    update: data,
+  });
 }

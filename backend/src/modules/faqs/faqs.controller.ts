@@ -2,11 +2,29 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ok, fail } from '../../lib/api-response.js';
 import { paginationQuerySchema } from '../../lib/pagination.js';
 import { auditLogFromRequest } from '../../lib/audit-log.js';
-import { listPublishedFaqs, listAdminFaqs, getFaqById, createFaq, updateFaq, deleteFaq, reorderFaqs } from './faqs.service.js';
-import { createFaqSchema, updateFaqSchema, reorderSchema } from './faqs.schema.js';
+import {
+  listPublishedFaqs,
+  listAdminFaqs,
+  getFaqById,
+  createFaq,
+  updateFaq,
+  deleteFaq,
+  reorderFaqs,
+  getFaqTranslation,
+  upsertFaqTranslation,
+} from './faqs.service.js';
+import {
+  createFaqSchema,
+  updateFaqSchema,
+  reorderSchema,
+  faqListQuerySchema,
+  upsertFaqTranslationSchema,
+} from './faqs.schema.js';
+import { localeParamSchema } from '../translations/translations.schema.js';
 
-export async function publicListHandler(request: FastifyRequest) {
-  return ok(await listPublishedFaqs(request.server.prisma));
+export async function publicListHandler(request: FastifyRequest<{ Querystring: { locale?: string } }>) {
+  const { locale } = faqListQuerySchema.parse(request.query);
+  return ok(await listPublishedFaqs(request.server.prisma, locale));
 }
 
 export async function adminListHandler(request: FastifyRequest<{ Querystring: { q?: string } }>) {
@@ -62,4 +80,29 @@ export async function adminReorderHandler(request: FastifyRequest) {
   const { items } = reorderSchema.parse(request.body);
   await reorderFaqs(request.server.prisma, items);
   return ok({ reordered: true });
+}
+
+export async function adminGetTranslationHandler(
+  request: FastifyRequest<{ Params: { id: string; locale: string } }>,
+) {
+  const { locale } = localeParamSchema.parse({ locale: request.params.locale });
+  const translation = await getFaqTranslation(request.server.prisma, Number(request.params.id), locale);
+  return ok(translation);
+}
+
+export async function adminUpsertTranslationHandler(
+  request: FastifyRequest<{ Params: { id: string; locale: string } }>,
+) {
+  const { locale } = localeParamSchema.parse({ locale: request.params.locale });
+  const input = upsertFaqTranslationSchema.parse(request.body);
+  const faqId = Number(request.params.id);
+  const translation = await upsertFaqTranslation(request.server.prisma, faqId, locale, input, request.user.sub);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'faq.translation_update',
+    resourceType: 'faq',
+    resourceId: faqId,
+    summary: `更新 FAQ #${faqId} 的 ${locale} 翻译（状态：${translation.translationStatus}）`,
+    after: { locale, translationStatus: translation.translationStatus },
+  });
+  return ok(translation);
 }
