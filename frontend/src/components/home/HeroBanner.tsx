@@ -1,8 +1,10 @@
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import type { PublicSiteSettings } from '@/types/settings';
+import type { Locale } from '@/lib/i18n/locales';
+import { localeHref } from '@/lib/i18n/paths';
 
-export function HeroBanner({ settings }: { settings: PublicSiteSettings }) {
+export function HeroBanner({ settings, locale = 'en' }: { settings: PublicSiteSettings; locale?: Locale }) {
   // 移动端没单独传图时兜底用桌面图（保持原有行为），反过来同理——两个字段都是可选的，
   // 不能因为其中一个没配就在对应设备上整个 hero 区域变成空白导航蓝底
   const desktopSrc = settings.heroDesktopImage ?? settings.heroMobileImage;
@@ -37,10 +39,10 @@ export function HeroBanner({ settings }: { settings: PublicSiteSettings }) {
           <h1 className="text-4xl font-bold leading-tight text-white sm:text-5xl">{settings.heroHeadline}</h1>
           <p className="mt-5 text-lg text-grey-100/90">{settings.heroSubheadline}</p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <Button href={settings.heroButton1Link} variant="primary">
+            <Button href={localeHref(settings.heroButton1Link, locale)} variant="primary">
               {settings.heroButton1Text}
             </Button>
-            <Button href={settings.heroButton2Link} variant="outline" className="!border-white !text-white hover:!bg-white hover:!text-navy-950">
+            <Button href={localeHref(settings.heroButton2Link, locale)} variant="outline" className="!border-white !text-white hover:!bg-white hover:!text-navy-950">
               {settings.heroButton2Text}
             </Button>
           </div>

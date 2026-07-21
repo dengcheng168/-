@@ -8,6 +8,7 @@ import { getTranslationMap } from '@/lib/api/translations';
 import { localizeNavigation } from '@/lib/i18n/content-overlay';
 import { t } from '@/lib/i18n/site-strings';
 import type { Locale } from '@/lib/i18n/locales';
+import { localeHref } from '@/lib/i18n/paths';
 import { Container } from '@/components/ui/Container';
 import { getWhatsappHref } from '@/lib/utils/whatsapp';
 import { SOCIAL_ICONS } from './SocialIcons';
@@ -50,12 +51,11 @@ export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
     listProductCategories(),
     locale === 'en' ? Promise.resolve({}) : getTranslationMap(locale),
   ]);
-  const navItems = locale === 'en' ? rawNavItems : localizeNavigation(rawNavItems, translations);
+  const localizedNavItems = locale === 'en' ? rawNavItems : localizeNavigation(rawNavItems, translations);
+  const navItems = localizedNavItems.map((item) => ({ ...item, url: localeHref(item.url, locale) }));
   const year = new Date().getFullYear();
   const activeSocialLinks = settings.socialLinks.filter((link) => link.enabled && link.url);
   const whatsappHref = getWhatsappHref(settings);
-  // 隐私政策/使用条款/联系我们这几个页面本批次还没有西班牙语版本（见实施文档"未翻译范围"），
-  // 宁可诚实地跳去英文原页面，也不要把翻译好的链接文字指向一个内容答非所问的西语首页。
 
   return (
     <footer className="mt-auto border-t border-grey-200 bg-navy-950 text-grey-200">
@@ -121,7 +121,7 @@ export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
           <ul className="mt-3 space-y-2">
             {categories.map((category) => (
               <li key={category.id}>
-                <Link href={`/products/category/${category.slug}`} className="flex items-center gap-1.5 text-sm text-grey-200/80 hover:text-white">
+                <Link href={localeHref(`/products/category/${category.slug}`, locale)} className="flex items-center gap-1.5 text-sm text-grey-200/80 hover:text-white">
                   <span className="text-water-500">&gt;</span> {category.name}
                 </Link>
               </li>
@@ -177,13 +177,13 @@ export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
         <Container className="flex flex-col items-center justify-between gap-3 text-xs text-grey-200/60 sm:flex-row">
           <p>{settings.footerText || `© ${year} ${settings.companyName || 'Water Purifier Factory'}. ${t(locale, 'footerRightsReserved')}`}</p>
           <div className="flex items-center gap-4">
-            <Link href="/privacy-policy" className="hover:text-white">
+            <Link href={localeHref('/privacy-policy', locale)} className="hover:text-white">
               {t(locale, 'footerPrivacyPolicy')}
             </Link>
-            <Link href="/terms-of-use" className="hover:text-white">
+            <Link href={localeHref('/terms-of-use', locale)} className="hover:text-white">
               {t(locale, 'footerTermsOfUse')}
             </Link>
-            <Link href="/contact" className="hover:text-white">
+            <Link href={localeHref('/contact', locale)} className="hover:text-white">
               {t(locale, 'footerContactUs')}
             </Link>
           </div>

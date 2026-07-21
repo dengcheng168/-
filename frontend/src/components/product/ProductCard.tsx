@@ -1,11 +1,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Product } from '@/types/product';
+import type { Locale } from '@/lib/i18n/locales';
+import { localeHref } from '@/lib/i18n/paths';
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product, locale = 'en' }: { product: Product; locale?: Locale }) {
   return (
     <Link
-      href={`/products/${product.slug}`}
+      href={localeHref(`/products/${product.slug}`, locale)}
       className="group flex flex-col overflow-hidden rounded-lg border border-grey-200 bg-white transition-shadow hover:shadow-lg"
     >
       <div className="relative aspect-square w-full overflow-hidden bg-grey-50">

@@ -31,16 +31,19 @@ export default async function SpanishHomePage() {
   const [settings, categories, featuredProducts, certificates, latestPosts, faqs, translations] =
     await Promise.all([
       getPublicSettings(),
-      listProductCategories(),
-      listProducts({ featured: true, pageSize: 8 }),
-      listCertificates(),
-      listBlogPosts({ pageSize: 3 }),
+      listProductCategories('es'),
+      listProducts({ featured: true, pageSize: 8 }, 'es'),
+      listCertificates('es'),
+      listBlogPosts({ pageSize: 3 }, 'es'),
+      // FAQ 故意不传 locale：已有的西语问答目前存在旧的通用 Translation 表（faq.{id}.question/answer,
+      // 后台"多语言设置"编辑出来的），新的 FaqTranslation 表要等 Phase G 回填后才有数据。
+      // 这里继续用 localizeFaqs 叠加旧表，避免在 Phase G 跑完之前把已经上线的西语 FAQ 内容清空。
       listFaqs(),
       getTranslationMap('es'),
     ]);
 
-  // 首页产品分类/推荐产品/证书/博客文章本批次仍然只有英文内容（见实施文档"未翻译范围"），
-  // 只有 Hero 文案和 FAQ 问答叠加了西班牙语译文，未翻译字段自动回退显示英文原文。
+  // 产品分类/推荐产品/证书/博客文章现在都通过 Phase C 的 locale-aware 数据函数请求西语翻译，
+  // 缺失翻译的字段由 resolveLocalizedEntity 自动回退显示英文原文（见 lib/i18n/localize.ts）。
   const localizedSettings = localizeHero(settings, translations);
   const localizedFaqs = localizeFaqs(faqs, translations);
 
@@ -49,7 +52,7 @@ export default async function SpanishHomePage() {
       <JsonLd data={organizationJsonLd(settings)} />
       <JsonLd data={websiteJsonLd(settings)} />
 
-      <HeroBanner settings={localizedSettings} />
+      <HeroBanner settings={localizedSettings} locale="es" />
       <CoreAdvantages items={settings.coreAdvantages} />
       <ProductCategories categories={categories} locale="es" />
       <FeaturedProducts products={featuredProducts.items} locale="es" />

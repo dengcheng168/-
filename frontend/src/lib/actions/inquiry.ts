@@ -1,6 +1,9 @@
 'use server';
 
 import { apiFetch, ApiError } from '@/lib/api/client';
+import { t } from '@/lib/i18n/site-strings';
+import { isSupportedLocale } from '@/lib/i18n/locales';
+import type { Locale } from '@/lib/i18n/locales';
 
 export interface InquiryFormState {
   success?: boolean;
@@ -15,6 +18,9 @@ export async function submitInquiryAction(
     const v = formData.get(key);
     return typeof v === 'string' && v.trim() !== '' ? v.trim() : undefined;
   };
+
+  const rawLocale = value('locale');
+  const locale: Locale = rawLocale && isSupportedLocale(rawLocale) ? rawLocale : 'en';
 
   const payload = {
     name: value('name'),
@@ -32,7 +38,7 @@ export async function submitInquiryAction(
   };
 
   if (!payload.name || !payload.email) {
-    return { success: false, message: 'Name and email are required.' };
+    return { success: false, message: t(locale, 'formRequiredError') };
   }
 
   try {
@@ -40,11 +46,11 @@ export async function submitInquiryAction(
       method: 'POST',
       body: JSON.stringify(payload),
     });
-    return { success: true, message: "Thank you! We've received your inquiry and will get back to you soon." };
+    return { success: true, message: t(locale, 'formSuccessMessage') };
   } catch (err) {
     if (err instanceof ApiError) {
       return { success: false, message: err.message };
     }
-    return { success: false, message: 'Something went wrong. Please try again later.' };
+    return { success: false, message: t(locale, 'formGenericError') };
   }
 }

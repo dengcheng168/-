@@ -4,6 +4,7 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
 import { t } from '@/lib/i18n/site-strings';
 import type { Locale } from '@/lib/i18n/locales';
+import { localeHref } from '@/lib/i18n/paths';
 import type { Certificate } from '@/types/content';
 
 export function CertificatesShowcase({ certificates, locale = 'en' }: { certificates: Certificate[]; locale?: Locale }) {
@@ -24,7 +25,7 @@ export function CertificatesShowcase({ certificates, locale = 'en' }: { certific
           ))}
         </div>
         <div className="mt-10 text-center">
-          <Button href="/certificates" variant="outline">
+          <Button href={localeHref('/certificates', locale)} variant="outline">
             {t(locale, 'viewAllCertificates')}
           </Button>
         </div>

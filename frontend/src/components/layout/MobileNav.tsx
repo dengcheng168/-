@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { t } from '@/lib/i18n/site-strings';
 import type { Locale } from '@/lib/i18n/locales';
+import { localeHref } from '@/lib/i18n/paths';
 import type { NavigationItem } from '@/types/navigation';
 import { LanguageSwitcher } from './LanguageSwitcher';
 
@@ -48,7 +49,7 @@ export function MobileNav({ items, locale = 'en' }: { items: NavigationItem[]; l
             <div className="border-b border-grey-100 py-3">
               <LanguageSwitcher locale={locale} />
             </div>
-            <Button href="/contact" onClick={() => setOpen(false)} className="mt-3">
+            <Button href={localeHref('/contact', locale)} onClick={() => setOpen(false)} className="mt-3">
               {t(locale, 'headerCta')}
             </Button>
           </nav>

@@ -6,6 +6,7 @@ import { getTranslationMap } from '@/lib/api/translations';
 import { localizeNavigation } from '@/lib/i18n/content-overlay';
 import { t } from '@/lib/i18n/site-strings';
 import type { Locale } from '@/lib/i18n/locales';
+import { localeHref } from '@/lib/i18n/paths';
 import { Button } from '@/components/ui/Button';
 import { Container } from '@/components/ui/Container';
 import { MobileNav } from './MobileNav';
@@ -17,8 +18,11 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
     getPublicSettings(),
     locale === 'en' ? Promise.resolve({}) : getTranslationMap(locale),
   ]);
-  const navItems = locale === 'en' ? items : localizeNavigation(items, translations);
-  const homeHref = locale === 'en' ? '/' : `/${locale}`;
+  const localizedItems = locale === 'en' ? items : localizeNavigation(items, translations);
+  // 导航项的 url 是后台存的英文站内路径（如 "/products"），西语状态下统一加 /es 前缀，
+  // 确保从 /es 页面点导航依然停留在西语站，而不是悄悄跳回英文页面。
+  const navItems = localizedItems.map((item) => ({ ...item, url: localeHref(item.url, locale) }));
+  const homeHref = localeHref('/', locale);
 
   return (
     <header className="sticky top-0 z-50 bg-navy-950">
@@ -55,7 +59,7 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
 
         <div className="hidden items-center gap-4 md:ml-6 md:flex">
           <LanguageSwitcher locale={locale} />
-          <Button href="/contact" className="!px-4 !py-2">
+          <Button href={localeHref('/contact', locale)} className="!px-4 !py-2">
             {t(locale, 'headerCta')}
           </Button>
         </div>
