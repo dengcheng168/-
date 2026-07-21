@@ -1,32 +1,77 @@
+'use client';
+
+import { Suspense, useSyncExternalStore } from 'react';
 import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
 import type { Locale } from '@/lib/i18n/locales';
 import { LOCALE_LABELS } from '@/lib/i18n/locales';
+import { getLocalizedPath } from '@/lib/i18n/localized-path';
 
-/**
- * 目前只有首页和 FAQ 页有西班牙语版本（见 lib/i18n/locales.ts 的 SUPPORTED_LOCALES 和实施文档里的
- * "未翻译范围"说明），所以这里没有做到"保留当前子页面、只切语言前缀"——切换语言统一回到对应语言的首页，
- * 这是诚实的做法：假装每个子页面都有对应语言版本会导致大量 404。后续扩展更多语言页面时再增强这里。
- */
-export function LanguageSwitcher({ locale }: { locale: Locale }) {
+function subscribeToHashChange(callback: () => void) {
+  window.addEventListener('hashchange', callback);
+  return () => window.removeEventListener('hashchange', callback);
+}
+
+function getHashSnapshot() {
+  return window.location.hash;
+}
+
+function getServerHashSnapshot() {
+  return '';
+}
+
+function LanguageLink({ locale, targetLocale, href }: { locale: Locale; targetLocale: Locale; href: string }) {
+  return (
+    <Link
+      href={href}
+      aria-current={locale === targetLocale ? 'page' : undefined}
+      className={locale === targetLocale ? 'text-white' : 'text-grey-200/70 hover:text-white'}
+    >
+      {LOCALE_LABELS[targetLocale]}
+    </Link>
+  );
+}
+
+/** useSearchParams 需要 Suspense 兜底：静态预渲染阶段（尚未 hydrate）先用不保留路径的简单版本。 */
+function LanguageSwitcherFallback({ locale }: { locale: Locale }) {
   return (
     <div className="flex items-center gap-1 text-xs font-medium text-grey-200">
-      <Link
-        href="/"
-        aria-current={locale === 'en' ? 'page' : undefined}
-        className={locale === 'en' ? 'text-white' : 'text-grey-200/70 hover:text-white'}
-      >
-        {LOCALE_LABELS.en}
-      </Link>
+      <LanguageLink locale={locale} targetLocale="en" href="/" />
       <span aria-hidden="true" className="text-grey-200/40">
         /
       </span>
-      <Link
-        href="/es"
-        aria-current={locale === 'es' ? 'page' : undefined}
-        className={locale === 'es' ? 'text-white' : 'text-grey-200/70 hover:text-white'}
-      >
-        {LOCALE_LABELS.es}
-      </Link>
+      <LanguageLink locale={locale} targetLocale="es" href="/es" />
     </div>
+  );
+}
+
+function LanguageSwitcherResolved({ locale }: { locale: Locale }) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const qs = searchParams.toString();
+
+  // hash 不在 usePathname/useSearchParams 里，只能读 window；用 useSyncExternalStore
+  // 而不是直接在渲染里读 window.location.hash，是为了让首次客户端渲染（hydration）
+  // 跟服务端渲染的结果一致（getServerHashSnapshot 固定返回空字符串），避免 mismatch。
+  const hash = useSyncExternalStore(subscribeToHashChange, getHashSnapshot, getServerHashSnapshot);
+
+  const hrefFor = (target: Locale) => `${getLocalizedPath(pathname, target)}${qs ? `?${qs}` : ''}${hash}`;
+
+  return (
+    <div className="flex items-center gap-1 text-xs font-medium text-grey-200">
+      <LanguageLink locale={locale} targetLocale="en" href={hrefFor('en')} />
+      <span aria-hidden="true" className="text-grey-200/40">
+        /
+      </span>
+      <LanguageLink locale={locale} targetLocale="es" href={hrefFor('es')} />
+    </div>
+  );
+}
+
+export function LanguageSwitcher({ locale }: { locale: Locale }) {
+  return (
+    <Suspense fallback={<LanguageSwitcherFallback locale={locale} />}>
+      <LanguageSwitcherResolved locale={locale} />
+    </Suspense>
   );
 }
