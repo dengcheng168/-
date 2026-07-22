@@ -75,3 +75,13 @@ export const pixelSettingsSchema = z.object({
   tiktokPixelId: z.string().optional(),
   googlePixelId: z.string().optional(),
 });
+
+/**
+ * 这里只做"形状"校验（必须是字符串或 null），真正的域名格式规则（协议/路径/query/hash/
+ * localhost 等）在 settings.service.ts 的 updateSiteBaseUrl 里用 lib/site-url.ts 统一校验——
+ * 因为那部分规则依赖运行环境（生产/开发）判断是否放行 localhost，不是纯粹的 schema 形状问题。
+ * 传空字符串或 null 视为"清空覆盖，回退到运行时 SITE_URL"。
+ */
+export const siteDomainSettingsSchema = z.object({
+  siteBaseUrl: z.string().nullable(),
+});

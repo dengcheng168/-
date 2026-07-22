@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { adminFetch } from '@/lib/api/admin-client';
 import { ApiError } from '@/lib/api/client';
 import { SOCIAL_PLATFORMS } from '@/lib/constants/social-platforms';
@@ -149,4 +149,35 @@ export async function updatePixelSettingsAction(_prevState: AdminFormState, form
     tiktokPixelId: textOrUndefined(formData, 'tiktokPixelId'),
     googlePixelId: textOrUndefined(formData, 'googlePixelId'),
   });
+}
+
+/**
+ * 独立于上面的 patchSettings 帮助函数：PATCH /settings/site-domain 只有 SUPER_ADMIN 能调用
+ * （后端会真实返回 403，这里不额外做权限判断），成功时后端已经尝试触发前端缓存刷新，
+ * 返回体里的 cacheRefreshWarning 字段要单独展示，不能和"保存失败"混为一谈——
+ * 域名本身已经写入数据库，只是缓存刷新这一步可能失败，需要提示"可手动重试"而不是"保存失败"。
+ */
+export async function updateSiteBaseUrlAction(_prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
+  const raw = formData.get('siteBaseUrl');
+  const siteBaseUrl = typeof raw === 'string' && raw.trim() !== '' ? raw.trim() : null;
+
+  try {
+    const { data } = await adminFetch<{ cacheRefreshed: boolean; cacheRefreshWarning?: string }>('/settings/site-domain', {
+      method: 'PATCH',
+      body: JSON.stringify({ siteBaseUrl }),
+    });
+    revalidatePath('/admin/settings/seo');
+    revalidatePath('/', 'layout');
+    updateTag('site-config');
+
+    if (!data.cacheRefreshed) {
+      return {
+        success: true,
+        message: `域名已保存，但前端缓存刷新失败（${data.cacheRefreshWarning ?? '未知原因'}），可稍后手动重试或重新保存一次`,
+      };
+    }
+    return { success: true, message: '已保存，全站 SEO 缓存已刷新' };
+  } catch (err) {
+    return { message: err instanceof ApiError ? err.message : '保存失败' };
+  }
 }

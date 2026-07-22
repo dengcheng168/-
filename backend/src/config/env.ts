@@ -37,6 +37,20 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   SMTP_FROM_EMAIL: z.string().optional(),
+
+  /**
+   * 保存正式站点域名（SiteSetting.siteBaseUrl）后，后端服务器到服务器调用前端
+   * POST /api/internal/revalidate-site-config 的目标地址。本机开发时前后端分属不同端口
+   * （backend:4000 调用 frontend:3000），Docker 部署时改用服务名（见根目录 docker-compose.yml
+   * backend 服务的 FRONTEND_BASE_URL 覆盖值）。
+   */
+  FRONTEND_BASE_URL: z.string().default('http://localhost:3000'),
+  /**
+   * 与前端共享的内部调用密钥，用于 revalidate-site-config 接口鉴权，不是 NEXT_PUBLIC_*。
+   * 未配置时后端仍会尝试调用（返回 401 会被当作"缓存刷新失败"处理，不阻塞域名保存本身），
+   * 生产环境必须显式配置且与前端的同名变量一致。
+   */
+  REVALIDATE_SECRET: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

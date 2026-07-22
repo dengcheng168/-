@@ -23,6 +23,7 @@ export type Resource =
   | 'translations' // 多语言译文（目前仅西班牙语）
   | 'settings' // 一般站点设置：联系方式/SEO/社交/WhatsApp
   | 'settingsSensitive' // SMTP 凭据、Turnstile 密钥
+  | 'siteDomain' // 正式站点域名（siteBaseUrl，全站 SEO 绝对 URL 的事实源），只有 SUPER_ADMIN 能改
   | 'inquiries'
   | 'logs'; // 登录记录 + 操作日志
 
@@ -54,6 +55,7 @@ export const PERMISSION_MATRIX: Matrix = {
     admins: [...RW],
     settings: [...RW],
     settingsSensitive: [...RW],
+    siteDomain: [...RW],
     logs: ['read'],
     inquiries: [...RW],
     ...Object.fromEntries(CONTENT_RESOURCES.map((r) => [r, [...RW]])),

@@ -16,4 +16,5 @@ export const CONTENT_ROLES = rolesWithPermission('products', 'write');
 export const INQUIRY_ROLES = rolesWithPermission('inquiries', 'write');
 export const ADMIN_MANAGE_ROLES = rolesWithPermission('admins', 'write');
 export const SETTINGS_SENSITIVE_ROLES = rolesWithPermission('settingsSensitive', 'write');
+export const SITE_DOMAIN_ROLES = rolesWithPermission('siteDomain', 'write');
 export const LOG_VIEW_ROLES = rolesWithPermission('logs', 'read');

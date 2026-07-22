@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { requireRole } from '../../middleware/require-role.js';
-import { CONTENT_ROLES, SETTINGS_SENSITIVE_ROLES } from '../../config/roles.js';
+import { CONTENT_ROLES, SETTINGS_SENSITIVE_ROLES, SITE_DOMAIN_ROLES } from '../../config/roles.js';
 import {
   publicSettingsHandler,
   adminGetSettingsHandler,
@@ -13,6 +13,7 @@ import {
   adminPatchFooterHandler,
   adminPatchTurnstileHandler,
   adminPatchPixelsHandler,
+  adminPatchSiteDomainHandler,
   adminTestSmtpHandler,
 } from './settings.controller.js';
 
@@ -37,4 +38,7 @@ export async function adminSettingsRoutes(app: FastifyInstance) {
   app.patch('/settings/turnstile', { preHandler: requireRole(SETTINGS_SENSITIVE_ROLES) }, adminPatchTurnstileHandler);
   app.post('/settings/smtp/test', { preHandler: requireRole(SETTINGS_SENSITIVE_ROLES) }, adminTestSmtpHandler);
   app.patch('/settings/pixels', adminPatchPixelsHandler);
+  // 正式站点域名：只有 SUPER_ADMIN 能改，两层 preHandler（CONTENT_ROLES + SITE_DOMAIN_ROLES）是"与"的关系，
+  // 与上面 SMTP/Turnstile 用 SETTINGS_SENSITIVE_ROLES 的写法一致
+  app.patch('/settings/site-domain', { preHandler: requireRole(SITE_DOMAIN_ROLES) }, adminPatchSiteDomainHandler);
 }

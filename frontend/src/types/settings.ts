@@ -60,4 +60,7 @@ export interface PublicSiteSettings {
   metaPixelId: string | null;
   tiktokPixelId: string | null;
   googlePixelId: string | null;
+  /** 正式站点域名（Runtime Site Domain Configuration）：为 null 时由运行时 SITE_URL 环境变量兜底，
+   * 见 lib/site/get-site-base-url.ts。不含路径/末尾斜杠，仅 protocol + host。 */
+  siteBaseUrl: string | null;
 }

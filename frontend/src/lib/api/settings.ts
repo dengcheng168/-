@@ -42,6 +42,7 @@ const FALLBACK_SETTINGS: PublicSiteSettings = {
   metaPixelId: null,
   tiktokPixelId: null,
   googlePixelId: null,
+  siteBaseUrl: null,
 };
 
 function resolveSettingsMedia(settings: PublicSiteSettings): PublicSiteSettings {
