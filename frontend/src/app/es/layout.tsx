@@ -3,6 +3,7 @@ import '../globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { AnalyticsPixels } from '@/components/analytics/AnalyticsPixels';
+import { PageViewTracker } from '@/components/analytics/PageViewTracker';
 import { getPublicBaseMetadata } from '@/lib/seo/base-metadata';
 
 // 独立的根 layout（跟 (site)/layout.tsx 是姐妹关系，app/ 顶层已经没有共享的 layout.tsx 了），
@@ -18,6 +19,7 @@ export default function SpanishSiteLayout({ children }: { children: React.ReactN
     <html lang="es" className="h-full antialiased">
       <body className="flex min-h-full flex-col">
         <AnalyticsPixels locale="es" />
+        <PageViewTracker />
         <Header locale="es" />
         <main className="flex-1">{children}</main>
         <Footer locale="es" />

@@ -43,6 +43,18 @@ model AdminUser {
   @@map("admin_users")
 }
 
+/// 前台公开页面访问记录：每次公开页面加载（英文站 + 西语站）插入一条，后台管理面板和登录页
+/// 不计入。只用于"数据概览"页展示访问总量这个简单指标，不做详细访客画像/来源分析，
+/// 所以不记 IP/UA——真要做更细的分析，应该接入专门的分析服务，而不是在这张表上垒字段。
+model PageView {
+  id        Int      @id @default(autoincrement())
+  path      String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("page_views")
+}
+
 /// 登录尝试记录（成功和失败都记，用于登录失败次数限制与登录记录页面）；
 /// 不关联 AdminUser——输错邮箱本身也是一次要记录的尝试，此时没有对应的真实用户
 model LoginLog {

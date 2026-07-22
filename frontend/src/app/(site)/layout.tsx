@@ -3,6 +3,7 @@ import '../globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { AnalyticsPixels } from '@/components/analytics/AnalyticsPixels';
+import { PageViewTracker } from '@/components/analytics/PageViewTracker';
 import { getPublicBaseMetadata } from '@/lib/seo/base-metadata';
 
 // (site) 现在是一个根 layout（app/ 顶层不再有共享的 layout.tsx，见该文件被删除时的提交说明），
@@ -18,6 +19,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="h-full antialiased">
       <body className="flex min-h-full flex-col">
         <AnalyticsPixels />
+        <PageViewTracker />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

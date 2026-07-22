@@ -31,6 +31,7 @@ import { adminAccountRoutes } from './modules/account/account.routes.js';
 import { adminSystemRoutes } from './modules/system/system.routes.js';
 import { adminAuditRoutes } from './modules/audit/audit.routes.js';
 import { adminUserRoutes } from './modules/admin-users/admin-users.routes.js';
+import { publicPageViewRoutes, adminPageViewRoutes } from './modules/page-views/page-views.routes.js';
 import { env } from './config/env.js';
 
 export async function buildApp() {
@@ -71,6 +72,7 @@ export async function buildApp() {
   await app.register(publicInquiryRoutes, { prefix: API_PREFIX });
   await app.register(publicSearchRoutes, { prefix: API_PREFIX });
   await app.register(publicTranslationRoutes, { prefix: API_PREFIX });
+  await app.register(publicPageViewRoutes, { prefix: API_PREFIX });
 
   await app.register(adminCategoryRoutes, { prefix: ADMIN_API_PREFIX });
   await app.register(adminProductRoutes, { prefix: ADMIN_API_PREFIX });
@@ -90,6 +92,7 @@ export async function buildApp() {
   await app.register(adminAuditRoutes, { prefix: ADMIN_API_PREFIX });
   await app.register(adminUserRoutes, { prefix: ADMIN_API_PREFIX });
   await app.register(adminTranslationRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminPageViewRoutes, { prefix: ADMIN_API_PREFIX });
 
   return app;
 }
