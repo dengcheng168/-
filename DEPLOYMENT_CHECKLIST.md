@@ -38,6 +38,51 @@
 - [ ] 已设置定期备份（cron + `scripts/backup.sh`）
 - [ ] 已用真实浏览器（非自动化工具）完整走一遍：首页浏览 → 产品详情 → 提交询盘 → 后台登录 → 查看询盘 → 编辑首页 Banner → 退出登录
 
+## SQLite 数据库持久化与备份
+
+项目继续使用 SQLite（不安装 MySQL/PostgreSQL）。生产数据库不是宝塔面板里的独立数据库服务，
+而是容器内 `/app/data/production.db` 这一个文件，对应宿主机 `./data` 目录（`docker-compose.yml`
+里 `./data:/app/data` 绑定挂载）。**宝塔"数据库"菜单显示为 0 是正常现象**，不代表数据库没建好或
+配置有问题——SQLite 是文件数据库，不需要在宝塔的数据库管理界面里创建。
+
+- [ ] 确认服务器上 `./data` 目录存在且不为空（`ls -lah data/`），里面应该有 `production.db`
+- [ ] 重启容器后确认数据未丢失：`docker compose restart backend`，再登录后台确认之前保存的设置还在
+- [ ] 重建镜像后确认数据未丢失：`docker compose up -d --build backend`，同样登录确认设置还在
+- [ ] **禁止使用** `docker compose down -v`——`-v` 会删除 named volume，虽然本项目用的是宿主机绑定
+      目录（理论上不受影响），但仍然不要养成加 `-v` 的习惯
+- [ ] 已配置定期备份（`scripts/backup.sh`，用的是 SQLite 官方在线备份 API `.backup`，不是在数据库
+      正在写入时直接 `cp`/`tar` 主文件——后者在极端情况下可能拷到一个事务写到一半的不一致状态）
+- [ ] 备份文件不提交进 Git（`backups/` 已在 `.gitignore` 里），不放在 Nginx 会直接对外提供静态文件
+      的目录下
+
+### 服务器验证清单（本地开发环境没有 Docker CLI，以下命令待部署到服务器后执行）
+
+```bash
+docker compose config
+docker compose build
+docker compose up -d
+docker compose ps
+docker compose logs --tail=200 backend
+
+# 确认数据库路径和挂载
+docker compose exec backend sh -lc 'echo "$DATABASE_URL"'
+docker compose exec backend sh -lc 'ls -lah /app/data'
+
+# 验证持久化：先在后台改一项设置，记下来，然后：
+docker compose restart backend
+# 重新登录后台确认设置还在
+docker compose up -d --build backend   # 重建镜像，不删除 volume
+# 再次确认设置还在
+```
+
+## 自动化测试数据库隔离
+
+后端 `npm test` 不会连接开发数据库（`backend/prisma/dev.db`）或生产数据库，每个测试文件运行在
+独立进程里，各自在系统临时目录下创建一个全新的隔离 SQLite 文件（`test/bootstrap.ts` 自动完成，
+不需要开发者手工配置 `DATABASE_URL`），测试结束自动删除。`backend/src/lib/database-safety.ts`
+在 `NODE_ENV=test`/`NODE_ENV=production` 时分别做强制校验，防止测试误连开发/生产库、防止生产
+环境误用测试库路径。**不要**在生产容器里直接跑未隔离的测试脚本。
+
 ## 已知限制（交付时的说明，非缺陷）
 
 - 未实现西班牙语/阿拉伯语多语言路由（按用户要求：前台仅英语，后台仅中文，见 `README.md` 开头说明）
