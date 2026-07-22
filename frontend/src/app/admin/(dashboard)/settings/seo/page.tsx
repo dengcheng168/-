@@ -52,8 +52,8 @@ export default async function AdminSeoSettingsPage() {
           lastModifiedBy={lastModified?.adminEmail ?? null}
           lastModifiedAt={lastModified?.createdAt ?? null}
         />
-        <SeoSettingsForm initialValues={data} />
         <SitemapStatus sitemapUrl={sitemapUrl} />
+        <SeoSettingsForm initialValues={data} />
       </div>
     </div>
   );
