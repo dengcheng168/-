@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { z } from 'zod';
+import { assertDatabaseSafety } from '../lib/database-safety.js';
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -64,3 +65,9 @@ if (!parsed.success) {
 export const env = parsed.data;
 
 export const isProduction = env.NODE_ENV === 'production';
+
+// 数据库安全门禁：test 环境只允许连接系统临时目录下的隔离测试库，production 环境禁止连接
+// 任何看起来是测试库/临时目录的路径。校验必须在这里（env 模块顶层、任何 PrismaClient 构造之前）
+// 无条件执行——它是整个应用里最早被 import 的模块之一，能保证在 prisma.ts 的 new PrismaClient()
+// 跑之前就已经校验完毕；校验不通过直接抛错终止进程启动，不是打日志放行。
+assertDatabaseSafety(env.NODE_ENV, env.DATABASE_URL);
