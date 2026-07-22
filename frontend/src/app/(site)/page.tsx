@@ -5,6 +5,7 @@ import { listCertificates, listFaqs } from '@/lib/api/content';
 import { listBlogPosts } from '@/lib/api/blog';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo/jsonld';
+import { getSiteUrl } from '@/lib/seo/site';
 import { HeroBanner } from '@/components/home/HeroBanner';
 import { CoreAdvantages } from '@/components/home/CoreAdvantages';
 import { ProductCategories } from '@/components/home/ProductCategories';
@@ -26,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [settings, categories, featuredProducts, certificates, latestPosts, faqs] =
+  const [settings, categories, featuredProducts, certificates, latestPosts, faqs, siteUrl] =
     await Promise.all([
       getPublicSettings(),
       listProductCategories(),
@@ -34,12 +35,13 @@ export default async function HomePage() {
       listCertificates(),
       listBlogPosts({ pageSize: 3 }),
       listFaqs(),
+      getSiteUrl(),
     ]);
 
   return (
     <>
-      <JsonLd data={organizationJsonLd(settings)} />
-      <JsonLd data={websiteJsonLd(settings)} />
+      <JsonLd data={organizationJsonLd(settings, siteUrl)} />
+      <JsonLd data={websiteJsonLd(settings, siteUrl)} />
 
       <HeroBanner settings={settings} />
       <CoreAdvantages items={settings.coreAdvantages} />

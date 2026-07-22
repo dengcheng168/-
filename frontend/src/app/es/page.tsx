@@ -7,6 +7,7 @@ import { getTranslationMap } from '@/lib/api/translations';
 import { localizeHero } from '@/lib/i18n/content-overlay';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo/jsonld';
+import { getSiteUrl } from '@/lib/seo/site';
 import { HeroBanner } from '@/components/home/HeroBanner';
 import { CoreAdvantages } from '@/components/home/CoreAdvantages';
 import { ProductCategories } from '@/components/home/ProductCategories';
@@ -23,12 +24,12 @@ export async function generateMetadata(): Promise<Metadata> {
     ...(settings.defaultSeoTitle ? { title: settings.defaultSeoTitle } : {}),
     ...(settings.defaultSeoDescription ? { description: settings.defaultSeoDescription } : {}),
     alternates: { canonical: '/es', languages: { en: '/', es: '/es', 'x-default': '/' } },
-    openGraph: { locale: 'es', alternateLocale: 'en', title: localized.heroHeadline },
+    openGraph: { url: '/es', locale: 'es', alternateLocale: 'en', title: localized.heroHeadline },
   };
 }
 
 export default async function SpanishHomePage() {
-  const [settings, categories, featuredProducts, certificates, latestPosts, faqs, translations] =
+  const [settings, categories, featuredProducts, certificates, latestPosts, faqs, translations, siteUrl] =
     await Promise.all([
       getPublicSettings(),
       listProductCategories('es'),
@@ -39,6 +40,7 @@ export default async function SpanishHomePage() {
       // 英文原文兜底的三级顺序解析，见 lib/api/content.ts 和 lib/i18n/faq-source.ts
       listFaqs('es'),
       getTranslationMap('es'),
+      getSiteUrl(),
     ]);
 
   // 产品分类/推荐产品/证书/博客文章/FAQ 现在都通过 locale-aware 数据函数请求西语翻译，
@@ -47,8 +49,8 @@ export default async function SpanishHomePage() {
 
   return (
     <>
-      <JsonLd data={organizationJsonLd(settings)} />
-      <JsonLd data={websiteJsonLd(settings, 'es')} />
+      <JsonLd data={organizationJsonLd(settings, siteUrl)} />
+      <JsonLd data={websiteJsonLd(settings, siteUrl, 'es')} />
 
       <HeroBanner settings={localizedSettings} locale="es" />
       <CoreAdvantages items={settings.coreAdvantages} />

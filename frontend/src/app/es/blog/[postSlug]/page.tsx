@@ -9,6 +9,7 @@ import { RelatedPosts } from '@/components/blog/RelatedPosts';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getBlogPostBySlug } from '@/lib/api/blog';
 import { articleJsonLd, breadcrumbListJsonLd } from '@/lib/seo/jsonld';
+import { getSiteUrl } from '@/lib/seo/site';
 import { extractHeadingsAndInjectIds } from '@/lib/utils/toc';
 import { t } from '@/lib/i18n/site-strings';
 
@@ -29,7 +30,7 @@ export async function generateMetadata({
       canonical: `/es/blog/${postSlug}`,
       languages: { en: `/blog/${postSlug}`, es: `/es/blog/${postSlug}`, 'x-default': `/blog/${postSlug}` },
     },
-    openGraph: { locale: 'es', alternateLocale: 'en', images: post.coverImage ? [post.coverImage] : undefined },
+    openGraph: { url: `/es/blog/${postSlug}`, locale: 'es', alternateLocale: 'en', images: post.coverImage ? [post.coverImage] : undefined },
   };
 }
 
@@ -44,7 +45,7 @@ export default async function SpanishBlogDetailPage({
   params: Promise<{ postSlug: string }>;
 }) {
   const { postSlug } = await params;
-  const result = await getBlogPostBySlug(postSlug, 'es');
+  const [result, siteUrl] = await Promise.all([getBlogPostBySlug(postSlug, 'es'), getSiteUrl()]);
   if (!result) notFound();
 
   const { post, related } = result;
@@ -52,13 +53,16 @@ export default async function SpanishBlogDetailPage({
 
   return (
     <Container className="py-12">
-      <JsonLd data={articleJsonLd(post, 'es')} />
+      <JsonLd data={articleJsonLd(post, siteUrl, 'es')} />
       <JsonLd
-        data={breadcrumbListJsonLd([
-          { label: t('es', 'breadcrumbHome'), href: '/es' },
-          { label: t('es', 'breadcrumbBlog'), href: '/es/blog' },
-          { label: post.title, href: `/es/blog/${post.slug}` },
-        ])}
+        data={breadcrumbListJsonLd(
+          [
+            { label: t('es', 'breadcrumbHome'), href: '/es' },
+            { label: t('es', 'breadcrumbBlog'), href: '/es/blog' },
+            { label: post.title, href: `/es/blog/${post.slug}` },
+          ],
+          siteUrl,
+        )}
       />
 
       <Breadcrumbs

@@ -10,9 +10,9 @@ import type { Locale } from '@/lib/i18n/locales';
  * 这里抽成共享函数只是避免 4 处分别手写同一段 fetch 逻辑，不是运行时的"继承"。
  */
 async function sharedMetadataBase(): Promise<Pick<Metadata, 'metadataBase' | 'icons'>> {
-  const settings = await getPublicSettings();
+  const [settings, siteUrl] = await Promise.all([getPublicSettings(), getSiteUrl()]);
   return {
-    metadataBase: new URL(getSiteUrl()),
+    metadataBase: new URL(siteUrl),
     // 必须显式传 icons，不能依赖 app/favicon.ico 的文件约定兜底：Next.js 文档明确说文件约定
     // 的图标优先级高于 metadata 里配置的 icons，两者会同时输出成两个 <link rel="icon">，
     // 浏览器实测会优先选中文件约定那个，导致后台传了新图标也不生效。
