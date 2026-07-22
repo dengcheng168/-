@@ -2,6 +2,7 @@ import type { PrismaClient, Prisma } from '@prisma/client';
 import { generateUniqueSlug } from '../../lib/slugify.js';
 import { toSkipTake, buildPaginationMeta, type PaginationQuery } from '../../lib/pagination.js';
 import { sanitizeRichText } from '../../lib/sanitize.js';
+import { attachNestedBlogCategoryTranslations } from '../../lib/nested-category.js';
 import type { CreateBlogPostInput, UpdateBlogPostInput, UpsertBlogPostTranslationInput } from './blog.schema.js';
 
 const includeRelations = {
@@ -51,8 +52,9 @@ export async function listPublicPosts(
     prisma.blogPost.count({ where }),
   ]);
 
+  const withOwnTranslation = await attachPostTranslations(prisma, items.map(serializePost), filters.locale);
   return {
-    items: await attachPostTranslations(prisma, items.map(serializePost), filters.locale),
+    items: await attachNestedBlogCategoryTranslations(prisma, withOwnTranslation, filters.locale),
     meta: buildPaginationMeta(query, total),
   };
 }
@@ -71,10 +73,18 @@ export async function getPublicPostBySlug(prisma: PrismaClient, slug: string, lo
     take: 3,
   });
 
-  const [localizedPost] = await attachPostTranslations(prisma, [serializePost(post)], locale);
+  const localizedPosts = await attachPostTranslations(prisma, [serializePost(post)], locale);
+  const localizedRelated = await attachPostTranslations(prisma, related.map(serializePost), locale);
+
+  const [postsWithCategory, relatedWithCategory] = await Promise.all([
+    attachNestedBlogCategoryTranslations(prisma, localizedPosts, locale),
+    attachNestedBlogCategoryTranslations(prisma, localizedRelated, locale),
+  ]);
+
   return {
-    post: localizedPost,
-    related: await attachPostTranslations(prisma, related.map(serializePost), locale),
+    // localizedPosts 由 [serializePost(post)] 生成，长度恒为 1，这里安全非空断言
+    post: postsWithCategory[0]!,
+    related: relatedWithCategory,
   };
 }
 

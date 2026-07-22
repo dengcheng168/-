@@ -4,7 +4,7 @@ import { listProductCategories, listProducts } from '@/lib/api/products';
 import { listCertificates, listFaqs } from '@/lib/api/content';
 import { listBlogPosts } from '@/lib/api/blog';
 import { getTranslationMap } from '@/lib/api/translations';
-import { localizeHero, localizeFaqs } from '@/lib/i18n/content-overlay';
+import { localizeHero } from '@/lib/i18n/content-overlay';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo/jsonld';
 import { HeroBanner } from '@/components/home/HeroBanner';
@@ -35,17 +35,15 @@ export default async function SpanishHomePage() {
       listProducts({ featured: true, pageSize: 8 }, 'es'),
       listCertificates('es'),
       listBlogPosts({ pageSize: 3 }, 'es'),
-      // FAQ 故意不传 locale：已有的西语问答目前存在旧的通用 Translation 表（faq.{id}.question/answer,
-      // 后台"多语言设置"编辑出来的），新的 FaqTranslation 表要等 Phase G 回填后才有数据。
-      // 这里继续用 localizeFaqs 叠加旧表，避免在 Phase G 跑完之前把已经上线的西语 FAQ 内容清空。
-      listFaqs(),
+      // listFaqs('es') 内部按 FaqTranslation 已发布内容优先、旧 Translation 表兼容、
+      // 英文原文兜底的三级顺序解析，见 lib/api/content.ts 和 lib/i18n/faq-source.ts
+      listFaqs('es'),
       getTranslationMap('es'),
     ]);
 
-  // 产品分类/推荐产品/证书/博客文章现在都通过 Phase C 的 locale-aware 数据函数请求西语翻译，
-  // 缺失翻译的字段由 resolveLocalizedEntity 自动回退显示英文原文（见 lib/i18n/localize.ts）。
+  // 产品分类/推荐产品/证书/博客文章/FAQ 现在都通过 locale-aware 数据函数请求西语翻译，
+  // 缺失翻译的字段自动回退显示英文原文（见 lib/i18n/localize.ts 和 lib/i18n/faq-source.ts）。
   const localizedSettings = localizeHero(settings, translations);
-  const localizedFaqs = localizeFaqs(faqs, translations);
 
   return (
     <>
@@ -58,7 +56,7 @@ export default async function SpanishHomePage() {
       <FeaturedProducts products={featuredProducts.items} locale="es" />
       <CertificatesShowcase certificates={certificates} locale="es" />
       <LatestBlogPosts posts={latestPosts.items} locale="es" />
-      <FaqPreview faqs={localizedFaqs} locale="es" />
+      <FaqPreview faqs={faqs} locale="es" />
       <InquirySection locale="es" />
     </>
   );

@@ -3,9 +3,17 @@ import { generateUniqueSlug } from '../../lib/slugify.js';
 import { fromJsonString, toJsonString } from '../../lib/json.js';
 import { toSkipTake, buildPaginationMeta, type PaginationQuery } from '../../lib/pagination.js';
 import { sanitizeRichText } from '../../lib/sanitize.js';
+import { attachNestedProductCategoryTranslations } from '../../lib/nested-category.js';
 import type { CreateProductInput, UpdateProductInput, UpsertProductTranslationInput } from './products.schema.js';
 
-export function serializeProduct(product: Product) {
+/**
+ * 泛型而不是固定用 Product 类型，是为了让 include 了 category 关联的查询结果
+ * 在序列化后依然保留 category 字段（普通函数签名 (product: Product) 会让
+ * TypeScript 按 Product 类型本身的已知字段推断返回值，实际运行时多出来的
+ * category 属性会被"抹掉"，导致后面 attachNestedProductCategoryTranslations
+ * 读不到它）。
+ */
+export function serializeProduct<T extends Product>(product: T) {
   return {
     ...product,
     galleryImages: fromJsonString(product.galleryImages, []),
@@ -76,8 +84,9 @@ export async function listPublicProducts(
     prisma.product.count({ where }),
   ]);
 
+  const withOwnTranslation = await attachProductTranslations(prisma, items.map(serializeProduct), filters.locale);
   return {
-    items: await attachProductTranslations(prisma, items.map(serializeProduct), filters.locale),
+    items: await attachNestedProductCategoryTranslations(prisma, withOwnTranslation, filters.locale),
     meta: buildPaginationMeta(query, total),
   };
 }
@@ -97,13 +106,22 @@ export async function getPublicProductBySlug(prisma: PrismaClient, slug: string,
       id: { not: product.id },
     },
     orderBy: { sortOrder: 'asc' },
+    include: { category: true },
     take: 4,
   });
 
-  const [localizedProduct] = await attachProductTranslations(prisma, [serializeProduct(product)], locale);
+  const localizedProducts = await attachProductTranslations(prisma, [serializeProduct(product)], locale);
+  const localizedRelated = await attachProductTranslations(prisma, related.map(serializeProduct), locale);
+
+  const [productsWithCategory, relatedWithCategory] = await Promise.all([
+    attachNestedProductCategoryTranslations(prisma, localizedProducts, locale),
+    attachNestedProductCategoryTranslations(prisma, localizedRelated, locale),
+  ]);
+
   return {
-    product: localizedProduct,
-    related: await attachProductTranslations(prisma, related.map(serializeProduct), locale),
+    // localizedProducts 由 [serializeProduct(product)] 生成，长度恒为 1，这里安全非空断言
+    product: productsWithCategory[0]!,
+    related: relatedWithCategory,
   };
 }
 

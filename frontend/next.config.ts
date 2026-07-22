@@ -4,6 +4,13 @@ const nextConfig: NextConfig = {
   // 生成独立运行时（.next/standalone），Docker 镜像只需复制这个目录 + 静态资源即可运行，
   // 不需要把完整 node_modules 打进最终镜像，显著减小生产镜像体积，适合小内存 VPS。
   output: 'standalone',
+  experimental: {
+    // app/ 顶层不再有共享的 layout.tsx（改成 (site)/es/admin/登录页各自独立的根 layout，
+    // 是为了让 <html lang> 能在服务端首次响应里就正确输出 en/es，见 lib/seo/base-metadata.ts），
+    // 这种"多根 layout"结构下 Next.js 没法从多棵路由树里拼出一个统一的全局 404，
+    // 必须显式开这个 flag 配合 app/global-not-found.tsx 使用。
+    globalNotFound: true,
+  },
   images: {
     // 关闭 Next.js 内置的图片优化代理（/_next/image）。
     //

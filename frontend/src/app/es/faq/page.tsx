@@ -4,8 +4,6 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { FaqAccordion } from '@/components/faq/FaqAccordion';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { listFaqs } from '@/lib/api/content';
-import { getTranslationMap } from '@/lib/api/translations';
-import { localizeFaqs } from '@/lib/i18n/content-overlay';
 import { faqPageJsonLd } from '@/lib/seo/jsonld';
 import { t } from '@/lib/i18n/site-strings';
 
@@ -16,17 +14,16 @@ export const metadata: Metadata = {
 };
 
 export default async function SpanishFaqPage() {
-  const [faqs, translations] = await Promise.all([listFaqs(), getTranslationMap('es')]);
-  const localizedFaqs = localizeFaqs(faqs, translations);
+  const faqs = await listFaqs('es');
 
   return (
     <Container className="py-12">
-      <JsonLd data={faqPageJsonLd(localizedFaqs, 'es')} />
+      <JsonLd data={faqPageJsonLd(faqs, 'es')} />
       <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'faqBreadcrumb') }]} />
       <h1 className="mt-4 text-3xl font-semibold text-navy-950">{t('es', 'faqPageTitle')}</h1>
 
       <div className="mt-10 max-w-3xl">
-        <FaqAccordion faqs={localizedFaqs} />
+        <FaqAccordion faqs={faqs} />
       </div>
     </Container>
   );

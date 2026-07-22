@@ -1,23 +1,19 @@
 import { apiFetch } from './client';
+import { getTranslationMap } from './translations';
 import { resolveMediaUrl } from '@/lib/utils/media';
 import type { Certificate, Faq, Page } from '@/types/content';
-import type { Locale } from '@/lib/i18n/locales';
+import type { Locale, SupportedLocale } from '@/lib/i18n/locales';
 import { resolveLocalizedEntity, localeQueryParam, localizedTag } from '@/lib/i18n/localize';
+import { resolveFaqListContent } from '@/lib/i18n/faq-source';
 
 type WithTranslation<T> = T & { translation?: Partial<T> | null };
 
 const CERTIFICATE_TRANSLATABLE_FIELDS: (keyof Certificate)[] = ['name', 'description'];
-const FAQ_TRANSLATABLE_FIELDS: (keyof Faq)[] = ['question', 'answer'];
 const PAGE_TRANSLATABLE_FIELDS: (keyof Page)[] = ['title', 'bodyHtml', 'sections', 'seoTitle', 'seoDescription'];
 
 function localizeCertificate(cert: WithTranslation<Certificate>): Certificate {
   const { translation, ...base } = cert;
   return resolveLocalizedEntity(base as Certificate, translation, CERTIFICATE_TRANSLATABLE_FIELDS);
-}
-
-function localizeFaq(faq: WithTranslation<Faq>): Faq {
-  const { translation, ...base } = faq;
-  return resolveLocalizedEntity(base as Faq, translation, FAQ_TRANSLATABLE_FIELDS);
 }
 
 function localizePage(page: WithTranslation<Page>): Page {
@@ -31,6 +27,12 @@ function resolveCertificateMedia(cert: Certificate): Certificate {
     imageUrl: resolveMediaUrl(cert.imageUrl),
     pdfUrl: cert.pdfUrl ? resolveMediaUrl(cert.pdfUrl) : cert.pdfUrl,
   };
+}
+
+function omitTranslation<T>(item: WithTranslation<T>): T {
+  const rest: Record<string, unknown> = { ...item };
+  delete rest.translation;
+  return rest as T;
 }
 
 function resolvePageMedia(page: Page): Page {
@@ -57,6 +59,12 @@ export async function listCertificates(locale: Locale = 'en'): Promise<Certifica
   }
 }
 
+/**
+ * FaqTranslation（已发布内容）是西语 FAQ 的正式事实源；旧的通用 Translation 表
+ * （faq.{id}.question/answer）只作为迁移前遗留内容的兼容回退——见
+ * lib/i18n/faq-source.ts 的 resolveFaqListContent 和 backend/prisma/migrate-faq-translations.ts。
+ * locale='en' 时完全不查任何翻译源，直接返回英文主表内容，跟其它实体的规则一致。
+ */
 export async function listFaqs(locale: Locale = 'en'): Promise<Faq[]> {
   const localeParam = localeQueryParam(locale);
   try {
@@ -64,7 +72,11 @@ export async function listFaqs(locale: Locale = 'en'): Promise<Faq[]> {
       revalidate: 300,
       tags: ['faqs', ...localizedTag('faqs', locale)],
     });
-    return data.map(localizeFaq);
+    if (locale === 'en') {
+      return data.map(omitTranslation);
+    }
+    const legacyMap = await getTranslationMap(locale as SupportedLocale);
+    return resolveFaqListContent(data, legacyMap);
   } catch {
     return [];
   }
