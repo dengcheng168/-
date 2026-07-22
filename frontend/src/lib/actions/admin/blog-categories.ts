@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { adminFetch } from '@/lib/api/admin-client';
 import { ApiError } from '@/lib/api/client';
@@ -28,6 +28,7 @@ export async function createBlogCategoryAction(_prevState: AdminFormState, formD
     return { message: err instanceof ApiError ? err.message : '创建失败' };
   }
   revalidatePath('/admin/blog-categories');
+  updateTag('blog-categories');
   redirect('/admin/blog-categories');
 }
 
@@ -49,6 +50,7 @@ export async function updateBlogCategoryAction(
     return { message: err instanceof ApiError ? err.message : '保存失败' };
   }
   revalidatePath('/admin/blog-categories');
+  updateTag('blog-categories');
   redirect('/admin/blog-categories');
 }
 
@@ -56,6 +58,7 @@ export async function deleteBlogCategoryAction(formData: FormData): Promise<void
   const id = formData.get('id');
   await adminFetch(`/blog-categories/${id}`, { method: 'DELETE' });
   revalidatePath('/admin/blog-categories');
+  updateTag('blog-categories');
 }
 
 export async function updateBlogCategoryTranslationAction(

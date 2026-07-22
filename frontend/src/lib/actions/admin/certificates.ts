@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { adminFetch } from '@/lib/api/admin-client';
 import { ApiError } from '@/lib/api/client';
@@ -36,6 +36,7 @@ export async function createCertificateAction(_prevState: AdminFormState, formDa
     return { message: err instanceof ApiError ? err.message : '创建失败' };
   }
   revalidatePath('/admin/certificates');
+  updateTag('certificates');
   redirect('/admin/certificates');
 }
 
@@ -50,6 +51,7 @@ export async function updateCertificateAction(
     return { message: err instanceof ApiError ? err.message : '保存失败' };
   }
   revalidatePath('/admin/certificates');
+  updateTag('certificates');
   redirect('/admin/certificates');
 }
 
@@ -57,6 +59,7 @@ export async function deleteCertificateAction(formData: FormData): Promise<void>
   const id = formData.get('id');
   await adminFetch(`/certificates/${id}`, { method: 'DELETE' });
   revalidatePath('/admin/certificates');
+  updateTag('certificates');
 }
 
 export async function updateCertificateTranslationAction(

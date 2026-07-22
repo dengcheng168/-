@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { adminFetch } from '@/lib/api/admin-client';
 import { ApiError } from '@/lib/api/client';
@@ -32,21 +32,25 @@ function buildPayload(formData: FormData) {
 
 export async function createBlogPostAction(_prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
   try {
-    await adminFetch('/blog', { method: 'POST', body: JSON.stringify(buildPayload(formData)) });
+    const { data } = await adminFetch<{ slug: string }>('/blog', { method: 'POST', body: JSON.stringify(buildPayload(formData)) });
+    revalidatePath('/admin/blog');
+    updateTag('blog');
+    updateTag(`blog:${data.slug}`);
   } catch (err) {
     return { message: err instanceof ApiError ? err.message : '创建失败' };
   }
-  revalidatePath('/admin/blog');
   redirect('/admin/blog');
 }
 
 export async function updateBlogPostAction(id: number, _prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
   try {
-    await adminFetch(`/blog/${id}`, { method: 'PATCH', body: JSON.stringify(buildPayload(formData)) });
+    const { data } = await adminFetch<{ slug: string }>(`/blog/${id}`, { method: 'PATCH', body: JSON.stringify(buildPayload(formData)) });
+    revalidatePath('/admin/blog');
+    updateTag('blog');
+    updateTag(`blog:${data.slug}`);
   } catch (err) {
     return { message: err instanceof ApiError ? err.message : '保存失败' };
   }
-  revalidatePath('/admin/blog');
   redirect('/admin/blog');
 }
 
@@ -54,6 +58,7 @@ export async function deleteBlogPostAction(formData: FormData): Promise<void> {
   const id = formData.get('id');
   await adminFetch(`/blog/${id}`, { method: 'DELETE' });
   revalidatePath('/admin/blog');
+  updateTag('blog');
 }
 
 export async function updateBlogPostTranslationAction(
