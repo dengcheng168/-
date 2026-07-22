@@ -48,7 +48,7 @@ export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
   const [settings, rawNavItems, categories, translations] = await Promise.all([
     getPublicSettings(),
     getNavigation(),
-    listProductCategories(),
+    listProductCategories(locale),
     locale === 'en' ? Promise.resolve({}) : getTranslationMap(locale),
   ]);
   const localizedNavItems = locale === 'en' ? rawNavItems : localizeNavigation(rawNavItems, translations);
