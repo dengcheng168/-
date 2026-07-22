@@ -27,9 +27,9 @@ export async function generateMetadata({
     description: post.seoDescription ?? post.excerpt ?? undefined,
     alternates: {
       canonical: `/es/blog/${postSlug}`,
-      languages: { en: `/blog/${postSlug}`, es: `/es/blog/${postSlug}` },
+      languages: { en: `/blog/${postSlug}`, es: `/es/blog/${postSlug}`, 'x-default': `/blog/${postSlug}` },
     },
-    openGraph: { images: post.coverImage ? [post.coverImage] : undefined },
+    openGraph: { locale: 'es', alternateLocale: 'en', images: post.coverImage ? [post.coverImage] : undefined },
   };
 }
 
@@ -52,7 +52,7 @@ export default async function SpanishBlogDetailPage({
 
   return (
     <Container className="py-12">
-      <JsonLd data={articleJsonLd(post)} />
+      <JsonLd data={articleJsonLd(post, 'es')} />
       <JsonLd
         data={breadcrumbListJsonLd([
           { label: t('es', 'breadcrumbHome'), href: '/es' },

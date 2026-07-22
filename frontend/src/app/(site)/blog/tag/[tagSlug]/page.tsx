@@ -12,7 +12,12 @@ export async function generateMetadata({
   params: Promise<{ tagSlug: string }>;
 }): Promise<Metadata> {
   const { tagSlug } = await params;
-  return { alternates: { canonical: `/blog/tag/${tagSlug}` } };
+  return {
+    alternates: {
+      canonical: `/blog/tag/${tagSlug}`,
+      languages: { en: `/blog/tag/${tagSlug}`, es: `/es/blog/tag/${tagSlug}`, 'x-default': `/blog/tag/${tagSlug}` },
+    },
+  };
 }
 
 export default async function BlogTagPage({

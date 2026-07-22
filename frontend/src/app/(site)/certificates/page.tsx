@@ -8,7 +8,10 @@ import { listCertificates, getPageBySlug } from '@/lib/api/content';
 export const metadata: Metadata = {
   title: 'Certificates',
   description: 'Quality and compliance certificates for our water purifier products.',
-  alternates: { canonical: '/certificates' },
+  alternates: {
+    canonical: '/certificates',
+    languages: { en: '/certificates', es: '/es/certificates', 'x-default': '/certificates' },
+  },
 };
 
 function formatDate(dateStr: string | null) {

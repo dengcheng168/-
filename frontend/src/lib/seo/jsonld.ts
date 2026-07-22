@@ -2,6 +2,8 @@ import type { Product } from '@/types/product';
 import type { BlogPost } from '@/types/blog';
 import type { Faq } from '@/types/content';
 import type { PublicSiteSettings } from '@/types/settings';
+import type { Locale } from '@/lib/i18n/locales';
+import { localeHref } from '@/lib/i18n/paths';
 import { absoluteUrl } from './site';
 
 export function organizationJsonLd(settings: PublicSiteSettings) {
@@ -17,12 +19,13 @@ export function organizationJsonLd(settings: PublicSiteSettings) {
   };
 }
 
-export function websiteJsonLd(settings: PublicSiteSettings) {
+export function websiteJsonLd(settings: PublicSiteSettings, locale: Locale = 'en') {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: settings.companyName,
-    url: absoluteUrl('/'),
+    url: absoluteUrl(localeHref('/', locale)),
+    inLanguage: locale,
   };
 }
 
@@ -39,7 +42,7 @@ export function breadcrumbListJsonLd(items: { label: string; href: string }[]) {
   };
 }
 
-export function productJsonLd(product: Product) {
+export function productJsonLd(product: Product, locale: Locale = 'en') {
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -47,11 +50,12 @@ export function productJsonLd(product: Product) {
     description: product.shortDescription ?? product.seoDescription ?? undefined,
     image: product.mainImage ? absoluteUrl(product.mainImage) : undefined,
     sku: product.sku ?? undefined,
-    url: absoluteUrl(`/products/${product.slug}`),
+    url: absoluteUrl(localeHref(`/products/${product.slug}`, locale)),
+    inLanguage: locale,
   };
 }
 
-export function articleJsonLd(post: BlogPost) {
+export function articleJsonLd(post: BlogPost, locale: Locale = 'en') {
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -60,14 +64,16 @@ export function articleJsonLd(post: BlogPost) {
     image: post.coverImage ? absoluteUrl(post.coverImage) : undefined,
     datePublished: post.publishedAt ?? undefined,
     author: { '@type': 'Organization', name: post.authorName },
-    url: absoluteUrl(`/blog/${post.slug}`),
+    url: absoluteUrl(localeHref(`/blog/${post.slug}`, locale)),
+    inLanguage: locale,
   };
 }
 
-export function faqPageJsonLd(faqs: Faq[]) {
+export function faqPageJsonLd(faqs: Faq[], locale: Locale = 'en') {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
+    inLanguage: locale,
     mainEntity: faqs.map((faq) => ({
       '@type': 'Question',
       name: faq.question,

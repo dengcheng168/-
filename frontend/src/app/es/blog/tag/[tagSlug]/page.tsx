@@ -16,7 +16,11 @@ export async function generateMetadata({
   return {
     alternates: {
       canonical: `/es/blog/tag/${tagSlug}`,
-      languages: { en: `/blog/tag/${tagSlug}`, es: `/es/blog/tag/${tagSlug}` },
+      languages: {
+        en: `/blog/tag/${tagSlug}`,
+        es: `/es/blog/tag/${tagSlug}`,
+        'x-default': `/blog/tag/${tagSlug}`,
+      },
     },
   };
 }

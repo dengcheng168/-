@@ -24,8 +24,11 @@ export async function generateMetadata({
   return {
     title: post.seoTitle ?? post.title,
     description: post.seoDescription ?? post.excerpt ?? undefined,
-    alternates: { canonical: `/blog/${postSlug}` },
-    openGraph: { images: post.coverImage ? [post.coverImage] : undefined },
+    alternates: {
+      canonical: `/blog/${postSlug}`,
+      languages: { en: `/blog/${postSlug}`, es: `/es/blog/${postSlug}`, 'x-default': `/blog/${postSlug}` },
+    },
+    openGraph: { locale: 'en', alternateLocale: 'es', images: post.coverImage ? [post.coverImage] : undefined },
   };
 }
 

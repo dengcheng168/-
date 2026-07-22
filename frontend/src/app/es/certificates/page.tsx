@@ -9,7 +9,10 @@ import { t } from '@/lib/i18n/site-strings';
 export const metadata: Metadata = {
   title: t('es', 'certificatesPageTitle'),
   description: t('es', 'certificatesPageDescription'),
-  alternates: { canonical: '/es/certificates', languages: { en: '/certificates', es: '/es/certificates' } },
+  alternates: {
+    canonical: '/es/certificates',
+    languages: { en: '/certificates', es: '/es/certificates', 'x-default': '/certificates' },
+  },
 };
 
 function formatDate(dateStr: string | null) {

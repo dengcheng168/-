@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: page?.seoTitle ?? page?.title ?? 'Contact Us',
     description: page?.seoDescription ?? undefined,
-    alternates: { canonical: '/contact' },
+    alternates: { canonical: '/contact', languages: { en: '/contact', es: '/es/contact', 'x-default': '/contact' } },
   };
 }
 

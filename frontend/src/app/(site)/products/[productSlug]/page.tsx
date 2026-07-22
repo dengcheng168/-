@@ -28,8 +28,17 @@ export async function generateMetadata({
     title: product.seoTitle ?? product.name,
     description: product.seoDescription ?? product.shortDescription ?? undefined,
     keywords: product.seoKeywords ?? undefined,
-    alternates: { canonical: `/products/${productSlug}` },
+    alternates: {
+      canonical: `/products/${productSlug}`,
+      languages: {
+        en: `/products/${productSlug}`,
+        es: `/es/products/${productSlug}`,
+        'x-default': `/products/${productSlug}`,
+      },
+    },
     openGraph: {
+      locale: 'en',
+      alternateLocale: 'es',
       images: product.ogImage ? [product.ogImage] : [product.mainImage],
     },
   };

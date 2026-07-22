@@ -19,7 +19,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: page?.seoTitle ?? page?.title ?? t('es', 'factoryPageTitle'),
     description: page?.seoDescription ?? undefined,
-    alternates: { canonical: '/es/factory', languages: { en: '/factory', es: '/es/factory' } },
+    alternates: {
+      canonical: '/es/factory',
+      languages: { en: '/factory', es: '/es/factory', 'x-default': '/factory' },
+    },
   };
 }
 

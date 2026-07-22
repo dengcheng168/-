@@ -9,7 +9,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: page?.seoTitle ?? page?.title ?? t('es', 'termsOfUsePageTitle'),
     description: page?.seoDescription ?? undefined,
-    alternates: { canonical: '/es/terms-of-use', languages: { en: '/terms-of-use', es: '/es/terms-of-use' } },
+    alternates: {
+      canonical: '/es/terms-of-use',
+      languages: { en: '/terms-of-use', es: '/es/terms-of-use', 'x-default': '/terms-of-use' },
+    },
   };
 }
 

@@ -12,7 +12,10 @@ import { t } from '@/lib/i18n/site-strings';
 export const metadata: Metadata = {
   title: t('es', 'productsPageTitle'),
   description: t('es', 'productsPageDescription'),
-  alternates: { canonical: '/es/products', languages: { en: '/products', es: '/es/products' } },
+  alternates: {
+    canonical: '/es/products',
+    languages: { en: '/products', es: '/es/products', 'x-default': '/products' },
+  },
 };
 
 export default async function SpanishProductsPage({

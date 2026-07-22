@@ -11,7 +11,7 @@ import { getPageBySlug } from '@/lib/api/content';
 export const metadata: Metadata = {
   title: 'Blog',
   description: 'News and insights from our water purifier factory.',
-  alternates: { canonical: '/blog' },
+  alternates: { canonical: '/blog', languages: { en: '/blog', es: '/es/blog', 'x-default': '/blog' } },
 };
 
 export default async function BlogListPage({

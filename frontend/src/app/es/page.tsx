@@ -22,8 +22,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     ...(settings.defaultSeoTitle ? { title: settings.defaultSeoTitle } : {}),
     ...(settings.defaultSeoDescription ? { description: settings.defaultSeoDescription } : {}),
-    alternates: { canonical: '/es', languages: { en: '/', es: '/es' } },
-    openGraph: { title: localized.heroHeadline },
+    alternates: { canonical: '/es', languages: { en: '/', es: '/es', 'x-default': '/' } },
+    openGraph: { locale: 'es', alternateLocale: 'en', title: localized.heroHeadline },
   };
 }
 
@@ -50,7 +50,7 @@ export default async function SpanishHomePage() {
   return (
     <>
       <JsonLd data={organizationJsonLd(settings)} />
-      <JsonLd data={websiteJsonLd(settings)} />
+      <JsonLd data={websiteJsonLd(settings, 'es')} />
 
       <HeroBanner settings={localizedSettings} locale="es" />
       <CoreAdvantages items={settings.coreAdvantages} />

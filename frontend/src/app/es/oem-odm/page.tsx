@@ -15,7 +15,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: page?.seoTitle ?? page?.title ?? t('es', 'oemOdmPageTitle'),
     description: page?.seoDescription ?? undefined,
-    alternates: { canonical: '/es/oem-odm', languages: { en: '/oem-odm', es: '/es/oem-odm' } },
+    alternates: {
+      canonical: '/es/oem-odm',
+      languages: { en: '/oem-odm', es: '/es/oem-odm', 'x-default': '/oem-odm' },
+    },
   };
 }
 

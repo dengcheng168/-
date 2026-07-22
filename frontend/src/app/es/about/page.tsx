@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: page?.seoTitle ?? page?.title ?? t('es', 'aboutPageTitle'),
     description: page?.seoDescription ?? undefined,
-    alternates: { canonical: '/es/about', languages: { en: '/about', es: '/es/about' } },
+    alternates: { canonical: '/es/about', languages: { en: '/about', es: '/es/about', 'x-default': '/about' } },
   };
 }
 

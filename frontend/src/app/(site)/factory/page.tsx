@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: page?.seoTitle ?? page?.title ?? 'Factory Strength',
     description: page?.seoDescription ?? undefined,
-    alternates: { canonical: '/factory' },
+    alternates: { canonical: '/factory', languages: { en: '/factory', es: '/es/factory', 'x-default': '/factory' } },
   };
 }
 

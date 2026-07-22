@@ -31,9 +31,15 @@ export async function generateMetadata({
     keywords: product.seoKeywords ?? undefined,
     alternates: {
       canonical: `/es/products/${productSlug}`,
-      languages: { en: `/products/${productSlug}`, es: `/es/products/${productSlug}` },
+      languages: {
+        en: `/products/${productSlug}`,
+        es: `/es/products/${productSlug}`,
+        'x-default': `/products/${productSlug}`,
+      },
     },
     openGraph: {
+      locale: 'es',
+      alternateLocale: 'en',
       images: product.ogImage ? [product.ogImage] : [product.mainImage],
     },
   };
@@ -54,7 +60,7 @@ export default async function SpanishProductDetailPage({
 
   return (
     <Container className="py-12">
-      <JsonLd data={productJsonLd(product)} />
+      <JsonLd data={productJsonLd(product, 'es')} />
       <JsonLd
         data={breadcrumbListJsonLd([
           { label: t('es', 'breadcrumbHome'), href: '/es' },

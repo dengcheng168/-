@@ -12,7 +12,7 @@ import { t } from '@/lib/i18n/site-strings';
 export const metadata: Metadata = {
   title: t('es', 'faqPageTitle'),
   description: t('es', 'faqPageDescription'),
-  alternates: { canonical: '/es/faq', languages: { en: '/faq', es: '/es/faq' } },
+  alternates: { canonical: '/es/faq', languages: { en: '/faq', es: '/es/faq', 'x-default': '/faq' } },
 };
 
 export default async function SpanishFaqPage() {
@@ -21,7 +21,7 @@ export default async function SpanishFaqPage() {
 
   return (
     <Container className="py-12">
-      <JsonLd data={faqPageJsonLd(localizedFaqs)} />
+      <JsonLd data={faqPageJsonLd(localizedFaqs, 'es')} />
       <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'faqBreadcrumb') }]} />
       <h1 className="mt-4 text-3xl font-semibold text-navy-950">{t('es', 'faqPageTitle')}</h1>
 

@@ -11,7 +11,7 @@ import { getPageBySlug } from '@/lib/api/content';
 export const metadata: Metadata = {
   title: 'Products',
   description: 'Browse our full range of OEM/ODM water purifier products.',
-  alternates: { canonical: '/products' },
+  alternates: { canonical: '/products', languages: { en: '/products', es: '/es/products', 'x-default': '/products' } },
 };
 
 export default async function ProductsPage({

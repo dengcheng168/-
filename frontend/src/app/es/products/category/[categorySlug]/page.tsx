@@ -25,6 +25,7 @@ export async function generateMetadata({
       languages: {
         en: `/products/category/${categorySlug}`,
         es: `/es/products/category/${categorySlug}`,
+        'x-default': `/products/category/${categorySlug}`,
       },
     },
   };

@@ -9,7 +9,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: page?.seoTitle ?? page?.title ?? t('es', 'privacyPolicyPageTitle'),
     description: page?.seoDescription ?? undefined,
-    alternates: { canonical: '/es/privacy-policy', languages: { en: '/privacy-policy', es: '/es/privacy-policy' } },
+    alternates: {
+      canonical: '/es/privacy-policy',
+      languages: { en: '/privacy-policy', es: '/es/privacy-policy', 'x-default': '/privacy-policy' },
+    },
   };
 }
 

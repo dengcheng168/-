@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
     // 从而盖掉根 layout 的 title.default 变成空标题，所以未配置时要整个 key 都不传
     ...(settings.defaultSeoTitle ? { title: settings.defaultSeoTitle } : {}),
     ...(settings.defaultSeoDescription ? { description: settings.defaultSeoDescription } : {}),
-    alternates: { canonical: '/' },
+    alternates: { canonical: '/', languages: { en: '/', es: '/es', 'x-default': '/' } },
   };
 }
 

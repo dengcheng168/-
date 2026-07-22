@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: page?.seoTitle ?? page?.title ?? 'OEM / ODM Services',
     description: page?.seoDescription ?? undefined,
-    alternates: { canonical: '/oem-odm' },
+    alternates: { canonical: '/oem-odm', languages: { en: '/oem-odm', es: '/es/oem-odm', 'x-default': '/oem-odm' } },
   };
 }
 

@@ -12,7 +12,7 @@ import { t } from '@/lib/i18n/site-strings';
 export const metadata: Metadata = {
   title: t('es', 'blogPageTitle'),
   description: t('es', 'blogPageDescription'),
-  alternates: { canonical: '/es/blog', languages: { en: '/blog', es: '/es/blog' } },
+  alternates: { canonical: '/es/blog', languages: { en: '/blog', es: '/es/blog', 'x-default': '/blog' } },
 };
 
 export default async function SpanishBlogListPage({
