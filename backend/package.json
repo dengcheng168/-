@@ -21,7 +21,7 @@
     "migrate:faq-translations": "tsx prisma/migrate-faq-translations.ts",
     "backfill:site-base-url": "tsx prisma/backfill-site-base-url.ts",
     "create-admin": "tsx scripts/create-admin.ts",
-    "test": "node --import tsx --test test/*.test.ts"
+    "test": "node --import tsx --import ./test/bootstrap.ts --test test/*.test.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.1",

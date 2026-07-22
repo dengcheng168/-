@@ -258,18 +258,24 @@ test('12b. revoking sessions (force logout) invalidates an existing valid JWT', 
 test('13. a real admin write action produces an audit log row', async () => {
   const app = await buildApp();
   const email = uniqueEmail('audit-writer');
+  const categorySlug = `audit-test-category-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  let categoryId: number | undefined;
   try {
     await createTestAdmin(app, { email, role: 'SUPER_ADMIN' });
     const { cookieHeader } = await loginCookie(app, email);
 
-    const category = await app.prisma.productCategory.findFirst();
-    assert.ok(category, '测试环境需要至少有一个产品分类种子数据');
+    // 测试跑在每个测试文件独立的隔离临时数据库里（见 test/bootstrap.ts），不能假设开发库里
+    // 那些真实产品分类种子数据存在，这里自己建一个够用的最小分类 fixture。
+    const category = await app.prisma.productCategory.create({
+      data: { name: 'Audit Test Category', slug: categorySlug },
+    });
+    categoryId = category.id;
 
     const createRes = await app.inject({
       method: 'POST',
       url: '/api/admin/products',
       headers: { cookie: cookieHeader! },
-      payload: { name: 'Audit Test Product', categoryId: category!.id, description: 'desc', mainImage: '/x.webp' },
+      payload: { name: 'Audit Test Product', categoryId: category.id, description: 'desc', mainImage: '/x.webp' },
     });
     assert.equal(createRes.statusCode, 200);
     const productId = createRes.json().data.id;
@@ -282,6 +288,9 @@ test('13. a real admin write action produces an audit log row', async () => {
     await app.prisma.product.deleteMany({ where: { id: productId } });
     await app.prisma.auditLog.deleteMany({ where: { entityId: String(productId) } });
   } finally {
+    if (categoryId !== undefined) {
+      await app.prisma.productCategory.deleteMany({ where: { id: categoryId } });
+    }
     await cleanupTestAdmin(app, email);
     await app.close();
   }

@@ -1,4 +1,4 @@
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { PrismaClient } from '@prisma/client';
 import { checkLoginLock, recordLoginAttempt, getRecentFailureCount } from '../src/modules/auth/auth.service.js';
@@ -6,6 +6,13 @@ import { checkLoginLock, recordLoginAttempt, getRecentFailureCount } from '../sr
 // 直接测服务函数、不走 HTTP——路由层还叠了一个 5次/分钟 的 IP 限流（@fastify/rate-limit），
 // 两层都在保护登录接口，但会互相干扰对方的精确断言，这里只关心 checkLoginLock 自己的三维度逻辑。
 const prisma = new PrismaClient();
+
+// 这个文件自己开的 PrismaClient，此前从没有 $disconnect() 过——在隔离临时库的模式下，
+// 这会导致这个测试文件对应的 SQLite 文件句柄一直不释放，测试进程结束后临时目录删不掉
+// （已实测复现：连续跑几次 npm test 偶尔会在系统临时目录下留下这个文件对应的残留）。
+after(async () => {
+  await prisma.$disconnect();
+});
 
 function testEmail(label: string): string {
   return `lockout-test-${label}-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`;
