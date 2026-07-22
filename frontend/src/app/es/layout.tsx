@@ -15,7 +15,7 @@ export default function SpanishSiteLayout({ children }: { children: React.ReactN
   return (
     <>
       <SetHtmlLang lang="es" />
-      <AnalyticsPixels />
+      <AnalyticsPixels locale="es" />
       <Header locale="es" />
       <main className="flex-1">{children}</main>
       <Footer locale="es" />

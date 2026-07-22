@@ -1,7 +1,8 @@
 import Script from 'next/script';
+import type { Locale } from '@/lib/i18n/locales';
 
 /** Meta 官方推荐的标准像素代码（JS + noscript 兜底），仅在配置了 metaPixelId 时才会被渲染 */
-export function MetaPixel({ pixelId }: { pixelId: string }) {
+export function MetaPixel({ pixelId, locale = 'en' }: { pixelId: string; locale?: Locale }) {
   return (
     <>
       <Script id="meta-pixel" strategy="afterInteractive">
@@ -15,7 +16,7 @@ export function MetaPixel({ pixelId }: { pixelId: string }) {
           s.parentNode.insertBefore(t,s)}(window, document,'script',
           'https://connect.facebook.net/en_US/fbevents.js');
           fbq('init', '${pixelId}');
-          fbq('track', 'PageView');
+          fbq('track', 'PageView', { page_language: '${locale}' });
         `}
       </Script>
       <noscript>

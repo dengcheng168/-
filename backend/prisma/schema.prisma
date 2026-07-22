@@ -305,6 +305,9 @@ model Inquiry {
   quantity    String?
   message     String?
   sourcePage  String?
+  // 提交询盘时所在页面的语言：'en' | 'es'。历史数据（本字段上线前提交的询盘）为 null，
+  // 前台一律按 'en' 处理——不是遗漏，是诚实反映"当时还没有西语站，这些询盘确实来自英文页面"。
+  pageLanguage String?
   status      String   @default("NEW")
   adminNotes  String?
   ipAddress   String?
@@ -315,6 +318,7 @@ model Inquiry {
   @@index([status])
   @@index([createdAt])
   @@index([email])
+  @@index([pageLanguage])
   @@map("inquiries")
 }
 

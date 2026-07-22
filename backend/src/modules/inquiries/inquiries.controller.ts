@@ -33,7 +33,7 @@ export async function publicCreateHandler(request: FastifyRequest, reply: Fastif
 }
 
 export async function adminListHandler(
-  request: FastifyRequest<{ Querystring: { status?: string; q?: string } }>,
+  request: FastifyRequest<{ Querystring: { status?: string; q?: string; sourcePage?: string; pageLanguage?: string } }>,
 ) {
   const query = paginationQuerySchema.parse(request.query);
   const filters = inquiryListQuerySchema.parse(request.query);
@@ -69,15 +69,18 @@ export async function adminDeleteHandler(request: FastifyRequest<{ Params: { id:
 }
 
 export async function adminExportCsvHandler(
-  request: FastifyRequest<{ Querystring: { status?: string } }>,
+  request: FastifyRequest<{ Querystring: { status?: string; pageLanguage?: string } }>,
   reply: FastifyReply,
 ) {
-  const { csv, count } = await exportInquiriesCsv(request.server.prisma, { status: request.query.status });
+  const { csv, count } = await exportInquiriesCsv(request.server.prisma, {
+    status: request.query.status,
+    pageLanguage: request.query.pageLanguage,
+  });
   await auditLogFromRequest(request.server.prisma, request, {
     action: 'inquiry.export',
     resourceType: 'inquiry',
-    summary: `导出询盘 CSV（状态：${request.query.status ?? '全部'}，共 ${count} 条）`,
-    metadata: { status: request.query.status ?? null, count },
+    summary: `导出询盘 CSV（状态：${request.query.status ?? '全部'}，语言：${request.query.pageLanguage ?? '全部'}，共 ${count} 条）`,
+    metadata: { status: request.query.status ?? null, pageLanguage: request.query.pageLanguage ?? null, count },
   });
   reply.header('Content-Type', 'text/csv; charset=utf-8');
   reply.header('Content-Disposition', 'attachment; filename="inquiries.csv"');

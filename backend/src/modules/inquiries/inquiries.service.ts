@@ -88,11 +88,12 @@ async function notifyNewInquiry(prisma: PrismaClient, inquiryId: number) {
 export async function listAdminInquiries(
   prisma: PrismaClient,
   query: PaginationQuery,
-  filters: { status?: string; q?: string; sourcePage?: string },
+  filters: { status?: string; q?: string; sourcePage?: string; pageLanguage?: string },
 ) {
   const where = {
     ...(filters.status ? { status: filters.status } : {}),
     ...(filters.sourcePage ? { sourcePage: filters.sourcePage } : {}),
+    ...(filters.pageLanguage ? { pageLanguage: filters.pageLanguage } : {}),
     ...(filters.q
       ? {
           OR: [
@@ -132,8 +133,11 @@ export function deleteInquiry(prisma: PrismaClient, id: number) {
   return prisma.inquiry.delete({ where: { id } });
 }
 
-export async function exportInquiriesCsv(prisma: PrismaClient, filters: { status?: string }) {
-  const where = filters.status ? { status: filters.status } : {};
+export async function exportInquiriesCsv(prisma: PrismaClient, filters: { status?: string; pageLanguage?: string }) {
+  const where = {
+    ...(filters.status ? { status: filters.status } : {}),
+    ...(filters.pageLanguage ? { pageLanguage: filters.pageLanguage } : {}),
+  };
   const items = await prisma.inquiry.findMany({ where, orderBy: { createdAt: 'desc' } });
 
   const csv = toCsv(items, [
@@ -147,6 +151,8 @@ export async function exportInquiriesCsv(prisma: PrismaClient, filters: { status
     { key: 'productName', header: 'Product' },
     { key: 'quantity', header: 'Quantity' },
     { key: 'message', header: 'Message' },
+    { key: 'sourcePage', header: 'Source Page' },
+    { key: 'pageLanguage', header: 'Language' },
     { key: 'status', header: 'Status' },
     { key: 'adminNotes', header: 'Admin Notes' },
     { key: 'createdAt', header: 'Submitted At' },

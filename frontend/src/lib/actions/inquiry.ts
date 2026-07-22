@@ -33,6 +33,9 @@ export async function submitInquiryAction(
     quantity: value('quantity'),
     message: value('message'),
     sourcePage: value('sourcePage'),
+    // 表单里同一个隐藏 locale 字段，既用来挑选上面的提示文案，也直接作为询盘的
+    // pageLanguage 落库——两者本来就是同一件事，没必要分别传两个字段
+    pageLanguage: locale,
     // 蜜罐字段：正常用户看不到，机器人脚本常会自动填写
     website: value('website'),
   };
