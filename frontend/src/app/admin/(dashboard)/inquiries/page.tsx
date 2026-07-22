@@ -10,6 +10,7 @@ interface Row {
   company: string | null;
   email: string;
   status: string;
+  pageLanguage: string | null;
   createdAt: string;
 }
 
@@ -22,23 +23,53 @@ const STATUS_OPTIONS = [
   { value: 'SPAM', label: '垃圾询盘' },
 ];
 
+const LANGUAGE_OPTIONS = [
+  { value: '', label: '全部语言' },
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Español' },
+];
+
+function languageLabel(pageLanguage: string | null) {
+  if (pageLanguage === 'es') return 'Español';
+  if (pageLanguage === 'en') return 'English';
+  return '—'; // 本字段上线前的历史询盘，没有记录语言
+}
+
 export default async function AdminInquiriesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; sourcePage?: string; pageLanguage?: string }>;
 }) {
-  const { status } = await searchParams;
-  const qs = status ? `&status=${status}` : '';
+  const { status, sourcePage, pageLanguage } = await searchParams;
+  const qs =
+    (status ? `&status=${encodeURIComponent(status)}` : '') +
+    (sourcePage ? `&sourcePage=${encodeURIComponent(sourcePage)}` : '') +
+    (pageLanguage ? `&pageLanguage=${encodeURIComponent(pageLanguage)}` : '');
   const { data } = await adminFetch<Row[]>(`/inquiries?pageSize=100${qs}`);
+
+  const exportParams = new URLSearchParams();
+  if (status) exportParams.set('status', status);
+  if (pageLanguage) exportParams.set('pageLanguage', pageLanguage);
+  const exportQs = exportParams.toString();
+
+  const buildFilterHref = (next: { status?: string; pageLanguage?: string }) => {
+    const params = new URLSearchParams();
+    const nextStatus = next.status ?? status;
+    const nextLanguage = next.pageLanguage ?? pageLanguage;
+    if (nextStatus) params.set('status', nextStatus);
+    if (nextLanguage) params.set('pageLanguage', nextLanguage);
+    const s = params.toString();
+    return s ? `/admin/inquiries?${s}` : '/admin/inquiries';
+  };
 
   return (
     <div>
       <PageHeader
         title="询盘管理"
-        description="查看并跟进客户询盘，支持按状态筛选与导出。"
+        description={sourcePage ? `来源页面「${sourcePage}」的询盘，共 ${data.length} 条。` : '查看并跟进客户询盘，支持按状态、语言筛选与导出。'}
         action={
           <a
-            href={`/api/admin/inquiries/export${status ? `?status=${status}` : ''}`}
+            href={`/api/admin/inquiries/export${exportQs ? `?${exportQs}` : ''}`}
             className="rounded-md border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F6F7F9]"
           >
             导出 CSV
@@ -50,7 +81,7 @@ export default async function AdminInquiriesPage({
         {STATUS_OPTIONS.map((opt) => (
           <Link
             key={opt.value}
-            href={opt.value ? `/admin/inquiries?status=${opt.value}` : '/admin/inquiries'}
+            href={buildFilterHref({ status: opt.value })}
             className={`rounded-full px-3 py-1.5 text-sm ${
               (status ?? '') === opt.value ? 'bg-navy-900 text-white' : 'bg-grey-100 text-grey-700 hover:bg-grey-200'
             }`}
@@ -60,16 +91,31 @@ export default async function AdminInquiriesPage({
         ))}
       </div>
 
+      <div className="mt-3 flex flex-wrap gap-2">
+        {LANGUAGE_OPTIONS.map((opt) => (
+          <Link
+            key={opt.value}
+            href={buildFilterHref({ pageLanguage: opt.value })}
+            className={`rounded-full px-3 py-1.5 text-sm ${
+              (pageLanguage ?? '') === opt.value ? 'bg-water-600 text-white' : 'bg-grey-100 text-grey-700 hover:bg-grey-200'
+            }`}
+          >
+            {opt.label}
+          </Link>
+        ))}
+      </div>
+
       <div className="mt-6">
         <AdminTable>
-          <AdminTableHead columns={['姓名', '公司', '邮箱', '状态', '提交时间', '操作']} />
+          <AdminTableHead columns={['姓名', '公司', '邮箱', '语言', '状态', '提交时间', '操作']} />
           <tbody>
-            {data.length === 0 && <AdminEmptyRow colSpan={6} />}
+            {data.length === 0 && <AdminEmptyRow colSpan={7} />}
             {data.map((row) => (
               <tr key={row.id} className="border-b border-grey-100 last:border-none">
                 <td className="px-4 py-3 font-medium text-navy-950">{row.name}</td>
                 <td className="px-4 py-3 text-grey-500">{row.company ?? '-'}</td>
                 <td className="px-4 py-3 text-grey-500">{row.email}</td>
+                <td className="px-4 py-3 text-grey-500">{languageLabel(row.pageLanguage)}</td>
                 <td className="px-4 py-3">
                   <StatusBadge status={row.status} />
                 </td>

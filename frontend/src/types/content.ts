@@ -27,4 +27,6 @@ export interface Page {
   seoTitle: string | null;
   seoDescription: string | null;
   ogImage: string | null;
+  heroImage: string | null;
+  heroImageMobile: string | null;
 }

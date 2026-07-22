@@ -15,10 +15,17 @@ interface InquiryDetail {
   quantity: string | null;
   message: string | null;
   sourcePage: string | null;
+  pageLanguage: string | null;
   status: string;
   adminNotes: string | null;
   ipAddress: string | null;
   createdAt: string;
+}
+
+function languageLabel(pageLanguage: string | null) {
+  if (pageLanguage === 'es') return 'Español';
+  if (pageLanguage === 'en') return 'English';
+  return '未记录（本字段上线前的历史询盘）';
 }
 
 export default async function AdminInquiryDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -39,6 +46,7 @@ export default async function AdminInquiryDetailPage({ params }: { params: Promi
     ['采购数量', inquiry.quantity],
     ['留言', inquiry.message],
     ['来源页面', inquiry.sourcePage],
+    ['来源语言', languageLabel(inquiry.pageLanguage)],
     ['提交 IP', inquiry.ipAddress],
     ['提交时间', new Date(inquiry.createdAt).toLocaleString('zh-CN')],
   ];

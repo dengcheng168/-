@@ -16,75 +16,157 @@ datasource db {
 // 注意：SQLite 连接器不支持原生 enum 类型，以下"枚举"字段统一用 String 存储，
 // 允许的取值在应用层（zod schema）校验。迁移到 PostgreSQL 后可选择改回原生 enum。
 //
-// AdminRole:     "SUPER_ADMIN" | "EDITOR"
+// AdminRole:     "SUPER_ADMIN" | "CONTENT_ADMIN" | "SALES"（原 "EDITOR" 已通过迁移改名为 "CONTENT_ADMIN"）
 // ProductStatus: "DRAFT" | "PUBLISHED"
 // PostStatus:    "DRAFT" | "PUBLISHED"
 // InquiryStatus: "NEW" | "CONTACTED" | "QUOTED" | "CLOSED" | "SPAM"
 
 model AdminUser {
-  id           Int       @id @default(autoincrement())
-  email        String    @unique
-  passwordHash String
-  name         String?
-  role         String    @default("SUPER_ADMIN")
-  isActive     Boolean   @default(true)
-  lastLoginAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  mediaUploads Media[]
+  id             Int        @id @default(autoincrement())
+  email          String     @unique
+  passwordHash   String
+  name           String?
+  role           String     @default("SUPER_ADMIN")
+  isActive       Boolean    @default(true)
+  lastLoginAt    DateTime?
+  // 手动解除锁定的时间戳：isLoginLocked() 只统计这个时间之后的失败记录，
+  // 不需要改写/删除 LoginLog 历史（审计记录要保持真实完整）
+  unlockedAt     DateTime?
+  // "强制使已有 Session 失效"：超级管理员点一下就把这个数字加一，
+  // 旧 JWT 里签发时记录的 sessionVersion 跟数据库里当前值对不上就会被 requireAuth 拒绝
+  sessionVersion Int        @default(1)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  mediaUploads   Media[]
+  auditLogs      AuditLog[]
 
   @@map("admin_users")
 }
 
+/// 前台公开页面访问记录：每次公开页面加载（英文站 + 西语站）插入一条，后台管理面板和登录页
+/// 不计入。只用于"数据概览"页展示访问总量这个简单指标，不做详细访客画像/来源分析，
+/// 所以不记 IP/UA——真要做更细的分析，应该接入专门的分析服务，而不是在这张表上垒字段。
+model PageView {
+  id        Int      @id @default(autoincrement())
+  path      String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("page_views")
+}
+
+/// 登录尝试记录（成功和失败都记，用于登录失败次数限制与登录记录页面）；
+/// 不关联 AdminUser——输错邮箱本身也是一次要记录的尝试，此时没有对应的真实用户
+model LoginLog {
+  id        Int      @id @default(autoincrement())
+  email     String
+  success   Boolean
+  reason    String? // 失败原因，例如 "INVALID_CREDENTIALS" | "LOCKED" | "INACTIVE"，绝不存密码
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+  @@index([ipAddress, createdAt])
+  @@index([email, ipAddress, createdAt])
+  @@map("login_logs")
+}
+
+/// 后台操作日志：记录谁在什么时间对哪个对象做了什么操作，全站统一通过 lib/audit-log.ts 的 auditLog() 写入
+model AuditLog {
+  id          Int        @id @default(autoincrement())
+  adminUserId Int?
+  adminUser   AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+  adminEmail  String // 冗余存一份邮箱，管理员账号被删除后日志仍可读
+  actorRole   String? // 操作时的角色快照
+  action      String // 例如 "product.create" / "admin_user.role_change"
+  entityType  String // 例如 "product" / "admin_user"
+  entityId    String? // 关联对象 id，字符串存储以兼容不同实体的主键类型
+  summary     String // 人类可读的一句话描述
+  result      String     @default("SUCCESS") // "SUCCESS" | "FAILURE"
+  beforeData  String? // JSON 字符串，已过滤敏感字段+截断
+  afterData   String? // JSON 字符串，已过滤敏感字段+截断
+  metadata    String? // JSON 字符串，额外上下文（不含敏感信息）
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime   @default(now())
+
+  @@index([createdAt])
+  @@index([adminUserId])
+  @@index([action])
+  @@map("audit_logs")
+}
+
 model ProductCategory {
-  id             Int       @id @default(autoincrement())
+  id             Int                          @id @default(autoincrement())
   name           String
-  slug           String    @unique
+  slug           String                       @unique
   description    String?
   image          String?
-  sortOrder      Int       @default(0)
-  published      Boolean   @default(true)
+  sortOrder      Int                          @default(0)
+  published      Boolean                      @default(true)
   seoTitle       String?
   seoDescription String?
   deletedAt      DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt      DateTime                     @default(now())
+  updatedAt      DateTime                     @updatedAt
   products       Product[]
+  translations   ProductCategoryTranslation[]
 
   @@index([published])
   @@index([sortOrder])
   @@map("product_categories")
 }
 
+model ProductCategoryTranslation {
+  id                Int             @id @default(autoincrement())
+  categoryId        Int
+  category          ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  locale            String
+  name              String?
+  description       String?
+  seoTitle          String?
+  seoDescription    String?
+  translationStatus String          @default("DRAFT")
+  updatedBy         Int?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([categoryId, locale])
+  @@index([locale])
+  @@map("product_category_translations")
+}
+
 model Product {
-  id               Int             @id @default(autoincrement())
+  id               Int                  @id @default(autoincrement())
   name             String
-  slug             String          @unique
-  sku              String?         @unique
+  slug             String               @unique
+  sku              String?              @unique
   categoryId       Int
-  category         ProductCategory @relation(fields: [categoryId], references: [id])
+  category         ProductCategory      @relation(fields: [categoryId], references: [id])
   shortDescription String?
   description      String // 富文本 HTML，保存前会做 sanitize
   mainImage        String
-  galleryImages    String          @default("[]") // JSON 字符串：[{url, alt}]（SQLite 无原生 Json 类型，应用层负责序列化）
-  specs            String          @default("[]") // JSON 字符串：[{label, value}]
-  features         String          @default("[]") // JSON 字符串：string[] 或 [{title, description}]
-  applications     String          @default("[]") // JSON 字符串：[{title, description, image}]
+  galleryImages    String               @default("[]") // JSON 字符串：[{url, alt}]（SQLite 无原生 Json 类型，应用层负责序列化）
+  specs            String               @default("[]") // JSON 字符串：[{label, value}]
+  features         String               @default("[]") // JSON 字符串：string[] 或 [{title, description}]
+  applications     String               @default("[]") // JSON 字符串：[{title, description, image}]
   packagingInfo    String?
   moq              String?
-  oemOdmSupport    Boolean         @default(true)
+  oemOdmSupport    Boolean              @default(true)
   specSheetUrl     String?
-  status           String          @default("DRAFT")
-  featured         Boolean         @default(false)
-  sortOrder        Int             @default(0)
+  status           String               @default("DRAFT")
+  featured         Boolean              @default(false)
+  sortOrder        Int                  @default(0)
   seoTitle         String?
   seoDescription   String?
   seoKeywords      String?
   ogImage          String?
   deletedAt        DateTime?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
   inquiries        Inquiry[]
+  translations     ProductTranslation[]
 
   @@index([categoryId])
   @@index([status])
@@ -93,19 +175,65 @@ model Product {
   @@map("products")
 }
 
+/// 产品的非英语翻译覆盖，只存文字字段——SKU/图片/数值/关联关系继续共用 Product 主记录。
+/// locale='es' 是当前唯一取值，value 为空视同"没有译文"，前台按 resolveLocalizedEntity 回退英文。
+model ProductTranslation {
+  id                Int      @id @default(autoincrement())
+  productId         Int
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  locale            String
+  name              String?
+  shortDescription  String?
+  description       String?
+  features          String? // JSON 字符串，结构同 Product.features
+  specs             String? // JSON 字符串，结构同 Product.specs（数值本身不译，只译 label）
+  applications      String? // JSON 字符串，结构同 Product.applications
+  packagingInfo     String?
+  moq               String?
+  seoTitle          String?
+  seoDescription    String?
+  seoKeywords       String?
+  translationStatus String   @default("DRAFT") // "DRAFT" | "PUBLISHED"，只有 PUBLISHED 会出现在公开接口
+  updatedBy         Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([productId, locale])
+  @@index([locale])
+  @@map("product_translations")
+}
+
 model BlogCategory {
-  id          Int        @id @default(autoincrement())
-  name        String
-  slug        String     @unique
-  description String?
-  sortOrder   Int        @default(0)
-  published   Boolean    @default(true)
-  deletedAt   DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  posts       BlogPost[]
+  id           Int                       @id @default(autoincrement())
+  name         String
+  slug         String                    @unique
+  description  String?
+  sortOrder    Int                       @default(0)
+  published    Boolean                   @default(true)
+  deletedAt    DateTime?
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  posts        BlogPost[]
+  translations BlogCategoryTranslation[]
 
   @@map("blog_categories")
+}
+
+model BlogCategoryTranslation {
+  id                Int          @id @default(autoincrement())
+  categoryId        Int
+  category          BlogCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  locale            String
+  name              String?
+  description       String?
+  translationStatus String       @default("DRAFT")
+  updatedBy         Int?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@unique([categoryId, locale])
+  @@index([locale])
+  @@map("blog_category_translations")
 }
 
 model BlogTag {
@@ -119,28 +247,50 @@ model BlogTag {
 }
 
 model BlogPost {
-  id             Int          @id @default(autoincrement())
+  id             Int                   @id @default(autoincrement())
   title          String
-  slug           String       @unique
+  slug           String                @unique
   excerpt        String?
   body           String // 富文本 HTML，保存前会做 sanitize
   coverImage     String?
   categoryId     Int
-  category       BlogCategory @relation(fields: [categoryId], references: [id])
-  authorName     String       @default("Admin")
-  status         String       @default("DRAFT")
+  category       BlogCategory          @relation(fields: [categoryId], references: [id])
+  authorName     String                @default("Admin")
+  status         String                @default("DRAFT")
   publishedAt    DateTime?
   seoTitle       String?
   seoDescription String?
   deletedAt      DateTime?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
   tags           BlogPostTag[]
+  translations   BlogPostTranslation[]
 
   @@index([categoryId])
   @@index([status])
   @@index([publishedAt])
   @@map("blog_posts")
+}
+
+/// 对应用户规范里的 "ArticleTranslation"——本项目文章模型叫 BlogPost，命名跟随现有模型
+model BlogPostTranslation {
+  id                Int      @id @default(autoincrement())
+  postId            Int
+  post              BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  locale            String
+  title             String?
+  excerpt           String?
+  body              String?
+  seoTitle          String?
+  seoDescription    String?
+  translationStatus String   @default("DRAFT")
+  updatedBy         Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([postId, locale])
+  @@index([locale])
+  @@map("blog_post_translations")
 }
 
 model BlogPostTag {
@@ -154,7 +304,7 @@ model BlogPostTag {
 }
 
 model Inquiry {
-  id          Int           @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   company     String?
   country     String?
@@ -162,26 +312,30 @@ model Inquiry {
   phone       String?
   whatsapp    String?
   productId   Int?
-  product     Product?      @relation(fields: [productId], references: [id])
+  product     Product? @relation(fields: [productId], references: [id])
   productName String? // 自由文本"感兴趣的产品"，产品未选中时的兜底
   quantity    String?
   message     String?
   sourcePage  String?
-  status      String        @default("NEW")
+  // 提交询盘时所在页面的语言：'en' | 'es'。历史数据（本字段上线前提交的询盘）为 null，
+  // 前台一律按 'en' 处理——不是遗漏，是诚实反映"当时还没有西语站，这些询盘确实来自英文页面"。
+  pageLanguage String?
+  status      String   @default("NEW")
   adminNotes  String?
   ipAddress   String?
   userAgent   String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([status])
   @@index([createdAt])
   @@index([email])
+  @@index([pageLanguage])
   @@map("inquiries")
 }
 
 model Certificate {
-  id               Int       @id @default(autoincrement())
+  id               Int                      @id @default(autoincrement())
   name             String
   certType         String? // "CE" | "RoHS" | "ISO" | "CB" | "FCC" | "Other"，仅作为可配置示例
   certNumber       String?
@@ -191,28 +345,68 @@ model Certificate {
   imageUrl         String
   pdfUrl           String?
   description      String?
-  sortOrder        Int       @default(0)
-  published        Boolean   @default(true)
+  sortOrder        Int                      @default(0)
+  published        Boolean                  @default(true)
   deletedAt        DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  translations     CertificateTranslation[]
 
   @@index([published])
   @@map("certificates")
 }
 
+/// certType/certNumber/issuingAuthority 是官方名称/编号，不翻译，只留 name/description
+model CertificateTranslation {
+  id                Int         @id @default(autoincrement())
+  certificateId     Int
+  certificate       Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  locale            String
+  name              String?
+  description       String?
+  translationStatus String      @default("DRAFT")
+  updatedBy         Int?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@unique([certificateId, locale])
+  @@index([locale])
+  @@map("certificate_translations")
+}
+
 model Faq {
-  id        Int      @id @default(autoincrement())
-  question  String
-  answer    String
-  category  String?
-  sortOrder Int      @default(0)
-  published Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int              @id @default(autoincrement())
+  question     String
+  answer       String
+  category     String?
+  sortOrder    Int              @default(0)
+  published    Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  translations FaqTranslation[]
 
   @@index([published])
   @@map("faqs")
+}
+
+/// 新增于 i18n 二期：之前 /es/faq 是靠通用 Translation 表的 faq.{id}.question/answer key 拼出来的，
+/// 现在跟其它实体统一走"后台 Español 标签页编辑同一条记录"的模式，改读这张表；
+/// 旧的 faq.* Translation 行不删除（不再被读取，但数据保留，零风险）
+model FaqTranslation {
+  id                Int      @id @default(autoincrement())
+  faqId             Int
+  faq               Faq      @relation(fields: [faqId], references: [id], onDelete: Cascade)
+  locale            String
+  question          String?
+  answer            String?
+  translationStatus String   @default("DRAFT")
+  updatedBy         Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([faqId, locale])
+  @@index([locale])
+  @@map("faq_translations")
 }
 
 model Media {
@@ -237,17 +431,44 @@ model Media {
 }
 
 model Page {
-  id             Int      @id @default(autoincrement())
-  slug           String   @unique // "about" | "factory" | "oem-odm" | "privacy-policy" | "terms-of-use" | "contact"
-  title          String
-  bodyHtml       String? // 叙述性正文（About/Privacy/Terms）
-  sections       String? // JSON 字符串：结构化区块（工厂数据、OEM流程步骤等，页面各异）
-  seoTitle       String?
-  seoDescription String?
-  ogImage        String?
-  updatedAt      DateTime @updatedAt
+  id              Int               @id @default(autoincrement())
+  slug            String            @unique // "about" | "factory" | "oem-odm" | "privacy-policy" | "terms-of-use" | "contact"
+  title           String
+  bodyHtml        String? // 叙述性正文（About/Privacy/Terms）
+  sections        String? // JSON 字符串：结构化区块（工厂数据、OEM流程步骤等，页面各异）
+  seoTitle        String?
+  seoDescription  String?
+  ogImage         String?
+  // 页面顶部（面包屑+标题+简介区域）的背景图，可选；不设置时该区域保持原来的纯白背景
+  heroImage       String?
+  // 同一区域的手机端专用背景图，可选；不设置则手机端也用 heroImage 兜底（跟首页 Banner 逻辑一致）
+  heroImageMobile String?
+  updatedAt       DateTime          @updatedAt
+  translations    PageTranslation[]
 
   @@map("pages")
+}
+
+/// sections 是整段 JSON 覆盖（工厂数据/OEM 流程步骤等结构因页面而异，不逐字段拆分翻译）；
+/// heroImage/heroImageMobile 继续共用英文 Page 主记录，不设西语专属图
+model PageTranslation {
+  id                Int      @id @default(autoincrement())
+  pageId            Int
+  page              Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  locale            String
+  title             String?
+  bodyHtml          String?
+  sections          String? // JSON 字符串，结构同 Page.sections，整段覆盖
+  seoTitle          String?
+  seoDescription    String?
+  translationStatus String   @default("DRAFT")
+  updatedBy         Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([pageId, locale])
+  @@index([locale])
+  @@map("page_translations")
 }
 
 model NavigationItem {
@@ -273,6 +494,7 @@ model SiteSetting {
   id                    Int      @id @default(1)
   companyName           String   @default("")
   companyLogoUrl        String?
+  faviconUrl            String?
   companyAddress        String?
   companyEmail          String?
   companyPhone          String?
@@ -309,9 +531,37 @@ model SiteSetting {
   partnerRegions        String   @default("[]") // JSON 字符串
   footerText            String?
   footerColumns         String? // JSON 字符串
+  // 页脚 Logo 下方的公司简介，独立于网站基础设置里的 companyAddress，管理员单独填写
+  footerCompanyIntro    String?
+  // 营销像素 ID：Meta/TikTok/Google 三个填了会真实在前台注入追踪脚本（见 frontend
+  // components/analytics），目前没有 Cookie Consent，脚本对所有访客无条件加载
+  metaPixelId           String?
+  tiktokPixelId         String?
+  googlePixelId         String?
+  // 正式站点根地址（Runtime Site Domain Configuration）：全站 canonical/hreflang/sitemap/
+  // robots/Open Graph/JSON-LD 生成绝对 URL 的主要事实源，替代构建时写死的
+  // NEXT_PUBLIC_SITE_URL。只存协议+域名，不存路径/query/hash，见 backend/src/lib/site-url.ts
+  // 的规范化与校验规则。为 null 时由运行时 SITE_URL 环境变量兜底（见
+  // frontend/src/lib/site/get-site-base-url.ts）。只有 SUPER_ADMIN 可以修改。
+  siteBaseUrl           String?
   updatedAt             DateTime @updatedAt
 
   @@map("site_settings")
+}
+
+/// 多语言译文：只存"非英文"覆盖，英文内容仍然是各自内容表里的原始字段。
+/// key 是带命名空间的字符串（如 "settings.heroHeadline" / "nav.3.label" / "faq.5.question"），
+/// value 为空字符串等同于"清除译文、回退显示英文原文"，不会真的插入一行空值。
+model Translation {
+  id        Int      @id @default(autoincrement())
+  locale    String // 目前只有 "es"，预留其它语言时直接扩展取值，无需改表结构
+  key       String
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@unique([locale, key])
+  @@index([locale])
+  @@map("translations")
 }
 
 model Redirect {

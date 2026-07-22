@@ -5,6 +5,7 @@ import { listCertificates, listFaqs } from '@/lib/api/content';
 import { listBlogPosts } from '@/lib/api/blog';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo/jsonld';
+import { getSiteUrl } from '@/lib/seo/site';
 import { HeroBanner } from '@/components/home/HeroBanner';
 import { CoreAdvantages } from '@/components/home/CoreAdvantages';
 import { ProductCategories } from '@/components/home/ProductCategories';
@@ -17,14 +18,16 @@ import { InquirySection } from '@/components/home/InquirySection';
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicSettings();
   return {
-    title: settings.defaultSeoTitle ?? undefined,
-    description: settings.defaultSeoDescription ?? undefined,
-    alternates: { canonical: '/' },
+    // title/description 显式设为 undefined 也会被 Next.js 当作"本段落定义了该字段"，
+    // 从而盖掉根 layout 的 title.default 变成空标题，所以未配置时要整个 key 都不传
+    ...(settings.defaultSeoTitle ? { title: settings.defaultSeoTitle } : {}),
+    ...(settings.defaultSeoDescription ? { description: settings.defaultSeoDescription } : {}),
+    alternates: { canonical: '/', languages: { en: '/', es: '/es', 'x-default': '/' } },
   };
 }
 
 export default async function HomePage() {
-  const [settings, categories, featuredProducts, certificates, latestPosts, faqs] =
+  const [settings, categories, featuredProducts, certificates, latestPosts, faqs, siteUrl] =
     await Promise.all([
       getPublicSettings(),
       listProductCategories(),
@@ -32,12 +35,13 @@ export default async function HomePage() {
       listCertificates(),
       listBlogPosts({ pageSize: 3 }),
       listFaqs(),
+      getSiteUrl(),
     ]);
 
   return (
     <>
-      <JsonLd data={organizationJsonLd(settings)} />
-      <JsonLd data={websiteJsonLd(settings)} />
+      <JsonLd data={organizationJsonLd(settings, siteUrl)} />
+      <JsonLd data={websiteJsonLd(settings, siteUrl)} />
 
       <HeroBanner settings={settings} />
       <CoreAdvantages items={settings.coreAdvantages} />

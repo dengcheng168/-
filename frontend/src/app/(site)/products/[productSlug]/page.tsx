@@ -12,6 +12,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { getProductBySlug } from '@/lib/api/products';
 import { getPublicSettings } from '@/lib/api/settings';
 import { productJsonLd, breadcrumbListJsonLd } from '@/lib/seo/jsonld';
+import { getSiteUrl } from '@/lib/seo/site';
 import { getWhatsappHref } from '@/lib/utils/whatsapp';
 
 export async function generateMetadata({
@@ -28,8 +29,18 @@ export async function generateMetadata({
     title: product.seoTitle ?? product.name,
     description: product.seoDescription ?? product.shortDescription ?? undefined,
     keywords: product.seoKeywords ?? undefined,
-    alternates: { canonical: `/products/${productSlug}` },
+    alternates: {
+      canonical: `/products/${productSlug}`,
+      languages: {
+        en: `/products/${productSlug}`,
+        es: `/es/products/${productSlug}`,
+        'x-default': `/products/${productSlug}`,
+      },
+    },
     openGraph: {
+      url: `/products/${productSlug}`,
+      locale: 'en',
+      alternateLocale: 'es',
       images: product.ogImage ? [product.ogImage] : [product.mainImage],
     },
   };
@@ -41,7 +52,7 @@ export default async function ProductDetailPage({
   params: Promise<{ productSlug: string }>;
 }) {
   const { productSlug } = await params;
-  const [result, settings] = await Promise.all([getProductBySlug(productSlug), getPublicSettings()]);
+  const [result, settings, siteUrl] = await Promise.all([getProductBySlug(productSlug), getPublicSettings(), getSiteUrl()]);
 
   if (!result) notFound();
   const { product, related } = result;
@@ -50,13 +61,16 @@ export default async function ProductDetailPage({
 
   return (
     <Container className="py-12">
-      <JsonLd data={productJsonLd(product)} />
+      <JsonLd data={productJsonLd(product, siteUrl)} />
       <JsonLd
-        data={breadcrumbListJsonLd([
-          { label: 'Home', href: '/' },
-          { label: 'Products', href: '/products' },
-          { label: product.name, href: `/products/${product.slug}` },
-        ])}
+        data={breadcrumbListJsonLd(
+          [
+            { label: 'Home', href: '/' },
+            { label: 'Products', href: '/products' },
+            { label: product.name, href: `/products/${product.slug}` },
+          ],
+          siteUrl,
+        )}
       />
 
       <Breadcrumbs

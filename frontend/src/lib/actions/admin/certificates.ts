@@ -1,10 +1,13 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { adminFetch } from '@/lib/api/admin-client';
 import { ApiError } from '@/lib/api/client';
 import type { AdminFormState } from './categories';
+import { saveTranslation, localeCacheTags, translationStatusFromForm } from './translations-shared';
+import type { TranslationFormState } from './translations-shared';
+import type { Locale } from '@/lib/i18n/locales';
 
 function textOrUndefined(formData: FormData, key: string): string | undefined {
   const v = formData.get(key);
@@ -33,6 +36,7 @@ export async function createCertificateAction(_prevState: AdminFormState, formDa
     return { message: err instanceof ApiError ? err.message : '创建失败' };
   }
   revalidatePath('/admin/certificates');
+  updateTag('certificates');
   redirect('/admin/certificates');
 }
 
@@ -47,6 +51,7 @@ export async function updateCertificateAction(
     return { message: err instanceof ApiError ? err.message : '保存失败' };
   }
   revalidatePath('/admin/certificates');
+  updateTag('certificates');
   redirect('/admin/certificates');
 }
 
@@ -54,4 +59,20 @@ export async function deleteCertificateAction(formData: FormData): Promise<void>
   const id = formData.get('id');
   await adminFetch(`/certificates/${id}`, { method: 'DELETE' });
   revalidatePath('/admin/certificates');
+  updateTag('certificates');
+}
+
+export async function updateCertificateTranslationAction(
+  id: number,
+  locale: Locale,
+  _prevState: TranslationFormState,
+  formData: FormData,
+): Promise<TranslationFormState> {
+  const payload = {
+    name: textOrUndefined(formData, 'name'),
+    description: textOrUndefined(formData, 'description'),
+    translationStatus: translationStatusFromForm(formData),
+  };
+  const tags = localeCacheTags('certificates', locale);
+  return saveTranslation(`/certificates/${id}/translations/${locale}`, payload, tags);
 }

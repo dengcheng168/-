@@ -1,4 +1,6 @@
 import type { FastifyInstance } from 'fastify';
+import { requireRole } from '../../middleware/require-role.js';
+import { CONTENT_ROLES } from '../../config/roles.js';
 import {
   publicListHandler,
   publicDetailHandler,
@@ -8,6 +10,8 @@ import {
   adminUpdateHandler,
   adminDeleteHandler,
   adminReorderHandler,
+  adminGetTranslationHandler,
+  adminUpsertTranslationHandler,
 } from './categories.controller.js';
 
 export async function publicCategoryRoutes(app: FastifyInstance) {
@@ -17,6 +21,7 @@ export async function publicCategoryRoutes(app: FastifyInstance) {
 
 export async function adminCategoryRoutes(app: FastifyInstance) {
   app.addHook('preHandler', app.authenticate);
+  app.addHook('preHandler', requireRole(CONTENT_ROLES));
 
   app.get('/product-categories', adminListHandler);
   app.post('/product-categories', adminCreateHandler);
@@ -24,4 +29,6 @@ export async function adminCategoryRoutes(app: FastifyInstance) {
   app.patch('/product-categories/:id', adminUpdateHandler);
   app.delete('/product-categories/:id', adminDeleteHandler);
   app.post('/product-categories/reorder', adminReorderHandler);
+  app.get('/product-categories/:id/translations/:locale', adminGetTranslationHandler);
+  app.patch('/product-categories/:id/translations/:locale', adminUpsertTranslationHandler);
 }

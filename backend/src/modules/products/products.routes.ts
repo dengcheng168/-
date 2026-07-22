@@ -1,4 +1,6 @@
 import type { FastifyInstance } from 'fastify';
+import { requireRole } from '../../middleware/require-role.js';
+import { CONTENT_ROLES } from '../../config/roles.js';
 import {
   publicListHandler,
   publicDetailHandler,
@@ -11,6 +13,8 @@ import {
   adminToggleFeaturedHandler,
   adminReorderHandler,
   adminBulkStatusHandler,
+  adminGetTranslationHandler,
+  adminUpsertTranslationHandler,
 } from './products.controller.js';
 
 export async function publicProductRoutes(app: FastifyInstance) {
@@ -20,6 +24,7 @@ export async function publicProductRoutes(app: FastifyInstance) {
 
 export async function adminProductRoutes(app: FastifyInstance) {
   app.addHook('preHandler', app.authenticate);
+  app.addHook('preHandler', requireRole(CONTENT_ROLES));
 
   app.get('/products', adminListHandler);
   app.post('/products', adminCreateHandler);
@@ -30,4 +35,6 @@ export async function adminProductRoutes(app: FastifyInstance) {
   app.patch('/products/:id/featured', adminToggleFeaturedHandler);
   app.post('/products/reorder', adminReorderHandler);
   app.post('/products/bulk-status', adminBulkStatusHandler);
+  app.get('/products/:id/translations/:locale', adminGetTranslationHandler);
+  app.patch('/products/:id/translations/:locale', adminUpsertTranslationHandler);
 }

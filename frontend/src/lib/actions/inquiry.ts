@@ -1,6 +1,9 @@
 'use server';
 
 import { apiFetch, ApiError } from '@/lib/api/client';
+import { t } from '@/lib/i18n/site-strings';
+import { isSupportedLocale } from '@/lib/i18n/locales';
+import type { Locale } from '@/lib/i18n/locales';
 
 export interface InquiryFormState {
   success?: boolean;
@@ -16,6 +19,9 @@ export async function submitInquiryAction(
     return typeof v === 'string' && v.trim() !== '' ? v.trim() : undefined;
   };
 
+  const rawLocale = value('locale');
+  const locale: Locale = rawLocale && isSupportedLocale(rawLocale) ? rawLocale : 'en';
+
   const payload = {
     name: value('name'),
     company: value('company'),
@@ -27,12 +33,15 @@ export async function submitInquiryAction(
     quantity: value('quantity'),
     message: value('message'),
     sourcePage: value('sourcePage'),
+    // 表单里同一个隐藏 locale 字段，既用来挑选上面的提示文案，也直接作为询盘的
+    // pageLanguage 落库——两者本来就是同一件事，没必要分别传两个字段
+    pageLanguage: locale,
     // 蜜罐字段：正常用户看不到，机器人脚本常会自动填写
     website: value('website'),
   };
 
   if (!payload.name || !payload.email) {
-    return { success: false, message: 'Name and email are required.' };
+    return { success: false, message: t(locale, 'formRequiredError') };
   }
 
   try {
@@ -40,11 +49,11 @@ export async function submitInquiryAction(
       method: 'POST',
       body: JSON.stringify(payload),
     });
-    return { success: true, message: "Thank you! We've received your inquiry and will get back to you soon." };
+    return { success: true, message: t(locale, 'formSuccessMessage') };
   } catch (err) {
     if (err instanceof ApiError) {
       return { success: false, message: err.message };
     }
-    return { success: false, message: 'Something went wrong. Please try again later.' };
+    return { success: false, message: t(locale, 'formGenericError') };
   }
 }

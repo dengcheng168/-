@@ -9,7 +9,7 @@ import { faqPageJsonLd } from '@/lib/seo/jsonld';
 export const metadata: Metadata = {
   title: 'FAQ',
   description: 'Frequently asked questions about our water purifier products and OEM/ODM services.',
-  alternates: { canonical: '/faq' },
+  alternates: { canonical: '/faq', languages: { en: '/faq', es: '/es/faq', 'x-default': '/faq' } },
 };
 
 export default async function FaqPage() {

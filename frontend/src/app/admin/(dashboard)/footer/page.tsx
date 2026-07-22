@@ -4,6 +4,7 @@ import { FooterForm } from './FooterForm';
 
 interface Settings {
   footerText: string | null;
+  footerCompanyIntro: string | null;
 }
 
 export default async function AdminFooterPage() {

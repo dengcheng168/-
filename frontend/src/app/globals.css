@@ -42,6 +42,110 @@
   --font-sans:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
     sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+
+  /*
+   * shadcn/ui 标准语义化 token 注册（仅供后台 /admin 使用，见下方 .admin-theme 作用域说明）。
+   * 这里只是把 token 名字登记成 Tailwind 工具类（bg-primary、text-muted-foreground 等），
+   * 具体取值不写在这里、也不写在 :root —— 前台从不使用这些类名，不会受影响。
+   */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/*
+ * 后台专用主题作用域：这些变量的取值只在 .admin-theme 子树内生效（CSS 自定义属性级联），
+ * 挂在 AdminShell 根节点上，前台页面树上不会出现这个类名，因此前台样式完全不受影响。
+ * .admin-theme.dark 是 next-themes 切到深色模式时追加的类（仅作用于后台）。
+ */
+.admin-theme {
+  --radius: 0.5rem;
+  --background: #f6f7f9;
+  --foreground: var(--color-navy-950);
+  --card: #ffffff;
+  --card-foreground: var(--color-navy-950);
+  --popover: #ffffff;
+  --popover-foreground: var(--color-navy-950);
+  --primary: var(--color-navy-950);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-grey-100);
+  --secondary-foreground: var(--color-navy-950);
+  --muted: var(--color-grey-50);
+  --muted-foreground: var(--color-grey-500);
+  --accent: var(--color-water-100);
+  --accent-foreground: var(--color-water-600);
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: var(--color-grey-200);
+  --input: var(--color-grey-200);
+  --ring: var(--color-water-500);
+  --sidebar: #ffffff;
+  --sidebar-foreground: var(--color-grey-700);
+  --sidebar-primary: var(--color-navy-950);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eef2ff;
+  --sidebar-accent-foreground: var(--color-navy-950);
+  --sidebar-border: var(--color-grey-200);
+  --sidebar-ring: var(--color-water-500);
+
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.admin-theme.dark {
+  --background: #0f1620;
+  --foreground: #e8edf3;
+  --card: #161f2c;
+  --card-foreground: #e8edf3;
+  --popover: #161f2c;
+  --popover-foreground: #e8edf3;
+  --primary: var(--color-water-500);
+  --primary-foreground: #0a2540;
+  --secondary: #1f2937;
+  --secondary-foreground: #e8edf3;
+  --muted: #1a2330;
+  --muted-foreground: #8a97a8;
+  --accent: #15364a;
+  --accent-foreground: #7fd0f2;
+  --destructive: #f87171;
+  --destructive-foreground: #1a0505;
+  --border: #253143;
+  --input: #253143;
+  --ring: var(--color-water-500);
+  --sidebar: #101826;
+  --sidebar-foreground: #c7d0db;
+  --sidebar-primary: var(--color-water-500);
+  --sidebar-primary-foreground: #0a2540;
+  --sidebar-accent: #1b2a3a;
+  --sidebar-accent-foreground: #e8edf3;
+  --sidebar-border: #212c3d;
+  --sidebar-ring: var(--color-water-500);
 }
 
 body {

@@ -9,6 +9,7 @@ export const seoSettingsSchema = z.object({
 export const contactSettingsSchema = z.object({
   companyName: z.string().optional(),
   companyLogoUrl: z.string().optional(),
+  faviconUrl: z.string().optional(),
   companyAddress: z.string().optional(),
   companyEmail: z.string().optional(),
   companyPhone: z.string().optional(),
@@ -59,10 +60,28 @@ export const homepageSettingsSchema = z.object({
 export const footerSettingsSchema = z.object({
   footerText: z.string().optional(),
   footerColumns: z.array(z.unknown()).optional(),
+  footerCompanyIntro: z.string().optional(),
 });
 
 export const turnstileSettingsSchema = z.object({
   turnstileEnabled: z.boolean().optional(),
   turnstileSiteKey: z.string().optional(),
   turnstileSecretKey: z.string().optional(),
+});
+
+/** Meta / TikTok / Google 三个像素填了 ID 会真实在前台注入追踪脚本，见各平台组件 */
+export const pixelSettingsSchema = z.object({
+  metaPixelId: z.string().optional(),
+  tiktokPixelId: z.string().optional(),
+  googlePixelId: z.string().optional(),
+});
+
+/**
+ * 这里只做"形状"校验（必须是字符串或 null），真正的域名格式规则（协议/路径/query/hash/
+ * localhost 等）在 settings.service.ts 的 updateSiteBaseUrl 里用 lib/site-url.ts 统一校验——
+ * 因为那部分规则依赖运行环境（生产/开发）判断是否放行 localhost，不是纯粹的 schema 形状问题。
+ * 传空字符串或 null 视为"清空覆盖，回退到运行时 SITE_URL"。
+ */
+export const siteDomainSettingsSchema = z.object({
+  siteBaseUrl: z.string().nullable(),
 });

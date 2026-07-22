@@ -19,7 +19,14 @@ export async function generateMetadata({
   return {
     title: result.category.seoTitle ?? result.category.name,
     description: result.category.seoDescription ?? result.category.description ?? undefined,
-    alternates: { canonical: `/products/category/${categorySlug}` },
+    alternates: {
+      canonical: `/products/category/${categorySlug}`,
+      languages: {
+        en: `/products/category/${categorySlug}`,
+        es: `/es/products/category/${categorySlug}`,
+        'x-default': `/products/category/${categorySlug}`,
+      },
+    },
   };
 }
 

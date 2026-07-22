@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ok, fail } from '../../lib/api-response.js';
 import { paginationQuerySchema } from '../../lib/pagination.js';
+import { auditLogFromRequest } from '../../lib/audit-log.js';
 import {
   listPublishedCategories,
   getPublishedCategoryBySlug,
@@ -10,12 +11,23 @@ import {
   updateCategory,
   softDeleteCategory,
   reorderCategories,
+  getCategoryTranslation,
+  upsertCategoryTranslation,
 } from './categories.service.js';
-import { createCategorySchema, updateCategorySchema, reorderSchema } from './categories.schema.js';
+import {
+  createCategorySchema,
+  updateCategorySchema,
+  reorderSchema,
+  categoryDetailQuerySchema,
+  upsertCategoryTranslationSchema,
+} from './categories.schema.js';
+import { localeParamSchema } from '../translations/translations.schema.js';
+import { attachProductTranslations, serializeProduct } from '../products/products.service.js';
 import { DEFAULT_PAGE_SIZE } from '../../config/constants.js';
 
-export async function publicListHandler(request: FastifyRequest) {
-  const items = await listPublishedCategories(request.server.prisma);
+export async function publicListHandler(request: FastifyRequest<{ Querystring: { locale?: string } }>) {
+  const { locale } = categoryDetailQuerySchema.parse(request.query);
+  const items = await listPublishedCategories(request.server.prisma, locale);
   return ok(items);
 }
 
@@ -23,17 +35,19 @@ export async function publicDetailHandler(
   request: FastifyRequest<{ Params: { slug: string }; Querystring: Record<string, string> }>,
   reply: FastifyReply,
 ) {
-  const category = await getPublishedCategoryBySlug(request.server.prisma, request.params.slug);
+  const { locale } = categoryDetailQuerySchema.parse(request.query);
+  const category = await getPublishedCategoryBySlug(request.server.prisma, request.params.slug, locale);
   if (!category) return reply.status(404).send(fail('分类不存在', 'NOT_FOUND'));
 
   const query = paginationQuerySchema.parse(request.query);
   const { skip, take } = { skip: (query.page - 1) * query.pageSize, take: query.pageSize };
   const where = { categoryId: category.id, status: 'PUBLISHED', deletedAt: null };
 
-  const [products, total] = await Promise.all([
+  const [rawProducts, total] = await Promise.all([
     request.server.prisma.product.findMany({ where, orderBy: { sortOrder: 'asc' }, skip, take }),
     request.server.prisma.product.count({ where }),
   ]);
+  const products = await attachProductTranslations(request.server.prisma, rawProducts.map(serializeProduct), locale);
 
   return ok(
     { category, products },
@@ -59,6 +73,13 @@ export async function adminDetailHandler(
 export async function adminCreateHandler(request: FastifyRequest) {
   const input = createCategorySchema.parse(request.body);
   const category = await createCategory(request.server.prisma, input);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'product_category.create',
+    resourceType: 'product_category',
+    resourceId: category.id,
+    summary: `创建产品分类 ${category.name}`,
+    after: { name: category.name, slug: category.slug, published: category.published },
+  });
   return ok(category);
 }
 
@@ -67,11 +88,25 @@ export async function adminUpdateHandler(
 ) {
   const input = updateCategorySchema.parse(request.body);
   const category = await updateCategory(request.server.prisma, Number(request.params.id), input);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'product_category.update',
+    resourceType: 'product_category',
+    resourceId: category.id,
+    summary: `更新产品分类 ${category.name}`,
+    after: { name: category.name, slug: category.slug, published: category.published },
+  });
   return ok(category);
 }
 
 export async function adminDeleteHandler(request: FastifyRequest<{ Params: { id: string } }>) {
-  await softDeleteCategory(request.server.prisma, Number(request.params.id));
+  const id = Number(request.params.id);
+  await softDeleteCategory(request.server.prisma, id);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'product_category.delete',
+    resourceType: 'product_category',
+    resourceId: id,
+    summary: `删除产品分类 #${id}`,
+  });
   return ok({ deleted: true });
 }
 
@@ -79,4 +114,29 @@ export async function adminReorderHandler(request: FastifyRequest) {
   const { items } = reorderSchema.parse(request.body);
   await reorderCategories(request.server.prisma, items);
   return ok({ reordered: true });
+}
+
+export async function adminGetTranslationHandler(
+  request: FastifyRequest<{ Params: { id: string; locale: string } }>,
+) {
+  const { locale } = localeParamSchema.parse({ locale: request.params.locale });
+  const translation = await getCategoryTranslation(request.server.prisma, Number(request.params.id), locale);
+  return ok(translation);
+}
+
+export async function adminUpsertTranslationHandler(
+  request: FastifyRequest<{ Params: { id: string; locale: string } }>,
+) {
+  const { locale } = localeParamSchema.parse({ locale: request.params.locale });
+  const input = upsertCategoryTranslationSchema.parse(request.body);
+  const categoryId = Number(request.params.id);
+  const translation = await upsertCategoryTranslation(request.server.prisma, categoryId, locale, input, request.user.sub);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'product_category.translation_update',
+    resourceType: 'product_category',
+    resourceId: categoryId,
+    summary: `更新产品分类 #${categoryId} 的 ${locale} 翻译（状态：${translation.translationStatus}）`,
+    after: { locale, translationStatus: translation.translationStatus },
+  });
+  return ok(translation);
 }

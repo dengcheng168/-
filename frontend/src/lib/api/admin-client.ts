@@ -28,7 +28,10 @@ export async function adminFetch<T>(
     ...init,
     cache: 'no-store',
     headers: {
-      'Content-Type': 'application/json',
+      // 只有真的带 body 才声明 JSON 类型——否则 Fastify 的 JSON body parser 会因为
+      // "有 Content-Type 但 body 为空" 直接 400，这曾经导致所有无 body 的 POST/DELETE
+      // 操作（解锁、强制下线、以及全站的删除按钮）在生产环境里静默失败。
+      ...(init.body ? { 'Content-Type': 'application/json' } : {}),
       ...(token ? { Cookie: `${ADMIN_COOKIE_NAME}=${token}` } : {}),
       ...init.headers,
     },

@@ -9,6 +9,7 @@ import { RelatedPosts } from '@/components/blog/RelatedPosts';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getBlogPostBySlug } from '@/lib/api/blog';
 import { articleJsonLd, breadcrumbListJsonLd } from '@/lib/seo/jsonld';
+import { getSiteUrl } from '@/lib/seo/site';
 import { extractHeadingsAndInjectIds } from '@/lib/utils/toc';
 
 export async function generateMetadata({
@@ -24,8 +25,11 @@ export async function generateMetadata({
   return {
     title: post.seoTitle ?? post.title,
     description: post.seoDescription ?? post.excerpt ?? undefined,
-    alternates: { canonical: `/blog/${postSlug}` },
-    openGraph: { images: post.coverImage ? [post.coverImage] : undefined },
+    alternates: {
+      canonical: `/blog/${postSlug}`,
+      languages: { en: `/blog/${postSlug}`, es: `/es/blog/${postSlug}`, 'x-default': `/blog/${postSlug}` },
+    },
+    openGraph: { url: `/blog/${postSlug}`, locale: 'en', alternateLocale: 'es', images: post.coverImage ? [post.coverImage] : undefined },
   };
 }
 
@@ -40,7 +44,7 @@ export default async function BlogDetailPage({
   params: Promise<{ postSlug: string }>;
 }) {
   const { postSlug } = await params;
-  const result = await getBlogPostBySlug(postSlug);
+  const [result, siteUrl] = await Promise.all([getBlogPostBySlug(postSlug), getSiteUrl()]);
   if (!result) notFound();
 
   const { post, related } = result;
@@ -48,13 +52,16 @@ export default async function BlogDetailPage({
 
   return (
     <Container className="py-12">
-      <JsonLd data={articleJsonLd(post)} />
+      <JsonLd data={articleJsonLd(post, siteUrl)} />
       <JsonLd
-        data={breadcrumbListJsonLd([
-          { label: 'Home', href: '/' },
-          { label: 'Blog', href: '/blog' },
-          { label: post.title, href: `/blog/${post.slug}` },
-        ])}
+        data={breadcrumbListJsonLd(
+          [
+            { label: 'Home', href: '/' },
+            { label: 'Blog', href: '/blog' },
+            { label: post.title, href: `/blog/${post.slug}` },
+          ],
+          siteUrl,
+        )}
       />
 
       <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Blog', href: '/blog' }, { label: post.title }]} />

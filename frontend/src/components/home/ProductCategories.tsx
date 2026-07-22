@@ -2,20 +2,23 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { t } from '@/lib/i18n/site-strings';
+import type { Locale } from '@/lib/i18n/locales';
+import { localeHref } from '@/lib/i18n/paths';
 import type { ProductCategory } from '@/types/product';
 
-export function ProductCategories({ categories }: { categories: ProductCategory[] }) {
+export function ProductCategories({ categories, locale = 'en' }: { categories: ProductCategory[]; locale?: Locale }) {
   if (categories.length === 0) return null;
 
   return (
     <section className="bg-grey-50 py-16">
       <Container>
-        <SectionHeading eyebrow="Our Range" title="Product Categories" />
+        <SectionHeading eyebrow={t(locale, 'sectionProductCategoriesEyebrow')} title={t(locale, 'sectionProductCategoriesTitle')} />
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((category) => (
             <Link
               key={category.id}
-              href={`/products/category/${category.slug}`}
+              href={localeHref(`/products/category/${category.slug}`, locale)}
               className="group relative flex h-56 items-end overflow-hidden rounded-lg bg-navy-900"
             >
               {category.image && (

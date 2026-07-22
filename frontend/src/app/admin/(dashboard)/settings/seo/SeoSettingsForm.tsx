@@ -22,7 +22,13 @@ export function SeoSettingsForm({ initialValues }: { initialValues: Values }) {
       <FormField label="默认 SEO 描述" htmlFor="defaultSeoDescription">
         <textarea id="defaultSeoDescription" name="defaultSeoDescription" rows={3} defaultValue={initialValues.defaultSeoDescription ?? ''} className={fieldInputClasses} />
       </FormField>
-      <ImageUploader name="defaultOgImage" label="默认 Open Graph 图片" defaultValue={initialValues.defaultOgImage} />
+      <ImageUploader
+        name="defaultOgImage"
+        label="默认 Open Graph 图片"
+        defaultValue={initialValues.defaultOgImage}
+        recommendedSize="建议 1200×630px（Open Graph 标准尺寸）"
+        aspectRatio={1200 / 630}
+      />
 
       {state.message && <p className={`text-sm ${state.success ? 'text-green-600' : 'text-red-600'}`}>{state.message}</p>}
       <button type="submit" disabled={pending} className="rounded-md bg-water-500 px-5 py-2.5 text-sm font-medium text-white hover:bg-water-600 disabled:opacity-60">

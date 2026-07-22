@@ -1,7 +1,8 @@
 import type { MetadataRoute } from 'next';
 import { getSiteUrl } from '@/lib/seo/site';
 
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const siteUrl = await getSiteUrl();
   return {
     rules: [
       {
@@ -10,6 +11,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/admin', '/search'],
       },
     ],
-    sitemap: `${getSiteUrl()}/sitemap.xml`,
+    sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

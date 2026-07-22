@@ -51,13 +51,14 @@ export default async function AdminDashboardPage() {
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
 
-  const [products, posts, inquiriesNew, allInquiries, allPosts, apiHealthy] = await Promise.all([
+  const [products, posts, inquiriesNew, allInquiries, allPosts, apiHealthy, pageViews] = await Promise.all([
     countOf('/products'),
     countOf('/blog'),
     countOf('/inquiries?status=NEW'),
     adminFetch<InquiryRow[]>('/inquiries?pageSize=100').then((r) => r.data).catch(() => [] as InquiryRow[]),
     adminFetch<BlogRow[]>('/blog?pageSize=100').then((r) => r.data).catch(() => [] as BlogRow[]),
     checkSiteHealth(),
+    countOf('/page-views'),
   ]);
 
   const monthlyInquiries = allInquiries.filter((i) => new Date(i.createdAt) >= monthStart).length;
@@ -69,6 +70,7 @@ export default async function AdminDashboardPage() {
     { label: '博客文章数量', value: posts, href: '/admin/blog' },
     { label: '未处理询盘', value: inquiriesNew, href: '/admin/inquiries?status=NEW' },
     { label: '本月询盘', value: monthlyInquiries, href: '/admin/inquiries' },
+    { label: '网站访问量', value: pageViews },
   ];
 
   const quickActions = [
@@ -82,7 +84,7 @@ export default async function AdminDashboardPage() {
     <div>
       <PageHeader title="数据概览" description="欢迎回来，这里是网站运营情况总览。" />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         {cards.map((card) => (
           <StatCard key={card.label} {...card} />
         ))}

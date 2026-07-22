@@ -86,7 +86,17 @@ export async function listAdminMedia(
     prisma.media.findMany({ where, orderBy: { createdAt: 'desc' }, ...toSkipTake(query) }),
     prisma.media.count({ where }),
   ]);
-  return { items, meta: buildPaginationMeta(query, total) };
+
+  // 只在当前这一页（默认最多 100 条）逐个查引用，跟 listUnusedMedia 用同一套 N+1 取舍逻辑，
+  // 复用同一个 findMediaUsage，不会出现"列表说使用中，点删除却真的删掉了"这种前后矛盾
+  const itemsWithUsage = await Promise.all(
+    items.map(async (item) => {
+      const usages = await findMediaUsage(prisma, item);
+      return { ...item, inUse: usages.length > 0, usageCount: usages.length };
+    }),
+  );
+
+  return { items: itemsWithUsage, meta: buildPaginationMeta(query, total) };
 }
 
 export function getMediaById(prisma: PrismaClient, id: number) {
@@ -97,20 +107,34 @@ export function updateMediaAltText(prisma: PrismaClient, id: number, altText: st
   return prisma.media.update({ where: { id }, data: { altText } });
 }
 
+export interface MediaUrls {
+  url: string;
+  webpUrl: string | null;
+  thumbnailUrl: string | null;
+}
+
 /**
- * 删除前检查该媒体文件是否仍被产品/文章/证书/首页设置等引用。
+ * 删除前检查该媒体文件是否仍被产品/文章/证书/页面/首页设置等引用。
  * 采用字符串匹配而非正式的关联表——在当前内容规模下足够简单可靠。
+ *
+ * 必须同时匹配 url/webpUrl/thumbnailUrl 三个字段——栅格图片上传后前端 ImageUploader 存的是
+ * webpUrl（见 saveUpload 的返回值和 frontend ImageUploader.tsx 的 `webpUrl || url` 逻辑），
+ * 只拿原始文件路径去比对的话，几乎所有转过 webp 的图片都会被判定成"从未被引用"，哪怕它正在
+ * 首页/产品页上用着——这里之前只传了 url 一个字段，是一个会导致误删正在使用的图片的真实 bug。
  */
-export async function findMediaUsage(prisma: PrismaClient, url: string) {
+export async function findMediaUsage(prisma: PrismaClient, media: MediaUrls) {
+  const urls = [media.url, media.webpUrl, media.thumbnailUrl].filter((u): u is string => !!u);
   const usages: { type: string; id: number; name: string }[] = [];
 
   const products = await prisma.product.findMany({
     where: {
       OR: [
-        { mainImage: url },
-        { ogImage: url },
-        { specSheetUrl: url },
-        { galleryImages: { contains: url } },
+        { mainImage: { in: urls } },
+        { ogImage: { in: urls } },
+        { specSheetUrl: { in: urls } },
+        // 富文本正文/相册里手动插入的图片（不是通过主图字段选的）也算在用，否则"未使用媒体"
+        // 会误判成可以安全删除，实际删了会导致正文/相册里出现失效图片
+        ...urls.flatMap((u) => [{ galleryImages: { contains: u } }, { description: { contains: u } }]),
       ],
     },
     select: { id: true, name: true },
@@ -118,31 +142,45 @@ export async function findMediaUsage(prisma: PrismaClient, url: string) {
   usages.push(...products.map((p) => ({ type: 'product', id: p.id, name: p.name })));
 
   const categories = await prisma.productCategory.findMany({
-    where: { image: url },
+    where: { image: { in: urls } },
     select: { id: true, name: true },
   });
   usages.push(...categories.map((c) => ({ type: 'product-category', id: c.id, name: c.name })));
 
   const posts = await prisma.blogPost.findMany({
-    where: { coverImage: url },
+    where: { OR: [{ coverImage: { in: urls } }, ...urls.map((u) => ({ body: { contains: u } }))] },
     select: { id: true, title: true },
   });
   usages.push(...posts.map((p) => ({ type: 'blog-post', id: p.id, name: p.title })));
 
   const certs = await prisma.certificate.findMany({
-    where: { OR: [{ imageUrl: url }, { pdfUrl: url }] },
+    where: { OR: [{ imageUrl: { in: urls } }, { pdfUrl: { in: urls } }] },
     select: { id: true, name: true },
   });
   usages.push(...certs.map((c) => ({ type: 'certificate', id: c.id, name: c.name })));
 
+  const pages = await prisma.page.findMany({
+    where: {
+      OR: [
+        { ogImage: { in: urls } },
+        { heroImage: { in: urls } },
+        { heroImageMobile: { in: urls } },
+        ...urls.flatMap((u) => [{ bodyHtml: { contains: u } }, { sections: { contains: u } }]),
+      ],
+    },
+    select: { id: true, title: true },
+  });
+  usages.push(...pages.map((p) => ({ type: 'page', id: p.id, name: p.title })));
+
   const settings = await prisma.siteSetting.findFirst({
     where: {
       OR: [
-        { heroDesktopImage: url },
-        { heroMobileImage: url },
-        { companyLogoUrl: url },
-        { defaultOgImage: url },
-        { factoryPhotos: { contains: url } },
+        { heroDesktopImage: { in: urls } },
+        { heroMobileImage: { in: urls } },
+        { companyLogoUrl: { in: urls } },
+        { faviconUrl: { in: urls } },
+        { defaultOgImage: { in: urls } },
+        ...urls.map((u) => ({ factoryPhotos: { contains: u } })),
       ],
     },
   });
@@ -151,11 +189,26 @@ export async function findMediaUsage(prisma: PrismaClient, url: string) {
   return usages;
 }
 
+/**
+ * 逐个媒体文件复用 findMediaUsage 判断是否被引用——当前媒体库规模（几十到几百个文件）下，
+ * N 次简单查询远比维护一张形式化的关联表划算，也保证跟"删除前检查"用的是同一套判断逻辑，
+ * 不会出现"未使用媒体页面说没人用，点删除却报错被占用"这种自相矛盾的情况。
+ */
+export async function listUnusedMedia(prisma: PrismaClient) {
+  const allMedia = await prisma.media.findMany({ orderBy: { createdAt: 'desc' } });
+  const unused = [];
+  for (const media of allMedia) {
+    const usages = await findMediaUsage(prisma, media);
+    if (usages.length === 0) unused.push(media);
+  }
+  return unused;
+}
+
 export async function deleteMedia(prisma: PrismaClient, id: number) {
   const media = await prisma.media.findUnique({ where: { id } });
   if (!media) return;
 
-  const usages = await findMediaUsage(prisma, media.url);
+  const usages = await findMediaUsage(prisma, media);
   if (usages.length > 0) {
     throw new MediaInUseError('该媒体文件仍被以下内容使用，无法删除');
   }

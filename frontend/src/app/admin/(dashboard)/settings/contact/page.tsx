@@ -5,6 +5,7 @@ import { ContactSettingsForm } from './ContactSettingsForm';
 interface Settings {
   companyName: string;
   companyLogoUrl: string | null;
+  faviconUrl: string | null;
   companyAddress: string | null;
   companyEmail: string | null;
   companyPhone: string | null;

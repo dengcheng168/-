@@ -4,6 +4,11 @@ import Image from 'next/image';
 import { getPublicSettings } from '@/lib/api/settings';
 import { getNavigation } from '@/lib/api/navigation';
 import { listProductCategories } from '@/lib/api/products';
+import { getTranslationMap } from '@/lib/api/translations';
+import { localizeNavigation } from '@/lib/i18n/content-overlay';
+import { t } from '@/lib/i18n/site-strings';
+import type { Locale } from '@/lib/i18n/locales';
+import { localeHref } from '@/lib/i18n/paths';
 import { Container } from '@/components/ui/Container';
 import { getWhatsappHref } from '@/lib/utils/whatsapp';
 import { SOCIAL_ICONS } from './SocialIcons';
@@ -39,12 +44,15 @@ function MapPinIcon(props: IconProps) {
   );
 }
 
-export async function Footer() {
-  const [settings, navItems, categories] = await Promise.all([
+export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
+  const [settings, rawNavItems, categories, translations] = await Promise.all([
     getPublicSettings(),
     getNavigation(),
-    listProductCategories(),
+    listProductCategories(locale),
+    locale === 'en' ? Promise.resolve({}) : getTranslationMap(locale),
   ]);
+  const localizedNavItems = locale === 'en' ? rawNavItems : localizeNavigation(rawNavItems, translations);
+  const navItems = localizedNavItems.map((item) => ({ ...item, url: localeHref(item.url, locale) }));
   const year = new Date().getFullYear();
   const activeSocialLinks = settings.socialLinks.filter((link) => link.enabled && link.url);
   const whatsappHref = getWhatsappHref(settings);
@@ -66,7 +74,9 @@ export async function Footer() {
           ) : (
             <div className="text-lg font-semibold text-white">{settings.companyName || 'Water Purifier Factory'}</div>
           )}
-          {settings.companyAddress && <p className="mt-3 text-sm leading-relaxed text-grey-200/80">{settings.companyAddress}</p>}
+          {settings.footerCompanyIntro && (
+            <p className="mt-3 text-sm leading-relaxed text-grey-200/80">{settings.footerCompanyIntro}</p>
+          )}
 
           {activeSocialLinks.length > 0 && (
             <div className="mt-5 flex flex-wrap items-center gap-2">
@@ -90,7 +100,7 @@ export async function Footer() {
         </div>
 
         <div>
-          <div className="text-sm font-semibold uppercase tracking-wide text-white/90">Quick Navigation</div>
+          <div className="text-sm font-semibold uppercase tracking-wide text-white/90">{t(locale, 'footerQuickNav')}</div>
           <ul className="mt-3 space-y-2">
             {navItems.map((item) => (
               <li key={item.id}>
@@ -107,11 +117,11 @@ export async function Footer() {
         </div>
 
         <div>
-          <div className="text-sm font-semibold uppercase tracking-wide text-white/90">Categories</div>
+          <div className="text-sm font-semibold uppercase tracking-wide text-white/90">{t(locale, 'footerCategories')}</div>
           <ul className="mt-3 space-y-2">
             {categories.map((category) => (
               <li key={category.id}>
-                <Link href={`/products/category/${category.slug}`} className="flex items-center gap-1.5 text-sm text-grey-200/80 hover:text-white">
+                <Link href={localeHref(`/products/category/${category.slug}`, locale)} className="flex items-center gap-1.5 text-sm text-grey-200/80 hover:text-white">
                   <span className="text-water-500">&gt;</span> {category.name}
                 </Link>
               </li>
@@ -120,7 +130,7 @@ export async function Footer() {
         </div>
 
         <div>
-          <div className="text-sm font-semibold uppercase tracking-wide text-white/90">Contact Us</div>
+          <div className="text-sm font-semibold uppercase tracking-wide text-white/90">{t(locale, 'footerContactUs')}</div>
           <ul className="mt-4 space-y-4">
             {settings.companyPhone && (
               <li className="flex items-start gap-3">
@@ -128,7 +138,7 @@ export async function Footer() {
                   <PhoneIcon className="h-4 w-4" />
                 </span>
                 <div>
-                  <div className="text-xs text-grey-200/60">Phone</div>
+                  <div className="text-xs text-grey-200/60">{t(locale, 'footerPhone')}</div>
                   <a href={`tel:${settings.companyPhone}`} className="text-sm font-medium text-white hover:text-water-400">
                     {settings.companyPhone}
                   </a>
@@ -141,7 +151,7 @@ export async function Footer() {
                   <MailIcon className="h-4 w-4" />
                 </span>
                 <div>
-                  <div className="text-xs text-grey-200/60">Email</div>
+                  <div className="text-xs text-grey-200/60">{t(locale, 'footerEmail')}</div>
                   <a href={`mailto:${settings.companyEmail}`} className="text-sm font-medium text-white hover:text-water-400">
                     {settings.companyEmail}
                   </a>
@@ -154,7 +164,7 @@ export async function Footer() {
                   <MapPinIcon className="h-4 w-4" />
                 </span>
                 <div>
-                  <div className="text-xs text-grey-200/60">Address</div>
+                  <div className="text-xs text-grey-200/60">{t(locale, 'footerAddress')}</div>
                   <div className="text-sm font-medium text-white">{settings.companyAddress}</div>
                 </div>
               </li>
@@ -165,16 +175,16 @@ export async function Footer() {
 
       <div className="border-t border-white/10 py-4">
         <Container className="flex flex-col items-center justify-between gap-3 text-xs text-grey-200/60 sm:flex-row">
-          <p>{settings.footerText || `© ${year} ${settings.companyName || 'Water Purifier Factory'}. All rights reserved.`}</p>
+          <p>{settings.footerText || `© ${year} ${settings.companyName || 'Water Purifier Factory'}. ${t(locale, 'footerRightsReserved')}`}</p>
           <div className="flex items-center gap-4">
-            <Link href="/privacy-policy" className="hover:text-white">
-              Privacy Policy
+            <Link href={localeHref('/privacy-policy', locale)} className="hover:text-white">
+              {t(locale, 'footerPrivacyPolicy')}
             </Link>
-            <Link href="/terms-of-use" className="hover:text-white">
-              Terms of Use
+            <Link href={localeHref('/terms-of-use', locale)} className="hover:text-white">
+              {t(locale, 'footerTermsOfUse')}
             </Link>
-            <Link href="/contact" className="hover:text-white">
-              Contact Us
+            <Link href={localeHref('/contact', locale)} className="hover:text-white">
+              {t(locale, 'footerContactUs')}
             </Link>
           </div>
         </Container>

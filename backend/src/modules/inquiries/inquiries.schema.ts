@@ -12,6 +12,8 @@ export const createInquirySchema = z.object({
   quantity: z.string().optional(),
   message: z.string().optional(),
   sourcePage: z.string().optional(),
+  // 提交询盘时所在页面的语言，前台隐藏字段传入；省略时（旧客户端/直接调用 API）视为英文
+  pageLanguage: z.string().optional(),
   turnstileToken: z.string().optional(),
   // 蜜罐字段：正常用户看不到该输入框，机器人脚本通常会自动填写，一旦有值即视为垃圾提交（在 service 层判断，不在此处强制校验）
   website: z.string().optional(),
@@ -25,6 +27,8 @@ export const updateInquirySchema = z.object({
 export const inquiryListQuerySchema = z.object({
   status: z.enum(['NEW', 'CONTACTED', 'QUOTED', 'CLOSED', 'SPAM']).optional(),
   q: z.string().optional(),
+  sourcePage: z.string().optional(),
+  pageLanguage: z.string().optional(),
 });
 
 export type CreateInquiryInput = z.infer<typeof createInquirySchema>;

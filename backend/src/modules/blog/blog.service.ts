@@ -2,7 +2,8 @@ import type { PrismaClient, Prisma } from '@prisma/client';
 import { generateUniqueSlug } from '../../lib/slugify.js';
 import { toSkipTake, buildPaginationMeta, type PaginationQuery } from '../../lib/pagination.js';
 import { sanitizeRichText } from '../../lib/sanitize.js';
-import type { CreateBlogPostInput, UpdateBlogPostInput } from './blog.schema.js';
+import { attachNestedBlogCategoryTranslations } from '../../lib/nested-category.js';
+import type { CreateBlogPostInput, UpdateBlogPostInput, UpsertBlogPostTranslationInput } from './blog.schema.js';
 
 const includeRelations = {
   category: true,
@@ -14,10 +15,24 @@ function serializePost<T extends { tags: { tag: unknown }[] }>(post: T) {
   return { ...rest, tags: tags.map((t) => t.tag) };
 }
 
+/** 同 products 模块的 attachTranslations——只在传了 locale 才查一次批量翻译 */
+async function attachPostTranslations<T extends { id: number }>(
+  prisma: PrismaClient,
+  items: T[],
+  locale: string | undefined,
+) {
+  if (!locale || items.length === 0) return items;
+  const rows = await prisma.blogPostTranslation.findMany({
+    where: { postId: { in: items.map((i) => i.id) }, locale, translationStatus: 'PUBLISHED' },
+  });
+  const byId = new Map(rows.map((r) => [r.postId, r]));
+  return items.map((item) => ({ ...item, translation: byId.get(item.id) ?? null }));
+}
+
 export async function listPublicPosts(
   prisma: PrismaClient,
   query: PaginationQuery,
-  filters: { categorySlug?: string; tagSlug?: string; q?: string },
+  filters: { categorySlug?: string; tagSlug?: string; q?: string; locale?: string },
 ) {
   const where: Prisma.BlogPostWhereInput = {
     status: 'PUBLISHED',
@@ -37,10 +52,14 @@ export async function listPublicPosts(
     prisma.blogPost.count({ where }),
   ]);
 
-  return { items: items.map(serializePost), meta: buildPaginationMeta(query, total) };
+  const withOwnTranslation = await attachPostTranslations(prisma, items.map(serializePost), filters.locale);
+  return {
+    items: await attachNestedBlogCategoryTranslations(prisma, withOwnTranslation, filters.locale),
+    meta: buildPaginationMeta(query, total),
+  };
 }
 
-export async function getPublicPostBySlug(prisma: PrismaClient, slug: string) {
+export async function getPublicPostBySlug(prisma: PrismaClient, slug: string, locale?: string) {
   const post = await prisma.blogPost.findFirst({
     where: { slug, status: 'PUBLISHED', deletedAt: null },
     include: includeRelations,
@@ -54,7 +73,19 @@ export async function getPublicPostBySlug(prisma: PrismaClient, slug: string) {
     take: 3,
   });
 
-  return { post: serializePost(post), related: related.map(serializePost) };
+  const localizedPosts = await attachPostTranslations(prisma, [serializePost(post)], locale);
+  const localizedRelated = await attachPostTranslations(prisma, related.map(serializePost), locale);
+
+  const [postsWithCategory, relatedWithCategory] = await Promise.all([
+    attachNestedBlogCategoryTranslations(prisma, localizedPosts, locale),
+    attachNestedBlogCategoryTranslations(prisma, localizedRelated, locale),
+  ]);
+
+  return {
+    // localizedPosts 由 [serializePost(post)] 生成，长度恒为 1，这里安全非空断言
+    post: postsWithCategory[0]!,
+    related: relatedWithCategory,
+  };
 }
 
 export async function listAdminPosts(
@@ -139,5 +170,29 @@ export function updatePostStatus(prisma: PrismaClient, id: number, status: strin
   return prisma.blogPost.update({
     where: { id },
     data: { status, ...(status === 'PUBLISHED' ? { publishedAt: new Date() } : {}) },
+  });
+}
+
+export function getPostTranslation(prisma: PrismaClient, postId: number, locale: string) {
+  return prisma.blogPostTranslation.findUnique({ where: { postId_locale: { postId, locale } } });
+}
+
+export function upsertPostTranslation(
+  prisma: PrismaClient,
+  postId: number,
+  locale: string,
+  input: UpsertBlogPostTranslationInput,
+  updatedBy?: number,
+) {
+  const { body, ...rest } = input;
+  const data = {
+    ...rest,
+    ...(body !== undefined ? { body: sanitizeRichText(body) } : {}),
+    updatedBy,
+  };
+  return prisma.blogPostTranslation.upsert({
+    where: { postId_locale: { postId, locale } },
+    create: { postId, locale, ...data },
+    update: data,
   });
 }

@@ -12,7 +12,16 @@ export async function generateMetadata({
   params: Promise<{ categorySlug: string }>;
 }): Promise<Metadata> {
   const { categorySlug } = await params;
-  return { alternates: { canonical: `/blog/category/${categorySlug}` } };
+  return {
+    alternates: {
+      canonical: `/blog/category/${categorySlug}`,
+      languages: {
+        en: `/blog/category/${categorySlug}`,
+        es: `/es/blog/category/${categorySlug}`,
+        'x-default': `/blog/category/${categorySlug}`,
+      },
+    },
+  };
 }
 
 export default async function BlogCategoryPage({

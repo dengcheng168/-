@@ -26,13 +26,20 @@ import { publicSettingsRoutes, adminSettingsRoutes } from './modules/settings/se
 import { adminRedirectRoutes } from './modules/redirects/redirects.routes.js';
 import { publicInquiryRoutes, adminInquiryRoutes } from './modules/inquiries/inquiries.routes.js';
 import { publicSearchRoutes } from './modules/search/search.routes.js';
+import { publicTranslationRoutes, adminTranslationRoutes } from './modules/translations/translations.routes.js';
 import { adminAccountRoutes } from './modules/account/account.routes.js';
 import { adminSystemRoutes } from './modules/system/system.routes.js';
+import { adminAuditRoutes } from './modules/audit/audit.routes.js';
+import { adminUserRoutes } from './modules/admin-users/admin-users.routes.js';
+import { publicPageViewRoutes, adminPageViewRoutes } from './modules/page-views/page-views.routes.js';
+import { env } from './config/env.js';
 
 export async function buildApp() {
   const app = Fastify({
     loggerInstance: logger,
-    trustProxy: true,
+    // 只信任配置里明确列出的反向代理地址段来读 X-Forwarded-For，不是无条件信任所有请求头
+    // （见 config/env.ts 的 TRUST_PROXY 说明）——否则攻击者可以直接伪造这个头绕过按 IP 的限流/锁定。
+    trustProxy: env.TRUST_PROXY,
     // 关闭 Fastify 内置的每请求默认日志（incoming request / request completed 两行），
     // 改用 middleware/request-logger.ts 输出的单行结构化日志。
     // Fastify 5 中该选项仍可用（会打印 deprecation 提示），Fastify 6 移除后需改用 logController。
@@ -64,6 +71,8 @@ export async function buildApp() {
   await app.register(publicSettingsRoutes, { prefix: API_PREFIX });
   await app.register(publicInquiryRoutes, { prefix: API_PREFIX });
   await app.register(publicSearchRoutes, { prefix: API_PREFIX });
+  await app.register(publicTranslationRoutes, { prefix: API_PREFIX });
+  await app.register(publicPageViewRoutes, { prefix: API_PREFIX });
 
   await app.register(adminCategoryRoutes, { prefix: ADMIN_API_PREFIX });
   await app.register(adminProductRoutes, { prefix: ADMIN_API_PREFIX });
@@ -80,6 +89,10 @@ export async function buildApp() {
   await app.register(adminInquiryRoutes, { prefix: ADMIN_API_PREFIX });
   await app.register(adminAccountRoutes, { prefix: ADMIN_API_PREFIX });
   await app.register(adminSystemRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminAuditRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminUserRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminTranslationRoutes, { prefix: ADMIN_API_PREFIX });
+  await app.register(adminPageViewRoutes, { prefix: ADMIN_API_PREFIX });
 
   return app;
 }

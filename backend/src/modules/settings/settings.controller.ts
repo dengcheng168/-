@@ -1,7 +1,9 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ok, fail } from '../../lib/api-response.js';
-import { getFullSettings, getPublicSettings, patchSettings } from './settings.service.js';
+import { auditLogFromRequest } from '../../lib/audit-log.js';
+import { getFullSettings, getPublicSettings, patchSettings, updateSiteBaseUrl } from './settings.service.js';
 import { verifySmtpConnection } from '../../lib/mailer.js';
+import { revalidateSiteConfig } from '../../lib/revalidate-frontend.js';
 import {
   seoSettingsSchema,
   contactSettingsSchema,
@@ -11,6 +13,8 @@ import {
   homepageSettingsSchema,
   footerSettingsSchema,
   turnstileSettingsSchema,
+  pixelSettingsSchema,
+  siteDomainSettingsSchema,
 } from './settings.schema.js';
 
 export async function publicSettingsHandler(request: FastifyRequest) {
@@ -21,21 +25,89 @@ export async function adminGetSettingsHandler(request: FastifyRequest) {
   return ok(await getFullSettings(request.server.prisma));
 }
 
-function makePatchHandler(schema: { parse: (input: unknown) => Record<string, unknown> }) {
+function makePatchHandler(
+  schema: { parse: (input: unknown) => Record<string, unknown> },
+  action: string,
+  summary: string,
+  buildAfter: (input: Record<string, unknown>) => Record<string, unknown> = (input) => input,
+) {
   return async (request: FastifyRequest) => {
     const input = schema.parse(request.body);
-    return ok(await patchSettings(request.server.prisma, input));
+    const settings = await patchSettings(request.server.prisma, input);
+    await auditLogFromRequest(request.server.prisma, request, {
+      action,
+      resourceType: 'settings',
+      resourceId: 1,
+      summary,
+      after: buildAfter(input),
+    });
+    return ok(settings);
   };
 }
 
-export const adminPatchSeoHandler = makePatchHandler(seoSettingsSchema);
-export const adminPatchContactHandler = makePatchHandler(contactSettingsSchema);
-export const adminPatchSocialHandler = makePatchHandler(socialSettingsSchema);
-export const adminPatchWhatsappHandler = makePatchHandler(whatsappSettingsSchema);
-export const adminPatchSmtpHandler = makePatchHandler(smtpSettingsSchema);
-export const adminPatchHomepageHandler = makePatchHandler(homepageSettingsSchema);
-export const adminPatchFooterHandler = makePatchHandler(footerSettingsSchema);
-export const adminPatchTurnstileHandler = makePatchHandler(turnstileSettingsSchema);
+/** SMTP 密码绝不能出现在日志里，即使 audit-log 底层也会做敏感字段过滤，这里仍然显式剔除，双重保险 */
+function omitSmtpPassword(input: Record<string, unknown>): Record<string, unknown> {
+  const { smtpPassword: _smtpPassword, ...rest } = input;
+  return rest;
+}
+
+/** Turnstile secret key 同理，绝不写入日志 */
+function omitTurnstileSecretKey(input: Record<string, unknown>): Record<string, unknown> {
+  const { turnstileSecretKey: _turnstileSecretKey, ...rest } = input;
+  return rest;
+}
+
+export const adminPatchSeoHandler = makePatchHandler(seoSettingsSchema, 'settings.seo_update', '更新 SEO 设置');
+export const adminPatchContactHandler = makePatchHandler(contactSettingsSchema, 'settings.contact_update', '更新联系方式设置');
+export const adminPatchSocialHandler = makePatchHandler(socialSettingsSchema, 'settings.social_update', '更新社交媒体设置');
+export const adminPatchWhatsappHandler = makePatchHandler(whatsappSettingsSchema, 'settings.whatsapp_update', '更新 WhatsApp 设置');
+export const adminPatchSmtpHandler = makePatchHandler(
+  smtpSettingsSchema,
+  'settings.smtp_update',
+  '更新 SMTP 设置',
+  omitSmtpPassword,
+);
+export const adminPatchHomepageHandler = makePatchHandler(homepageSettingsSchema, 'settings.homepage_update', '更新首页设置');
+export const adminPatchFooterHandler = makePatchHandler(footerSettingsSchema, 'settings.footer_update', '更新页脚设置');
+export const adminPatchTurnstileHandler = makePatchHandler(
+  turnstileSettingsSchema,
+  'settings.turnstile_update',
+  '更新 Turnstile 人机验证设置',
+  omitTurnstileSecretKey,
+);
+export const adminPatchPixelsHandler = makePatchHandler(pixelSettingsSchema, 'settings.pixels_update', '更新营销像素 ID 设置');
+
+/**
+ * 独立于 makePatchHandler：这里的校验规则（协议/路径/query/hash/localhost）依赖运行环境，
+ * 不是简单的 zod 形状校验，失败时要返回 400 而不是静默忽略；成功后还要触发前端缓存刷新，
+ * 刷新失败只作为警告随保存结果一起返回，不影响域名本身已经写入数据库这件事。
+ */
+export async function adminPatchSiteDomainHandler(request: FastifyRequest, reply: FastifyReply) {
+  const input = siteDomainSettingsSchema.parse(request.body);
+  const result = await updateSiteBaseUrl(request.server.prisma, input.siteBaseUrl);
+
+  if (!result.ok) {
+    return reply.status(400).send(fail(result.error ?? '域名格式不正确', 'INVALID_SITE_BASE_URL'));
+  }
+
+  const revalidateResult = await revalidateSiteConfig();
+
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'settings.site_domain_update',
+    resourceType: 'settings',
+    resourceId: 1,
+    summary: `更新正式站点域名：${result.previousValue ?? '(未设置)'} -> ${result.newValue ?? '(已清空)'}`,
+    before: { siteBaseUrl: result.previousValue },
+    after: { siteBaseUrl: result.newValue },
+    metadata: { cacheRefreshed: revalidateResult.ok, cacheRefreshMessage: revalidateResult.message },
+  });
+
+  return ok({
+    ...result.settings,
+    cacheRefreshed: revalidateResult.ok,
+    cacheRefreshWarning: revalidateResult.ok ? undefined : (revalidateResult.message ?? '前端缓存刷新失败，可稍后手动重试'),
+  });
+}
 
 export async function adminTestSmtpHandler(request: FastifyRequest, reply: FastifyReply) {
   const settings = await getFullSettings(request.server.prisma);

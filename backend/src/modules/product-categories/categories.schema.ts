@@ -1,4 +1,19 @@
 import { z } from 'zod';
+import { SUPPORTED_LOCALES } from '../translations/translations.schema.js';
+
+export const categoryDetailQuerySchema = z.object({
+  locale: z.enum(SUPPORTED_LOCALES).optional(),
+});
+
+export const upsertCategoryTranslationSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  seoTitle: z.string().optional(),
+  seoDescription: z.string().optional(),
+  translationStatus: z.enum(['DRAFT', 'PUBLISHED']).optional(),
+});
+
+export type UpsertCategoryTranslationInput = z.infer<typeof upsertCategoryTranslationSchema>;
 
 export const createCategorySchema = z.object({
   name: z.string().min(1, '名称不能为空'),

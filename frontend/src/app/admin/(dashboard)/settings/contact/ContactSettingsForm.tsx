@@ -8,6 +8,7 @@ import { updateContactSettingsAction } from '@/lib/actions/admin/settings';
 interface Values {
   companyName: string;
   companyLogoUrl: string | null;
+  faviconUrl: string | null;
   companyAddress: string | null;
   companyEmail: string | null;
   companyPhone: string | null;
@@ -21,7 +22,19 @@ export function ContactSettingsForm({ initialValues }: { initialValues: Values }
       <FormField label="公司名称" htmlFor="companyName">
         <input id="companyName" name="companyName" defaultValue={initialValues.companyName} className={fieldInputClasses} />
       </FormField>
-      <ImageUploader name="companyLogoUrl" label="公司 Logo" defaultValue={initialValues.companyLogoUrl} />
+      <ImageUploader
+        name="companyLogoUrl"
+        label="公司 Logo"
+        defaultValue={initialValues.companyLogoUrl}
+        recommendedSize="建议宽高比约 4:1（如 400×100px），支持透明背景 PNG 或 SVG，不强制裁剪"
+      />
+      <ImageUploader
+        name="faviconUrl"
+        label="网站图标（浏览器标签 Logo）"
+        defaultValue={initialValues.faviconUrl}
+        recommendedSize="建议 512×512px 及以上的正方形图片，PNG 格式；不设置则使用默认图标"
+        aspectRatio={1}
+      />
       <FormField label="公司地址" htmlFor="companyAddress">
         <textarea id="companyAddress" name="companyAddress" rows={2} defaultValue={initialValues.companyAddress ?? ''} className={fieldInputClasses} />
       </FormField>

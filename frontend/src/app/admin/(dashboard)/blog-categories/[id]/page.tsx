@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import { adminFetch } from '@/lib/api/admin-client';
 import { BlogCategoryForm } from '../BlogCategoryForm';
-import { updateBlogCategoryAction } from '@/lib/actions/admin/blog-categories';
+import { updateBlogCategoryAction, updateBlogCategoryTranslationAction } from '@/lib/actions/admin/blog-categories';
+import { fetchTranslation } from '@/lib/actions/admin/translations-shared';
 
 interface Detail {
   id: number;
@@ -18,12 +19,21 @@ export default async function EditBlogCategoryPage({ params }: { params: Promise
   const category = result.data;
 
   const boundAction = updateBlogCategoryAction.bind(null, Number(id));
+  const boundTranslationAction = updateBlogCategoryTranslationAction.bind(null, Number(id), 'es');
+  const translation = await fetchTranslation<{ name: string | null; description: string | null }>(
+    `/blog-categories/${id}/translations/es`,
+  ).catch(() => null);
 
   return (
     <div>
       <h1 className="text-2xl font-semibold text-navy-950">编辑博客分类</h1>
       <div className="mt-6">
-        <BlogCategoryForm action={boundAction} initialValues={category} />
+        <BlogCategoryForm
+          action={boundAction}
+          initialValues={category}
+          translationAction={boundTranslationAction}
+          translation={translation}
+        />
       </div>
     </div>
   );

@@ -16,6 +16,10 @@ services:
       - UPLOAD_DIR=/app/uploads
       - HOST=0.0.0.0
       - BACKEND_PORT=4000
+      # 保存正式站点域名后，后端调用前端容器（同一 Docker 网络内用服务名访问）触发缓存刷新，
+      # 见 backend/src/lib/revalidate-frontend.ts；REVALIDATE_SECRET 必须和 frontend 那份一致
+      - FRONTEND_BASE_URL=http://frontend:3000
+      - REVALIDATE_SECRET=${REVALIDATE_SECRET:-}
     volumes:
       - ./data:/app/data
       - ./uploads:/app/uploads
@@ -44,6 +48,13 @@ services:
         INTERNAL_API_BASE_URL: http://backend:4000
     environment:
       - INTERNAL_API_BASE_URL=http://backend:4000
+      # 运行时故障回退（不是 NEXT_PUBLIC_*，不会打进构建产物）：后台"SEO 设置 -> 正式站点域名"
+      # 优先于这个值；这个值优先于构建时写死的 NEXT_PUBLIC_SITE_URL。修改这里之后只需要
+      # docker compose restart frontend，不需要重新 build。见 frontend/src/lib/site/get-site-base-url.ts
+      - SITE_URL=${SITE_URL:-}
+      # 必须和 backend 服务的 REVALIDATE_SECRET 取值一致，用于校验 backend 调用
+      # /api/internal/revalidate-site-config 的请求
+      - REVALIDATE_SECRET=${REVALIDATE_SECRET:-}
     depends_on:
       backend:
         condition: service_healthy
