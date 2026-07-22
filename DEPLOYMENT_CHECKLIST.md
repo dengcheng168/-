@@ -7,7 +7,9 @@
 - [ ] 已复制 `.env.example` → `.env` 并修改所有默认密码/密钥
 - [ ] 已修改 `JWT_SECRET` 为随机长字符串（`openssl rand -base64 48`）
 - [ ] 已修改 `ADMIN_INIT_EMAIL` / `ADMIN_INIT_PASSWORD`
-- [ ] 已将 `DOMAIN_NAME`、`NEXT_PUBLIC_SITE_URL` 改为真实域名
+- [ ] 已将 `DOMAIN_NAME` 改为真实域名（Nginx `server_name` / 证书用，与下面的 `SITE_URL` 用途不同，两个都要改）
+- [ ] 已配置 `SITE_URL` 为真实域名作为故障回退（`REVALIDATE_SECRET` 也已生成随机值，`openssl rand -base64 32`）
+- [ ] 已在后台"全站设置 -> SEO 与追踪 -> 正式站点域名"里配置正式域名（这是 canonical/hreflang/Sitemap/Robots/Open Graph/JSON-LD 的主要事实源，优先级高于 `SITE_URL`；`NEXT_PUBLIC_SITE_URL` 已废弃，不需要再单独配置，只在前两者都缺失时才会被读取）
 - [ ] 已确认服务器安全组/防火墙放行 80/443 端口
 - [ ] 已替换种子数据中的占位证书、客户评价、公司联系方式为真实内容
 
@@ -22,7 +24,9 @@
 - [ ] 前台询盘表单可以提交，后台「询盘管理」能看到并可导出 CSV
 - [ ] 首页 Banner、核心优势等模块可在后台「首页模块」修改并在前台生效
 - [ ] 手机端页面正常显示（导航折叠菜单、响应式布局）
-- [ ] `sitemap.xml`、`robots.txt` 可正常访问
+- [ ] `sitemap.xml`、`robots.txt` 可正常访问，且其中的地址是真实域名，不是 `localhost` 或容器内部地址
+- [ ] 后台"SEO 设置"页面查看正式站点域名的"当前生效来源"显示为"后台配置"（不是环境变量回退），产品/文章详情页 canonical、hreflang 也确认是真实域名
+- [ ] 已确认新域名的 DNS、SSL 证书已生效；如果是更换首选域名（例如从裸域名切到 www 子域名），非首选域名已配置 301 重定向到首选域名（这些都需要在 Nginx/证书/DNS 层单独配置，后台修改域名本身不会自动处理）
 - [ ] 重启容器（`docker compose restart`）后数据不丢失（挂载卷生效）
 - [ ] 内存占用适合 2GB 服务器（`docker stats` 观察，三容器总和不应长期逼近 1.2GB 上限）
 - [ ] 不依赖任何必须付费的第三方服务（Turnstile / SMTP 均为可选，未配置也能正常使用核心功能）

@@ -17,6 +17,10 @@ FROM deps AS build
 COPY . .
 
 ARG NEXT_PUBLIC_API_BASE_URL=/api
+# 已废弃（deprecated）：正式站点域名的主要事实源现在是后台"SEO 设置 -> 正式站点域名"
+# （SiteSetting.siteBaseUrl），运行时故障回退用 SITE_URL 环境变量（见下方 runtime 阶段），
+# 两者都不需要重新构建镜像即可生效。这个变量只作为两者都缺失时的最后一层兼容回退，
+# 计划后续版本移除，新的部署不再需要设置它。
 ARG NEXT_PUBLIC_SITE_URL=http://localhost
 ARG NEXT_PUBLIC_UPLOADS_BASE_URL=
 ARG INTERNAL_API_BASE_URL=http://backend:4000
