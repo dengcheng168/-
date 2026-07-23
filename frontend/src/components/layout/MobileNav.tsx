@@ -47,7 +47,7 @@ export function MobileNav({ items, locale = 'en' }: { items: NavigationItem[]; l
               </Link>
             ))}
             <div className="border-b border-grey-100 py-3">
-              <LanguageSwitcher locale={locale} />
+              <LanguageSwitcher locale={locale} variant="light" />
             </div>
             <Button href={localeHref('/contact', locale)} onClick={() => setOpen(false)} className="mt-3">
               {t(locale, 'headerCta')}
