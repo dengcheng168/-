@@ -53,7 +53,7 @@ export default async function SpanishHomePage() {
       <JsonLd data={websiteJsonLd(settings, siteUrl, 'es')} />
 
       <HeroBanner settings={localizedSettings} locale="es" />
-      <CoreAdvantages items={settings.coreAdvantages} />
+      <CoreAdvantages items={settings.coreAdvantages} locale="es" />
       <ProductCategories categories={categories} locale="es" />
       <FeaturedProducts products={featuredProducts.items} locale="es" />
       <CertificatesShowcase certificates={certificates} locale="es" />

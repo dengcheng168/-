@@ -87,6 +87,7 @@ export default async function SpanishProductDetailPage({
             : []),
           { label: product.name },
         ]}
+        locale="es"
       />
 
       <div className="mt-6 grid gap-10 lg:grid-cols-2">

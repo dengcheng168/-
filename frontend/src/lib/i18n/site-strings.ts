@@ -116,6 +116,13 @@ const SITE_STRINGS = {
     formRequiredError: 'Name and email are required.',
     formSuccessMessage: "Thank you! We've received your inquiry and will get back to you soon.",
     formGenericError: 'Something went wrong. Please try again later.',
+    paginationLabel: 'Pagination',
+    paginationPrevious: 'Previous',
+    paginationNext: 'Next',
+    breadcrumbLabel: 'Breadcrumb',
+    openMenuLabel: 'Open menu',
+    closeMenuLabel: 'Close menu',
+    productCategoriesLabel: 'Product categories',
   },
   es: {
     headerCta: 'Solicitar Cotización',
@@ -227,6 +234,13 @@ const SITE_STRINGS = {
     formRequiredError: 'El nombre y el correo son obligatorios.',
     formSuccessMessage: 'Gracias. Hemos recibido su consulta y nos pondremos en contacto pronto.',
     formGenericError: 'Ocurrió un error. Por favor, inténtelo de nuevo más tarde.',
+    paginationLabel: 'Paginación',
+    paginationPrevious: 'Anterior',
+    paginationNext: 'Siguiente',
+    breadcrumbLabel: 'Ruta de navegación',
+    openMenuLabel: 'Abrir menú',
+    closeMenuLabel: 'Cerrar menú',
+    productCategoriesLabel: 'Categorías de productos',
   },
 } satisfies Record<Locale, Record<string, string>>;
 

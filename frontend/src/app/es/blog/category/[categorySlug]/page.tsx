@@ -52,6 +52,7 @@ export default async function SpanishBlogCategoryPage({
           { label: t('es', 'breadcrumbBlog'), href: '/es/blog' },
           { label: category?.name ?? categorySlug },
         ]}
+        locale="es"
       />
       <h1 className="mt-4 text-3xl font-semibold text-navy-950">{category?.name ?? t('es', 'blogPageTitle')}</h1>
 
@@ -71,6 +72,7 @@ export default async function SpanishBlogCategoryPage({
             page={meta?.page ?? 1}
             totalPages={meta?.totalPages ?? 1}
             basePath={`/es/blog/category/${categorySlug}`}
+            locale="es"
           />
         </div>
       </div>

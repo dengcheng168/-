@@ -29,7 +29,7 @@ export default async function SpanishOemOdmPage() {
 
   return (
     <Container className="py-12">
-      <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'breadcrumbOemOdm') }]} />
+      <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'breadcrumbOemOdm') }]} locale="es" />
       <h1 className="mt-4 text-3xl font-semibold text-navy-950">{page?.title ?? t('es', 'oemOdmPageTitle')}</h1>
 
       {page?.bodyHtml && (

@@ -57,6 +57,7 @@ export default async function SpanishProductCategoryPage({
           { label: t('es', 'breadcrumbProducts'), href: '/es/products' },
           { label: result.category.name },
         ]}
+        locale="es"
       />
       <h1 className="mt-4 text-3xl font-semibold text-navy-950">{result.category.name}</h1>
       {result.category.description && <p className="mt-3 max-w-2xl text-grey-500">{result.category.description}</p>}
@@ -71,6 +72,7 @@ export default async function SpanishProductCategoryPage({
             page={result.meta?.page ?? 1}
             totalPages={result.meta?.totalPages ?? 1}
             basePath={`/es/products/category/${categorySlug}`}
+            locale="es"
           />
         </div>
       </div>

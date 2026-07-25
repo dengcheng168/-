@@ -39,7 +39,7 @@ export default async function SpanishFactoryPage() {
 
   return (
     <Container className="py-12">
-      <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'breadcrumbFactory') }]} />
+      <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'breadcrumbFactory') }]} locale="es" />
       <h1 className="mt-4 text-3xl font-semibold text-navy-950">{page?.title ?? t('es', 'factoryPageTitle')}</h1>
 
       {page?.bodyHtml && (

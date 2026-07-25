@@ -71,6 +71,7 @@ export default async function SpanishBlogDetailPage({
           { label: t('es', 'breadcrumbBlog'), href: '/es/blog' },
           { label: post.title },
         ]}
+        locale="es"
       />
 
       <article className="mt-6 grid gap-10 lg:grid-cols-[1fr_260px]">

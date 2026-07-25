@@ -32,7 +32,7 @@ export default async function SpanishAboutPage() {
       )}
 
       <Container className="py-12">
-        <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'breadcrumbAbout') }]} />
+        <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'breadcrumbAbout') }]} locale="es" />
         {!hasHero && (
           <>
             <h1 className="mt-4 text-3xl font-semibold text-navy-950">{page?.title ?? t('es', 'aboutPageTitle')}</h1>

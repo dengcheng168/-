@@ -52,6 +52,7 @@ export default async function SpanishBlogTagPage({
           { label: t('es', 'breadcrumbBlog'), href: '/es/blog' },
           { label: tag?.name ?? tagSlug },
         ]}
+        locale="es"
       />
       <h1 className="mt-4 text-3xl font-semibold text-navy-950">
         {t('es', 'tagPrefix')} {tag?.name ?? tagSlug}
@@ -69,7 +70,7 @@ export default async function SpanishBlogTagPage({
               ))}
             </div>
           )}
-          <Pagination page={meta?.page ?? 1} totalPages={meta?.totalPages ?? 1} basePath={`/es/blog/tag/${tagSlug}`} />
+          <Pagination page={meta?.page ?? 1} totalPages={meta?.totalPages ?? 1} basePath={`/es/blog/tag/${tagSlug}`} locale="es" />
         </div>
       </div>
     </Container>

@@ -21,7 +21,7 @@ export default async function SpanishPrivacyPolicyPage() {
 
   return (
     <Container className="py-12">
-      <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'breadcrumbPrivacyPolicy') }]} />
+      <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'breadcrumbPrivacyPolicy') }]} locale="es" />
       <h1 className="mt-4 text-3xl font-semibold text-navy-950">{page?.title ?? t('es', 'privacyPolicyPageTitle')}</h1>
       {page?.bodyHtml && (
         <div

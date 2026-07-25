@@ -38,7 +38,7 @@ export default async function SpanishBlogListPage({
       )}
 
       <Container className="py-12">
-        <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'breadcrumbBlog') }]} />
+        <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'breadcrumbBlog') }]} locale="es" />
         {!hasHero && <h1 className="mt-4 text-3xl font-semibold text-navy-950">{t('es', 'blogPageTitle')}</h1>}
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[240px_1fr]">
@@ -53,7 +53,7 @@ export default async function SpanishBlogListPage({
                 ))}
               </div>
             )}
-            <Pagination page={meta?.page ?? 1} totalPages={meta?.totalPages ?? 1} basePath="/es/blog" />
+            <Pagination page={meta?.page ?? 1} totalPages={meta?.totalPages ?? 1} basePath="/es/blog" locale="es" />
           </div>
         </div>
       </Container>

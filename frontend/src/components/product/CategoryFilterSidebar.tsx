@@ -14,7 +14,7 @@ export function CategoryFilterSidebar({
   locale?: Locale;
 }) {
   return (
-    <nav aria-label="Product categories" className="space-y-1">
+    <nav aria-label={t(locale, 'productCategoriesLabel')} className="space-y-1">
       <Link
         href={localeHref('/products', locale)}
         className={`block rounded-md px-3 py-2 text-sm font-medium ${

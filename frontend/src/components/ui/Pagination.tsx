@@ -1,13 +1,17 @@
 import Link from 'next/link';
+import type { Locale } from '@/lib/i18n/locales';
+import { t } from '@/lib/i18n/site-strings';
 
 export function Pagination({
   page,
   totalPages,
   basePath,
+  locale = 'en',
 }: {
   page: number;
   totalPages: number;
   basePath: string;
+  locale?: Locale;
 }) {
   if (totalPages <= 1) return null;
 
@@ -20,13 +24,13 @@ export function Pagination({
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <nav aria-label="Pagination" className="mt-10 flex items-center justify-center gap-2">
+    <nav aria-label={t(locale, 'paginationLabel')} className="mt-10 flex items-center justify-center gap-2">
       <Link
         href={pageHref(Math.max(1, page - 1))}
         aria-disabled={page <= 1}
         className={`rounded-md px-3 py-2 text-sm ${page <= 1 ? 'pointer-events-none text-grey-200' : 'text-navy-900 hover:bg-grey-100'}`}
       >
-        Previous
+        {t(locale, 'paginationPrevious')}
       </Link>
       {pages.map((p) => (
         <Link
@@ -42,7 +46,7 @@ export function Pagination({
         aria-disabled={page >= totalPages}
         className={`rounded-md px-3 py-2 text-sm ${page >= totalPages ? 'pointer-events-none text-grey-200' : 'text-navy-900 hover:bg-grey-100'}`}
       >
-        Next
+        {t(locale, 'paginationNext')}
       </Link>
     </nav>
   );

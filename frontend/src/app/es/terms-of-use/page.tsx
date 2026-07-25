@@ -21,7 +21,7 @@ export default async function SpanishTermsOfUsePage() {
 
   return (
     <Container className="py-12">
-      <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'breadcrumbTermsOfUse') }]} />
+      <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'breadcrumbTermsOfUse') }]} locale="es" />
       <h1 className="mt-4 text-3xl font-semibold text-navy-950">{page?.title ?? t('es', 'termsOfUsePageTitle')}</h1>
       {page?.bodyHtml && (
         <div

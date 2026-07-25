@@ -16,7 +16,7 @@ export function MobileNav({ items, locale = 'en' }: { items: NavigationItem[]; l
     <div className="md:hidden">
       <button
         type="button"
-        aria-label={open ? 'Close menu' : 'Open menu'}
+        aria-label={open ? t(locale, 'closeMenuLabel') : t(locale, 'openMenuLabel')}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className="flex h-10 w-10 items-center justify-center rounded-md text-white hover:bg-white/10"
