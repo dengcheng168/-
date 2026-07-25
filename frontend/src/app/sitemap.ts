@@ -4,6 +4,8 @@ import { listBlogPosts } from '@/lib/api/blog';
 import { absoluteUrl } from '@/lib/seo/site';
 import { localeHref } from '@/lib/i18n/paths';
 
+export const dynamic = 'force-dynamic';
+
 const staticPaths = [
   '',
   '/products',
