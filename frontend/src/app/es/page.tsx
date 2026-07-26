@@ -5,6 +5,7 @@ import { listCertificates, listFaqs } from '@/lib/api/content';
 import { listBlogPosts } from '@/lib/api/blog';
 import { getTranslationMap } from '@/lib/api/translations';
 import { localizeHero } from '@/lib/i18n/content-overlay';
+import { resolveHomeSeoMetadata } from '@/lib/seo/home-metadata';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo/jsonld';
 import { getSiteUrl } from '@/lib/seo/site';
@@ -19,12 +20,26 @@ import { InquirySection } from '@/components/home/InquirySection';
 
 export async function generateMetadata(): Promise<Metadata> {
   const [settings, translations] = await Promise.all([getPublicSettings(), getTranslationMap('es')]);
-  const localized = localizeHero(settings, translations);
+  const seo = resolveHomeSeoMetadata({
+    translations,
+    defaultSeoTitle: settings.defaultSeoTitle,
+    defaultSeoDescription: settings.defaultSeoDescription,
+  });
   return {
-    ...(settings.defaultSeoTitle ? { title: settings.defaultSeoTitle } : {}),
-    ...(settings.defaultSeoDescription ? { description: settings.defaultSeoDescription } : {}),
+    ...(seo.title ? { title: seo.title } : {}),
+    ...(seo.description ? { description: seo.description } : {}),
     alternates: { canonical: '/es', languages: { en: '/', es: '/es', 'x-default': '/' } },
-    openGraph: { url: '/es', locale: 'es', alternateLocale: 'en', title: localized.heroHeadline },
+    openGraph: {
+      url: '/es',
+      locale: 'es',
+      alternateLocale: 'en',
+      ...(seo.title ? { title: seo.title } : {}),
+      ...(seo.description ? { description: seo.description } : {}),
+    },
+    twitter: {
+      ...(seo.title ? { title: seo.title } : {}),
+      ...(seo.description ? { description: seo.description } : {}),
+    },
   };
 }
 
