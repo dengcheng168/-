@@ -46,6 +46,10 @@ services:
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
         NEXT_PUBLIC_UPLOADS_BASE_URL: ${NEXT_PUBLIC_UPLOADS_BASE_URL:-}
         INTERNAL_API_BASE_URL: http://backend:4000
+        # 构建期站点根地址：让本次构建产出的静态页面使用正式域名而非 localhost 兜底值，
+        # 缺失时直接让 docker compose build 失败（同一个 SITE_URL 变量，运行期已经在
+        # frontend.environment 里读取，这里只是额外让构建阶段也能拿到，不是新增变量）。
+        SITE_URL: ${SITE_URL:?SITE_URL is required}
     environment:
       - INTERNAL_API_BASE_URL=http://backend:4000
       # 运行时故障回退（不是 NEXT_PUBLIC_*，不会打进构建产物）：后台"SEO 设置 -> 正式站点域名"

@@ -24,10 +24,27 @@ ARG NEXT_PUBLIC_API_BASE_URL=/api
 ARG NEXT_PUBLIC_SITE_URL=http://localhost
 ARG NEXT_PUBLIC_UPLOADS_BASE_URL=
 ARG INTERNAL_API_BASE_URL=http://backend:4000
+# 构建期站点根地址：只用于让本次构建产物（canonical/hreflang/metadataBase 等）使用正式域名，
+# 不参与运行时故障回退优先级（那套逻辑仍由 SITE_URL 环境变量在 runtime 阶段单独提供，见下方
+# runtime 阶段说明及 lib/site/resolve-site-base-url.ts）。构建期缺失/非法时必须让本次
+# `npm run build` 直接失败，而不是静默落回上面的 NEXT_PUBLIC_SITE_URL=http://localhost 兼容值。
+ARG SITE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_UPLOADS_BASE_URL=$NEXT_PUBLIC_UPLOADS_BASE_URL
 ENV INTERNAL_API_BASE_URL=$INTERNAL_API_BASE_URL
+ENV SITE_URL=$SITE_URL
+
+RUN node -e "\
+const raw = process.env.SITE_URL; \
+if (!raw) throw new Error('SITE_URL is required during frontend build'); \
+const url = new URL(raw); \
+const blocked = new Set(['localhost', '127.0.0.1', '::1']); \
+if (!['http:', 'https:'].includes(url.protocol)) throw new Error('SITE_URL must use http or https'); \
+if (blocked.has(url.hostname)) throw new Error('SITE_URL must not use localhost'); \
+if (url.search || url.hash) throw new Error('SITE_URL must not include query or hash'); \
+console.log('Validated frontend build SITE_URL:', url.origin); \
+"
 
 RUN npm run build
 
