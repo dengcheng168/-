@@ -55,6 +55,7 @@ export function AdminIdleLogout() {
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const warningOpenRef = useRef(false);
   const loggingOutRef = useRef(false);
+  const logoutRequestInFlightRef = useRef(false);
   const tabIdRef = useRef('');
   const channelRef = useRef<BroadcastChannel | null>(null);
 
@@ -140,19 +141,31 @@ export function AdminIdleLogout() {
       navigateToLogin();
     };
 
+    // navigator.locks.request() 本身是异步的（哪怕加了 ifAvailable:true，浏览器仍需要一次任务队列往返
+    // 才能回调），loggingOutRef 只在真正拿到锁、进入 doLogout 后才会被置位。如果只在 doLogout 里置位，
+    // 两次相邻的 1 秒轮询就可能在锁回调落地前重复调用 runLogout，从同一个标签页发出两次登出请求。
+    // 用 logoutRequestInFlightRef 在发起锁/lease 请求前就同步占位，避免这个竞态；
+    // 只在确认"这一轮没拿到锁/lease"时才复位，保证非拥有者标签页下一轮仍能重试，不会死锁。
     const runLogout = async (reason: SessionEventReason) => {
-      if (loggingOutRef.current) return;
+      if (loggingOutRef.current || logoutRequestInFlightRef.current) return;
+      logoutRequestInFlightRef.current = true;
 
       const locks = getLocks(navigator);
       if (locks) {
+        let acquired = false;
         await locks.request(WEB_LOCK_NAME, { ifAvailable: true }, async (lock) => {
           if (lock === null) return;
+          acquired = true;
           await doLogout(reason);
         });
+        if (!acquired) {
+          logoutRequestInFlightRef.current = false;
+        }
         return;
       }
 
       if (!tryAcquireLease(window.localStorage, tabIdRef.current, Date.now())) {
+        logoutRequestInFlightRef.current = false;
         return;
       }
       await doLogout(reason);
