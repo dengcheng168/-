@@ -6,7 +6,6 @@ import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
 import { AdminThemeProvider, useAdminTheme } from './AdminThemeProvider';
 import { AdminPortalProvider } from './AdminPortalProvider';
-import { AdminIdleLogout } from './AdminIdleLogout';
 import { Toaster } from './ui/sonner';
 import { cn } from '@/lib/utils';
 import type { AdminUser } from '@/lib/auth/session';
@@ -41,7 +40,6 @@ function AdminShellInner({ user, children }: { user: AdminUser; children: ReactN
           </main>
         </div>
         <Toaster position="top-right" theme={theme} />
-        <AdminIdleLogout />
       </AdminPortalProvider>
     </div>
   );
