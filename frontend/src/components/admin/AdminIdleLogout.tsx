@@ -6,6 +6,7 @@ import {
   ACTIVITY_THROTTLE_MS,
   BROADCAST_CHANNEL_NAME,
   CHECK_INTERVAL_MS,
+  ADMIN_IDLE_LOGOUT_ENDPOINT,
   WEB_LOCK_NAME,
   computeRemainingMs,
   generateTabId,
@@ -90,7 +91,7 @@ export function AdminIdleLogout() {
 
   const performServerLogout = useCallback(async () => {
     try {
-      await fetch('/api/admin/logout', { method: 'POST', cache: 'no-store' });
+      await fetch(ADMIN_IDLE_LOGOUT_ENDPOINT, { method: 'POST', cache: 'no-store' });
     } catch {
       // 服务端登出请求失败也不阻塞后续导航兜底，见 doLogout 里始终执行 navigateToLogin
     }

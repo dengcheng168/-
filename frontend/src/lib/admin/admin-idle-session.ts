@@ -11,6 +11,7 @@ export const STORAGE_KEY_ACTIVITY = 'admin_last_activity_at';
 export const STORAGE_KEY_LEASE = 'admin_logout_lease_v1';
 export const BROADCAST_CHANNEL_NAME = 'koigate-admin-session-v1';
 export const WEB_LOCK_NAME = 'koigate-admin-idle-logout-v1';
+export const ADMIN_IDLE_LOGOUT_ENDPOINT = '/auth/admin/logout';
 
 export interface KeyValueStorage {
   getItem(key: string): string | null;
