@@ -14,9 +14,12 @@ export function CertificatesShowcase({ certificates, locale = 'en' }: { certific
     <section className="bg-grey-50 py-16">
       <Container>
         <SectionHeading eyebrow={t(locale, 'sectionCertificatesEyebrow')} title={t(locale, 'sectionCertificatesTitle')} />
-        <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-10 flex flex-wrap justify-center gap-6">
           {certificates.map((cert) => (
-            <div key={cert.id} className="flex flex-col items-center rounded-lg border border-grey-200 bg-white p-4 text-center">
+            <div
+              key={cert.id}
+              className="flex w-40 flex-col items-center rounded-lg border border-grey-200 bg-white p-4 text-center transition-shadow hover:shadow-md"
+            >
               <div className="relative h-24 w-24">
                 <Image src={cert.imageUrl} alt={cert.name} fill sizes="96px" className="object-contain" />
               </div>
