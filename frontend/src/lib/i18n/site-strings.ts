@@ -145,7 +145,7 @@ const SITE_STRINGS = {
     sectionCertificatesTitle: 'Certificados',
     sectionBlogEyebrow: 'Novedades',
     sectionBlogTitle: 'Últimas del Blog',
-    sectionFaqEyebrow: '¿Tiene Preguntas?',
+    sectionFaqEyebrow: 'Tiene Preguntas?',
     sectionFaqTitle: 'Preguntas Frecuentes',
     sectionInquiryEyebrow: 'Contáctenos',
     sectionInquiryTitle: 'Solicitar una Cotización',
