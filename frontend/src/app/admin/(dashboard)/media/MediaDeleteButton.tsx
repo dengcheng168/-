@@ -21,7 +21,12 @@ export function MediaDeleteButton({ id }: { id: number }) {
 
       if (!window.confirm('确定要删除这张图片吗？')) return;
 
-      await fetch(`/api/admin/proxy/media/${id}`, { method: 'DELETE' });
+      const deleteRes = await fetch(`/api/admin/proxy/media/${id}`, { method: 'DELETE' });
+      if (!deleteRes.ok) {
+        const body = await deleteRes.json().catch(() => null);
+        window.alert(body?.error?.message ?? `删除失败（HTTP ${deleteRes.status}）`);
+        return;
+      }
       router.refresh();
     } finally {
       setBusy(false);
