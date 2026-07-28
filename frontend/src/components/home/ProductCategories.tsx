@@ -9,13 +9,14 @@ import type { ProductCategory } from '@/types/product';
 
 export function ProductCategories({ categories, locale = 'en' }: { categories: ProductCategory[]; locale?: Locale }) {
   if (categories.length === 0) return null;
+  const displayedCategories = categories.slice(0, 3);
 
   return (
     <section className="bg-grey-50 py-16">
       <Container>
         <SectionHeading eyebrow={t(locale, 'sectionProductCategoriesEyebrow')} title={t(locale, 'sectionProductCategoriesTitle')} />
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map((category) => (
+          {displayedCategories.map((category) => (
             <Link
               key={category.id}
               href={localeHref(`/products/category/${category.slug}`, locale)}
