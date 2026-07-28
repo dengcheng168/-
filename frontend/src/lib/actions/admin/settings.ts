@@ -87,13 +87,27 @@ export async function testSmtpAction(): Promise<AdminFormState> {
 }
 
 export async function updateHomepageSettingsAction(_prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
-  function parseJsonField(key: string, fallback: unknown) {
+  // 之前这里 JSON.parse 失败会被静默吞掉、直接跳过该字段，导致整份表单显示"已保存"成功提示，
+  // 但填错格式的那个字段其实完全没有写入数据库——用户会以为是 bug（"保存不了"），
+  // 其实是不知道 JSON 语法错在哪。现在改成：任何一个字段解析失败就整体中止保存并指出是哪一项、错在哪。
+  const jsonFields: { key: string; label: string }[] = [
+    { key: 'coreAdvantagesJson', label: '核心优势' },
+    { key: 'statsJson', label: '数据统计' },
+    { key: 'oemProcessStepsJson', label: 'OEM 流程步骤' },
+    { key: 'factoryStatsJson', label: '工厂数据' },
+    { key: 'factoryPhotosJson', label: '工厂图片地址' },
+    { key: 'partnerRegionsJson', label: '全球合作区域' },
+  ];
+
+  const parsed: Record<string, unknown> = {};
+  for (const { key, label } of jsonFields) {
     const raw = textOrUndefined(formData, key);
-    if (!raw) return fallback;
+    if (!raw) continue;
     try {
-      return JSON.parse(raw);
-    } catch {
-      return fallback;
+      parsed[key] = JSON.parse(raw);
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : '';
+      return { message: `"${label}"不是合法的 JSON 格式，未保存任何改动。请检查每个地址/文字是否用英文双引号包裹（${detail}）` };
     }
   }
 
@@ -106,12 +120,12 @@ export async function updateHomepageSettingsAction(_prevState: AdminFormState, f
     heroButton2Link: formData.get('heroButton2Link'),
     heroDesktopImage: textOrUndefined(formData, 'heroDesktopImage'),
     heroMobileImage: textOrUndefined(formData, 'heroMobileImage'),
-    coreAdvantages: parseJsonField('coreAdvantagesJson', undefined),
-    stats: parseJsonField('statsJson', undefined),
-    oemProcessSteps: parseJsonField('oemProcessStepsJson', undefined),
-    factoryStats: parseJsonField('factoryStatsJson', undefined),
-    factoryPhotos: parseJsonField('factoryPhotosJson', undefined),
-    partnerRegions: parseJsonField('partnerRegionsJson', undefined),
+    coreAdvantages: parsed.coreAdvantagesJson,
+    stats: parsed.statsJson,
+    oemProcessSteps: parsed.oemProcessStepsJson,
+    factoryStats: parsed.factoryStatsJson,
+    factoryPhotos: parsed.factoryPhotosJson,
+    partnerRegions: parsed.partnerRegionsJson,
   }, '/admin/homepage');
 }
 
