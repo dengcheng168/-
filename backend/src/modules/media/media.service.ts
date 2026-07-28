@@ -128,6 +128,7 @@ export async function findMediaUsage(prisma: PrismaClient, media: MediaUrls) {
 
   const products = await prisma.product.findMany({
     where: {
+      deletedAt: null,
       OR: [
         { mainImage: { in: urls } },
         { ogImage: { in: urls } },
@@ -141,20 +142,24 @@ export async function findMediaUsage(prisma: PrismaClient, media: MediaUrls) {
   });
   usages.push(...products.map((p) => ({ type: 'product', id: p.id, name: p.name })));
 
+  // Product/ProductCategory/BlogPost/Certificate 都是软删除（deletedAt 字段打时间戳，
+  // 不会真的从表里移除记录）——这里必须显式过滤掉已软删除的记录，否则"已删除"的证书/产品
+  // 只要图片字段还留着旧 URL，就会被永远判定为"在用"，导致对应媒体文件再也删不掉
+  // （Page/Faq 没有 deletedAt 字段，是硬删除，不需要也不能加这个过滤条件）。
   const categories = await prisma.productCategory.findMany({
-    where: { image: { in: urls } },
+    where: { deletedAt: null, image: { in: urls } },
     select: { id: true, name: true },
   });
   usages.push(...categories.map((c) => ({ type: 'product-category', id: c.id, name: c.name })));
 
   const posts = await prisma.blogPost.findMany({
-    where: { OR: [{ coverImage: { in: urls } }, ...urls.map((u) => ({ body: { contains: u } }))] },
+    where: { deletedAt: null, OR: [{ coverImage: { in: urls } }, ...urls.map((u) => ({ body: { contains: u } }))] },
     select: { id: true, title: true },
   });
   usages.push(...posts.map((p) => ({ type: 'blog-post', id: p.id, name: p.title })));
 
   const certs = await prisma.certificate.findMany({
-    where: { OR: [{ imageUrl: { in: urls } }, { pdfUrl: { in: urls } }] },
+    where: { deletedAt: null, OR: [{ imageUrl: { in: urls } }, { pdfUrl: { in: urls } }] },
     select: { id: true, name: true },
   });
   usages.push(...certs.map((c) => ({ type: 'certificate', id: c.id, name: c.name })));
