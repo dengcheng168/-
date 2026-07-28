@@ -4,7 +4,8 @@ import { AdminTable, AdminTableHead, AdminEmptyRow } from '@/components/admin/Ad
 import { ConfirmSubmitButton } from '@/components/admin/ConfirmSubmitButton';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { IconPlus } from '@/components/admin/icons';
-import { deleteCategoryAction } from '@/lib/actions/admin/categories';
+import { SortOrderInput } from '@/components/admin/SortOrderInput';
+import { deleteCategoryAction, setCategorySortOrderAction } from '@/lib/actions/admin/categories';
 
 interface CategoryRow {
   id: number;
@@ -42,7 +43,9 @@ export default async function AdminProductCategoriesPage() {
               <tr key={cat.id} className="border-b border-grey-100 last:border-none">
                 <td className="px-4 py-3 font-medium text-navy-950">{cat.name}</td>
                 <td className="px-4 py-3 text-grey-500">{cat.slug}</td>
-                <td className="px-4 py-3 text-grey-500">{cat.sortOrder}</td>
+                <td className="px-4 py-3">
+                  <SortOrderInput id={cat.id} defaultValue={cat.sortOrder} action={setCategorySortOrderAction} />
+                </td>
                 <td className="px-4 py-3">
                   <span className={`rounded-full px-2 py-0.5 text-xs ${cat.published ? 'bg-green-100 text-green-700' : 'bg-grey-100 text-grey-700'}`}>
                     {cat.published ? '已发布' : '未发布'}

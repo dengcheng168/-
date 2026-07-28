@@ -123,6 +123,20 @@ export async function setProductStatusAction(id: number, status: 'DRAFT' | 'PUBL
   return { success: true, message: status === 'PUBLISHED' ? '已发布' : '已下架' };
 }
 
+/**
+ * 供产品列表"排序"列的输入框直接调用，复用后端已有的批量重排接口
+ * POST /admin/products/reorder（只传一条记录，等价于单条更新 sortOrder）。
+ */
+export async function setProductSortOrderAction(id: number, sortOrder: number): Promise<AdminFormState> {
+  try {
+    await adminFetch('/products/reorder', { method: 'POST', body: JSON.stringify({ items: [{ id, sortOrder }] }) });
+  } catch (err) {
+    return { success: false, message: err instanceof ApiError ? err.message : '排序更新失败' };
+  }
+  revalidateProductCaches();
+  return { success: true, message: '排序已更新' };
+}
+
 function buildTranslationPayload(formData: FormData) {
   return {
     name: textOrUndefined(formData, 'name'),

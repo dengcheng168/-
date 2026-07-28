@@ -4,7 +4,8 @@ import { AdminTable, AdminTableHead, AdminEmptyRow } from '@/components/admin/Ad
 import { ConfirmSubmitButton } from '@/components/admin/ConfirmSubmitButton';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { IconPlus } from '@/components/admin/icons';
-import { deleteCertificateAction } from '@/lib/actions/admin/certificates';
+import { SortOrderInput } from '@/components/admin/SortOrderInput';
+import { deleteCertificateAction, setCertificateSortOrderAction } from '@/lib/actions/admin/certificates';
 
 interface Row {
   id: number;
@@ -42,7 +43,9 @@ export default async function AdminCertificatesPage() {
               <tr key={row.id} className="border-b border-grey-100 last:border-none">
                 <td className="px-4 py-3 font-medium text-navy-950">{row.name}</td>
                 <td className="px-4 py-3 text-grey-500">{row.certType ?? '-'}</td>
-                <td className="px-4 py-3 text-grey-500">{row.sortOrder}</td>
+                <td className="px-4 py-3">
+                  <SortOrderInput id={row.id} defaultValue={row.sortOrder} action={setCertificateSortOrderAction} />
+                </td>
                 <td className="px-4 py-3">
                   <span className={`rounded-full px-2 py-0.5 text-xs ${row.published ? 'bg-green-100 text-green-700' : 'bg-grey-100 text-grey-700'}`}>
                     {row.published ? '已发布' : '未发布'}

@@ -55,6 +55,21 @@ export async function updateCertificateAction(
   redirect('/admin/certificates');
 }
 
+/**
+ * 供证书列表"排序"列的输入框直接调用，复用后端已有的批量重排接口
+ * POST /admin/certificates/reorder（只传一条记录，等价于单条更新 sortOrder）。
+ */
+export async function setCertificateSortOrderAction(id: number, sortOrder: number): Promise<AdminFormState> {
+  try {
+    await adminFetch('/certificates/reorder', { method: 'POST', body: JSON.stringify({ items: [{ id, sortOrder }] }) });
+  } catch (err) {
+    return { success: false, message: err instanceof ApiError ? err.message : '排序更新失败' };
+  }
+  revalidatePath('/admin/certificates');
+  updateTag('certificates');
+  return { success: true, message: '排序已更新' };
+}
+
 export async function deleteCertificateAction(formData: FormData): Promise<void> {
   const id = formData.get('id');
   await adminFetch(`/certificates/${id}`, { method: 'DELETE' });

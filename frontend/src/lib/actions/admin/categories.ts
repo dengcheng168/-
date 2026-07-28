@@ -64,6 +64,21 @@ export async function updateCategoryAction(
   redirect('/admin/product-categories');
 }
 
+/**
+ * 供分类列表"排序"列的输入框直接调用，复用后端已有的批量重排接口
+ * POST /admin/product-categories/reorder（只传一条记录，等价于单条更新 sortOrder）。
+ */
+export async function setCategorySortOrderAction(id: number, sortOrder: number): Promise<AdminFormState> {
+  try {
+    await adminFetch('/product-categories/reorder', { method: 'POST', body: JSON.stringify({ items: [{ id, sortOrder }] }) });
+  } catch (err) {
+    return { success: false, message: err instanceof ApiError ? err.message : '排序更新失败' };
+  }
+  revalidatePath('/admin/product-categories');
+  updateTag('product-categories');
+  return { success: true, message: '排序已更新' };
+}
+
 export async function deleteCategoryAction(formData: FormData): Promise<void> {
   const id = formData.get('id');
   await adminFetch(`/product-categories/${id}`, { method: 'DELETE' });

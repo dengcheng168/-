@@ -10,7 +10,8 @@ import { Badge } from '@/components/admin/ui/badge';
 import { Button } from '@/components/admin/ui/button';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/admin/ui/table';
 import { EmptyState } from '@/components/admin/EmptyState';
-import { setProductStatusAction } from '@/lib/actions/admin/products';
+import { SortOrderInput } from '@/components/admin/SortOrderInput';
+import { setProductStatusAction, setProductSortOrderAction } from '@/lib/actions/admin/products';
 import { resolveMediaUrl } from '@/lib/utils/media';
 
 export interface ProductRow {
@@ -135,7 +136,9 @@ export function ProductListClient({ rows, total }: { rows: ProductRow[]; total: 
                   <TableCell>
                     <Badge variant={isPublished ? 'success' : 'muted'}>{isPublished ? '已发布' : '草稿'}</Badge>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{row.sortOrder}</TableCell>
+                  <TableCell>
+                    <SortOrderInput id={row.id} defaultValue={row.sortOrder} action={setProductSortOrderAction} />
+                  </TableCell>
                   <TableCell className="text-muted-foreground">{new Date(row.updatedAt).toLocaleDateString('zh-CN')}</TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-1">
