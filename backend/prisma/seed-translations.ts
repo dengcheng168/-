@@ -239,20 +239,20 @@ const pageTranslations: Record<
 
 const faqTranslations: Record<string, { question: string; answer: string }> = {
   'Do you support OEM and ODM services?': {
-    question: '¿Ofrecen servicios OEM y ODM?',
+    question: 'Ofrecen servicios OEM y ODM?',
     answer: 'Sí, ofrecemos personalización OEM/ODM completa, incluyendo logotipo, empaque y apariencia.',
   },
   'What is your minimum order quantity (MOQ)?': {
-    question: '¿Cuál es su cantidad mínima de pedido (MOQ)?',
+    question: 'Cuál es su cantidad mínima de pedido (MOQ)?',
     answer: 'El MOQ varía según el producto; consulte las páginas de cada producto o contáctenos para más detalles.',
   },
   'Can you provide product certifications?': {
-    question: '¿Pueden proporcionar certificaciones de producto?',
+    question: 'Pueden proporcionar certificaciones de producto?',
     answer:
       'Podemos proporcionar las certificaciones pertinentes de nuestros productos a solicitud; consulte nuestra página de Certificados para ver ejemplos.',
   },
   'What is your typical lead time?': {
-    question: '¿Cuál es su plazo de entrega habitual?',
+    question: 'Cuál es su plazo de entrega habitual?',
     answer:
       'El plazo de entrega depende del volumen del pedido y los requisitos de personalización; contáctenos para una cotización precisa.',
   },
