@@ -1,12 +1,14 @@
 import { adminFetch } from '@/lib/api/admin-client';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { TranslationsForm } from './TranslationsForm';
+import type { CoreAdvantage } from '@/types/settings';
 
 interface HeroSettings {
   heroHeadline: string;
   heroSubheadline: string;
   heroButton1Text: string;
   heroButton2Text: string;
+  coreAdvantages: CoreAdvantage[];
 }
 
 interface NavItem {

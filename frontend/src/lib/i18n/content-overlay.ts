@@ -1,6 +1,6 @@
 import { translate } from '@/lib/api/translations';
 import type { NavigationItem } from '@/types/navigation';
-import type { PublicSiteSettings } from '@/types/settings';
+import type { CoreAdvantage, PublicSiteSettings } from '@/types/settings';
 
 /**
  * 把 Translation 表里的西班牙语覆盖叠加到英文原始内容上——没有对应译文的字段自动回退显示英文，
@@ -22,4 +22,14 @@ export function localizeHero(settings: PublicSiteSettings, map: Record<string, s
     heroButton1Text: translate(map, 'settings.heroButton1Text', settings.heroButton1Text),
     heroButton2Text: translate(map, 'settings.heroButton2Text', settings.heroButton2Text),
   };
+}
+
+export function localizeCoreAdvantages(items: CoreAdvantage[], map: Record<string, string>): CoreAdvantage[] {
+  return items.map((item, i) => ({
+    ...item,
+    title: translate(map, `settings.coreAdvantages.${i}.title`, item.title),
+    description: item.description
+      ? translate(map, `settings.coreAdvantages.${i}.description`, item.description)
+      : item.description,
+  }));
 }

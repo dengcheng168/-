@@ -4,7 +4,7 @@ import { listProductCategories, listProducts } from '@/lib/api/products';
 import { listCertificates, listFaqs } from '@/lib/api/content';
 import { listBlogPosts } from '@/lib/api/blog';
 import { getTranslationMap } from '@/lib/api/translations';
-import { localizeHero } from '@/lib/i18n/content-overlay';
+import { localizeHero, localizeCoreAdvantages } from '@/lib/i18n/content-overlay';
 import { resolveHomeSeoMetadata } from '@/lib/seo/home-metadata';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo/jsonld';
@@ -61,6 +61,7 @@ export default async function SpanishHomePage() {
   // 产品分类/推荐产品/证书/博客文章/FAQ 现在都通过 locale-aware 数据函数请求西语翻译，
   // 缺失翻译的字段自动回退显示英文原文（见 lib/i18n/localize.ts 和 lib/i18n/faq-source.ts）。
   const localizedSettings = localizeHero(settings, translations);
+  const localizedCoreAdvantages = localizeCoreAdvantages(settings.coreAdvantages, translations);
 
   return (
     <>
@@ -68,7 +69,7 @@ export default async function SpanishHomePage() {
       <JsonLd data={websiteJsonLd(settings, siteUrl, 'es')} />
 
       <HeroBanner settings={localizedSettings} locale="es" />
-      <CoreAdvantages items={settings.coreAdvantages} locale="es" />
+      <CoreAdvantages items={localizedCoreAdvantages} locale="es" />
       <ProductCategories categories={categories} locale="es" />
       <FeaturedProducts products={featuredProducts.items} locale="es" />
       <CertificatesShowcase certificates={certificates} locale="es" />

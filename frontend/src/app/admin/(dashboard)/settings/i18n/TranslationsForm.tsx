@@ -3,12 +3,14 @@
 import { useActionState } from 'react';
 import { FormField, fieldInputClasses } from '@/components/admin/FormField';
 import { saveTranslationsAction } from '@/lib/actions/admin/translations';
+import type { CoreAdvantage } from '@/types/settings';
 
 interface HeroSettings {
   heroHeadline: string;
   heroSubheadline: string;
   heroButton1Text: string;
   heroButton2Text: string;
+  coreAdvantages: CoreAdvantage[];
 }
 
 interface NavItem {
@@ -62,6 +64,30 @@ export function TranslationsForm({
         <EsField name="t__settings.heroSubheadline" label="副标题" enValue={settings.heroSubheadline} translations={translations} multiline />
         <EsField name="t__settings.heroButton1Text" label="按钮一文字" enValue={settings.heroButton1Text} translations={translations} />
         <EsField name="t__settings.heroButton2Text" label="按钮二文字" enValue={settings.heroButton2Text} translations={translations} />
+      </section>
+
+      <section className="space-y-6 rounded-xl border border-border bg-card p-6">
+        <h2 className="text-base font-semibold text-foreground">核心优势</h2>
+        {settings.coreAdvantages.length === 0 && <p className="text-sm text-muted-foreground">暂无核心优势卡片。</p>}
+        {settings.coreAdvantages.map((item, i) => (
+          <div key={i} className="space-y-3 border-t border-border pt-4 first:border-none first:pt-0">
+            <EsField
+              name={`t__settings.coreAdvantages.${i}.title`}
+              label={`卡片 #${i + 1} 标题`}
+              enValue={item.title}
+              translations={translations}
+            />
+            {item.description && (
+              <EsField
+                name={`t__settings.coreAdvantages.${i}.description`}
+                label={`卡片 #${i + 1} 描述`}
+                enValue={item.description}
+                translations={translations}
+                multiline
+              />
+            )}
+          </div>
+        ))}
       </section>
 
       <section className="space-y-4 rounded-xl border border-border bg-card p-6">
