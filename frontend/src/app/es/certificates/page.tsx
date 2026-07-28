@@ -41,30 +41,43 @@ export default async function SpanishCertificatesPage() {
           </>
         )}
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 flex flex-wrap justify-center gap-6">
           {certificates.map((cert) => (
-            <div key={cert.id} className="flex flex-col items-center rounded-lg border border-grey-200 bg-white p-6 text-center">
-              <div className="relative h-32 w-32">
-                <Image src={cert.imageUrl} alt={cert.name} fill sizes="128px" className="object-contain" />
+            <div
+              key={cert.id}
+              className="group flex w-full max-w-xs flex-col overflow-hidden rounded-lg border border-grey-200 bg-white text-center transition-shadow hover:shadow-lg sm:w-72"
+            >
+              <div className="relative aspect-square w-full overflow-hidden bg-grey-50">
+                <Image
+                  src={cert.imageUrl}
+                  alt={cert.name}
+                  fill
+                  sizes="288px"
+                  className="object-contain p-6 transition-transform duration-300 group-hover:scale-105"
+                />
               </div>
-              <h3 className="mt-4 font-semibold text-navy-950">{cert.name}</h3>
-              {cert.issuingAuthority && <p className="mt-1 text-sm text-grey-500">{cert.issuingAuthority}</p>}
-              {cert.certNumber && (
-                <p className="mt-1 text-xs text-grey-500">
-                  {t('es', 'certNumberPrefix')} {cert.certNumber}
-                </p>
-              )}
-              {formatDate(cert.issueDate) && (
-                <p className="mt-1 text-xs text-grey-500">
-                  {t('es', 'issuedLabel')} {formatDate(cert.issueDate)}
-                </p>
-              )}
-              {cert.description && <p className="mt-3 text-sm text-grey-500">{cert.description}</p>}
-              {cert.pdfUrl && (
-                <a href={cert.pdfUrl} target="_blank" rel="noopener noreferrer" className="mt-3 text-sm font-medium text-water-600 hover:underline">
-                  {t('es', 'viewPdf')}
-                </a>
-              )}
+              <div className="flex flex-1 flex-col items-center p-4">
+                {cert.issuingAuthority && (
+                  <span className="text-xs font-medium uppercase tracking-wide text-water-600">{cert.issuingAuthority}</span>
+                )}
+                <h3 className="mt-1 text-base font-semibold text-navy-950">{cert.name}</h3>
+                {cert.certNumber && (
+                  <p className="mt-1 text-xs text-grey-500">
+                    {t('es', 'certNumberPrefix')} {cert.certNumber}
+                  </p>
+                )}
+                {formatDate(cert.issueDate) && (
+                  <p className="mt-1 text-xs text-grey-500">
+                    {t('es', 'issuedLabel')} {formatDate(cert.issueDate)}
+                  </p>
+                )}
+                {cert.description && <p className="mt-2 line-clamp-2 text-sm text-grey-500">{cert.description}</p>}
+                {cert.pdfUrl && (
+                  <a href={cert.pdfUrl} target="_blank" rel="noopener noreferrer" className="mt-3 text-sm font-medium text-water-600 hover:underline">
+                    {t('es', 'viewPdf')}
+                  </a>
+                )}
+              </div>
             </div>
           ))}
         </div>
