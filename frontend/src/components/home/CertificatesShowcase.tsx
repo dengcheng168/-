@@ -18,12 +18,24 @@ export function CertificatesShowcase({ certificates, locale = 'en' }: { certific
           {certificates.map((cert) => (
             <div
               key={cert.id}
-              className="flex w-40 flex-col items-center rounded-lg border border-grey-200 bg-white p-4 text-center transition-shadow hover:shadow-md"
+              className="group flex w-full max-w-xs flex-col overflow-hidden rounded-lg border border-grey-200 bg-white text-center transition-shadow hover:shadow-lg sm:w-72"
             >
-              <div className="relative h-24 w-24">
-                <Image src={cert.imageUrl} alt={cert.name} fill sizes="96px" className="object-contain" />
+              <div className="relative aspect-square w-full overflow-hidden bg-grey-50">
+                <Image
+                  src={cert.imageUrl}
+                  alt={cert.name}
+                  fill
+                  sizes="288px"
+                  className="object-contain p-6 transition-transform duration-300 group-hover:scale-105"
+                />
               </div>
-              <p className="mt-3 text-sm font-medium text-navy-950">{cert.name}</p>
+              <div className="flex flex-1 flex-col items-center p-4">
+                {cert.issuingAuthority && (
+                  <span className="text-xs font-medium uppercase tracking-wide text-water-600">{cert.issuingAuthority}</span>
+                )}
+                <h3 className="mt-1 text-base font-semibold text-navy-950">{cert.name}</h3>
+                {cert.description && <p className="mt-2 line-clamp-2 text-sm text-grey-500">{cert.description}</p>}
+              </div>
             </div>
           ))}
         </div>
