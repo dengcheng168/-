@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { resolveMediaUrl } from '@/lib/utils/media';
 import { ImageCropper } from './ImageCropper';
+import { MediaLibraryPicker } from './MediaLibraryPicker';
 
 const RASTER_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
 
@@ -91,11 +92,14 @@ export function ImageUploader({
           />
           {uploading && <p className="mt-1 text-xs text-grey-500">上传中...</p>}
           {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
-          {url && (
-            <button type="button" onClick={() => setUrl('')} className="mt-1 text-xs text-red-600 hover:underline">
-              移除图片
-            </button>
-          )}
+          <div className="mt-1 flex items-center gap-3">
+            <MediaLibraryPicker onSelect={setUrl} />
+            {url && (
+              <button type="button" onClick={() => setUrl('')} className="text-xs text-red-600 hover:underline">
+                移除图片
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
