@@ -69,7 +69,7 @@ export default async function AdminInquiriesPage({
         description={sourcePage ? `来源页面「${sourcePage}」的询盘，共 ${data.length} 条。` : '查看并跟进客户询盘，支持按状态、语言筛选与导出。'}
         action={
           <a
-            href={`/api/admin/inquiries/export${exportQs ? `?${exportQs}` : ''}`}
+            href={`/auth/admin/inquiries/export${exportQs ? `?${exportQs}` : ''}`}
             className="rounded-md border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F6F7F9]"
           >
             导出 CSV

@@ -10,7 +10,7 @@ export function MediaDeleteButton({ id }: { id: number }) {
   async function handleDelete() {
     setBusy(true);
     try {
-      const usageRes = await fetch(`/api/admin/proxy/media/${id}/usage`);
+      const usageRes = await fetch(`/auth/admin/proxy/media/${id}/usage`);
       const usageBody = await usageRes.json();
 
       if (usageBody?.data?.inUse) {
@@ -21,7 +21,7 @@ export function MediaDeleteButton({ id }: { id: number }) {
 
       if (!window.confirm('确定要删除这张图片吗？')) return;
 
-      const deleteRes = await fetch(`/api/admin/proxy/media/${id}`, { method: 'DELETE' });
+      const deleteRes = await fetch(`/auth/admin/proxy/media/${id}`, { method: 'DELETE' });
       if (!deleteRes.ok) {
         const body = await deleteRes.json().catch(() => null);
         window.alert(body?.error?.message ?? `删除失败（HTTP ${deleteRes.status}）`);

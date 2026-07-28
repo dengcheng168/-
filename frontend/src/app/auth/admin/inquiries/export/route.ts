@@ -2,7 +2,12 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { ADMIN_COOKIE_NAME } from '@/config/constants';
 
-/** CSV 导出同样需要经服务端代理转发 Cookie（原因见 media/upload/route.ts 的注释）*/
+/**
+ * CSV 导出同样需要经服务端代理转发 Cookie（原因见 media/upload/route.ts 的注释）。
+ * 路径放在 /auth/admin/ 而不是 /api/admin/：原来的 /api/admin/inquiries/export 会被生产
+ * Nginx 的 location /api/ 直接转发给 backend（跳过这个 Route Handler），但 backend 实际路由是
+ * /admin/inquiries/export.csv（带 .csv 后缀），路径对不上导致 404——跟 media 代理是同一类问题。
+ */
 export async function GET(request: Request) {
   const cookieStore = await cookies();
   const token = cookieStore.get(ADMIN_COOKIE_NAME)?.value;

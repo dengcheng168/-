@@ -6,6 +6,13 @@ import { ADMIN_COOKIE_NAME } from '@/config/constants';
  * 通用的后台 API 代理：供少数需要在客户端直接发起请求的交互使用
  * （例如删除媒体前先查用量、再弹确认框），同样是为了转发 Cookie（见 media/upload/route.ts 注释）。
  * 大多数场景应优先使用 Server Action + adminFetch，这个通用代理只用于必须在客户端交互的场景。
+ *
+ * 路径特意放在 /auth/admin/ 而不是 /api/admin/：生产 Nginx 的 location /api/ 会把所有 /api/*
+ * 统一转发给 backend_upstream，这个 Next.js frontend 自己的 Route Handler 永远收不到请求（实测
+ * DELETE /api/admin/proxy/media/:id 会被 Nginx 直接转发到 backend，backend 收到的是原封不动的
+ * "/api/admin/proxy/media/:id" 这个路径，它当然没有这条路由，报 404——跟 /auth/admin/logout 那次
+ * 是同一类问题）。/auth/admin/proxy/... 同时避开 Nginx 的 location /api/ 和 proxy.ts 的
+ * '/admin/:path*' matcher，自动落入 Nginx 的 location / 转发给 frontend，无需改动 Nginx。
  */
 async function proxy(request: Request, path: string[]) {
   const cookieStore = await cookies();
