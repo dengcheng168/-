@@ -6,9 +6,11 @@ export async function adminSystemRoutes(app: FastifyInstance) {
   app.addHook('preHandler', app.authenticate);
 
   app.get('/system/info', async (request) => {
+    // Product/BlogPost 是软删除，不加 deletedAt: null 的话已删除的记录仍会被计入总数，
+    // 跟列表页实际能看到的数量对不上（Inquiry/Media 没有 deletedAt 字段，不需要过滤）。
     const [productCount, postCount, inquiryCount, mediaCount] = await Promise.all([
-      request.server.prisma.product.count(),
-      request.server.prisma.blogPost.count(),
+      request.server.prisma.product.count({ where: { deletedAt: null } }),
+      request.server.prisma.blogPost.count({ where: { deletedAt: null } }),
       request.server.prisma.inquiry.count(),
       request.server.prisma.media.count(),
     ]);
