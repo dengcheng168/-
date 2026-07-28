@@ -77,7 +77,9 @@ export async function listPublicProducts(
   const [items, total] = await Promise.all([
     prisma.product.findMany({
       where,
-      orderBy: { sortOrder: 'asc' },
+      // sortOrder 相同（比如都还是默认值 0）时用 id 兜底排序，保证列表左到右/上到下的显示顺序
+      // 稳定不跳动，不依赖 SQLite 未定义的平局顺序（做法同 blog.service.ts 的 publishedAt 兜底）
+      orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
       include: { category: true },
       ...toSkipTake(query),
     }),
@@ -105,7 +107,7 @@ export async function getPublicProductBySlug(prisma: PrismaClient, slug: string,
       deletedAt: null,
       id: { not: product.id },
     },
-    orderBy: { sortOrder: 'asc' },
+    orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
     include: { category: true },
     take: 4,
   });
@@ -140,7 +142,7 @@ export async function listAdminProducts(
   const [items, total] = await Promise.all([
     prisma.product.findMany({
       where,
-      orderBy: { sortOrder: 'asc' },
+      orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
       include: { category: true },
       ...toSkipTake(query),
     }),

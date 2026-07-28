@@ -20,7 +20,8 @@ async function attachCategoryTranslations<T extends { id: number }>(
 export async function listPublishedCategories(prisma: PrismaClient, locale?: string) {
   const categories = await prisma.productCategory.findMany({
     where: { published: true, deletedAt: null },
-    orderBy: { sortOrder: 'asc' },
+    // sortOrder 相同时按 id 兜底排序，保持顺序稳定（做法同 products.service.ts）
+    orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
   });
   return attachCategoryTranslations(prisma, categories, locale);
 }
@@ -47,7 +48,7 @@ export async function listAdminCategories(
   const [items, total] = await Promise.all([
     prisma.productCategory.findMany({
       where,
-      orderBy: { sortOrder: 'asc' },
+      orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
       ...toSkipTake(query),
     }),
     prisma.productCategory.count({ where }),
