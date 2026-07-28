@@ -133,14 +133,32 @@ export async function findMediaUsage(prisma: PrismaClient, media: MediaUrls) {
         { mainImage: { in: urls } },
         { ogImage: { in: urls } },
         { specSheetUrl: { in: urls } },
-        // 富文本正文/相册里手动插入的图片（不是通过主图字段选的）也算在用，否则"未使用媒体"
-        // 会误判成可以安全删除，实际删了会导致正文/相册里出现失效图片
-        ...urls.flatMap((u) => [{ galleryImages: { contains: u } }, { description: { contains: u } }]),
+        // 富文本正文/相册/应用场景区块里手动插入或选择的图片也算在用，否则"未使用媒体"
+        // 会误判成可以安全删除，实际删了会导致正文/相册/应用场景出现失效图片
+        ...urls.flatMap((u) => [
+          { galleryImages: { contains: u } },
+          { description: { contains: u } },
+          { applications: { contains: u } },
+        ]),
       ],
     },
     select: { id: true, name: true },
   });
   usages.push(...products.map((p) => ({ type: 'product', id: p.id, name: p.name })));
+
+  // 西班牙语译文里的正文/应用场景/结构化区块同样可能内嵌图片，只在译文里出现、英文原文没有
+  // 的图片如果不查这三张翻译表，会被误判为"未使用"从而被误删——查询要 join 回父表判断
+  // deletedAt: null（Page 没有 deletedAt，PageTranslation 不需要这层过滤）。
+  const productTranslations = await prisma.productTranslation.findMany({
+    where: {
+      product: { deletedAt: null },
+      OR: urls.flatMap((u) => [{ description: { contains: u } }, { applications: { contains: u } }]),
+    },
+    select: { productId: true, product: { select: { name: true } } },
+  });
+  usages.push(
+    ...productTranslations.map((t) => ({ type: 'product', id: t.productId, name: `${t.product.name}（西班牙语译文）` })),
+  );
 
   // Product/ProductCategory/BlogPost/Certificate 都是软删除（deletedAt 字段打时间戳，
   // 不会真的从表里移除记录）——这里必须显式过滤掉已软删除的记录，否则"已删除"的证书/产品
@@ -157,6 +175,12 @@ export async function findMediaUsage(prisma: PrismaClient, media: MediaUrls) {
     select: { id: true, title: true },
   });
   usages.push(...posts.map((p) => ({ type: 'blog-post', id: p.id, name: p.title })));
+
+  const postTranslations = await prisma.blogPostTranslation.findMany({
+    where: { post: { deletedAt: null }, OR: urls.map((u) => ({ body: { contains: u } })) },
+    select: { postId: true, post: { select: { title: true } } },
+  });
+  usages.push(...postTranslations.map((t) => ({ type: 'blog-post', id: t.postId, name: `${t.post.title}（西班牙语译文）` })));
 
   const certs = await prisma.certificate.findMany({
     where: { deletedAt: null, OR: [{ imageUrl: { in: urls } }, { pdfUrl: { in: urls } }] },
@@ -176,6 +200,13 @@ export async function findMediaUsage(prisma: PrismaClient, media: MediaUrls) {
     select: { id: true, title: true },
   });
   usages.push(...pages.map((p) => ({ type: 'page', id: p.id, name: p.title })));
+
+  // Page 没有 deletedAt（硬删除），PageTranslation 不需要 join 过滤父表软删除状态
+  const pageTranslations = await prisma.pageTranslation.findMany({
+    where: { OR: urls.flatMap((u) => [{ bodyHtml: { contains: u } }, { sections: { contains: u } }]) },
+    select: { pageId: true, page: { select: { title: true } } },
+  });
+  usages.push(...pageTranslations.map((t) => ({ type: 'page', id: t.pageId, name: `${t.page.title}（西班牙语译文）` })));
 
   const settings = await prisma.siteSetting.findFirst({
     where: {
