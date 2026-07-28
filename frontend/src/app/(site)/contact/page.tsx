@@ -48,12 +48,6 @@ export default async function ContactPage() {
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_1.5fr]">
           <div className="space-y-4 text-sm">
-            {settings.companyAddress && (
-              <div>
-                <div className="font-semibold text-navy-950">Address</div>
-                <div className="mt-1 text-grey-500">{settings.companyAddress}</div>
-              </div>
-            )}
             {settings.companyEmail && (
               <div>
                 <div className="font-semibold text-navy-950">Email</div>
@@ -80,6 +74,13 @@ export default async function ContactPage() {
             <InquiryForm sourcePage="/contact" />
           </div>
         </div>
+
+        {settings.companyAddress && (
+          <div className="mt-10 border-t border-grey-200 pt-6 text-sm">
+            <div className="font-semibold text-navy-950">Address</div>
+            <div className="mt-1 text-grey-500">{settings.companyAddress}</div>
+          </div>
+        )}
       </Container>
     </>
   );
