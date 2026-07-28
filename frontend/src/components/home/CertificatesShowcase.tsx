@@ -26,7 +26,7 @@ export function CertificatesShowcase({ certificates, locale = 'en' }: { certific
                   alt={cert.name}
                   fill
                   sizes="288px"
-                  className="object-contain p-6 transition-transform duration-300 group-hover:scale-105"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               </div>
               <div className="flex flex-1 flex-col items-center p-4">
