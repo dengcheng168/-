@@ -52,9 +52,10 @@ export async function adminCreateHandler(request: FastifyRequest) {
   return ok(cert);
 }
 
-export async function adminUpdateHandler(request: FastifyRequest<{ Params: { id: string } }>) {
+export async function adminUpdateHandler(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
   const input = updateCertificateSchema.parse(request.body);
   const cert = await updateCertificate(request.server.prisma, Number(request.params.id), input);
+  if (!cert) return reply.status(404).send(fail('证书不存在或已被删除', 'NOT_FOUND'));
   await auditLogFromRequest(request.server.prisma, request, {
     action: 'certificate.update',
     resourceType: 'certificate',

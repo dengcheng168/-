@@ -85,9 +85,11 @@ export async function adminCreateHandler(request: FastifyRequest) {
 
 export async function adminUpdateHandler(
   request: FastifyRequest<{ Params: { id: string } }>,
+  reply: FastifyReply,
 ) {
   const input = updateCategorySchema.parse(request.body);
   const category = await updateCategory(request.server.prisma, Number(request.params.id), input);
+  if (!category) return reply.status(404).send(fail('分类不存在或已被删除', 'NOT_FOUND'));
   await auditLogFromRequest(request.server.prisma, request, {
     action: 'product_category.update',
     resourceType: 'product_category',

@@ -73,9 +73,10 @@ export async function adminCreateHandler(request: FastifyRequest) {
   return ok(post);
 }
 
-export async function adminUpdateHandler(request: FastifyRequest<{ Params: { id: string } }>) {
+export async function adminUpdateHandler(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
   const input = updateBlogPostSchema.parse(request.body);
   const post = await updatePost(request.server.prisma, Number(request.params.id), input);
+  if (!post) return reply.status(404).send(fail('文章不存在或已被删除', 'NOT_FOUND'));
   await auditLogFromRequest(request.server.prisma, request, {
     action: 'blog_post.update',
     resourceType: 'blog_post',

@@ -148,10 +148,15 @@ export async function createPost(prisma: PrismaClient, input: CreateBlogPostInpu
   return serializePost(post);
 }
 
+/**
+ * 更新前先确认文章仍然存在且未被软删除，避免并发场景下"复活"一个已经被删除的文章
+ * （做法同 products.service.ts 的 updateProduct，见那里的注释）。返回 null 交给 controller 转成 404。
+ */
 export async function updatePost(prisma: PrismaClient, id: number, input: UpdateBlogPostInput) {
   const { tagIds, body, publishedAt: publishedAtInput, ...rest } = input;
 
-  const existing = await prisma.blogPost.findUnique({ where: { id } });
+  const existing = await prisma.blogPost.findFirst({ where: { id, deletedAt: null } });
+  if (!existing) return null;
   // 手动指定了发布时间就用手动值（可以用来给文章改到任意时间点，从而调整"最新到最旧"的排序位置）；
   // 没手动指定时保留原逻辑：只有从没发布过的文章第一次转为已发布，才自动盖当前时间戳，
   // 已经发布过的文章后续再保存不会被自动改动发布时间。

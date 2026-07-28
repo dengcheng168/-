@@ -71,7 +71,13 @@ export async function createCategory(prisma: PrismaClient, input: CreateCategory
   });
 }
 
-export function updateCategory(prisma: PrismaClient, id: number, input: UpdateCategoryInput) {
+/**
+ * 更新前先确认分类仍然存在且未被软删除，避免并发场景下"复活"一个已经被删除的分类
+ * （做法同 products.service.ts 的 updateProduct，见那里的注释）。返回 null 交给 controller 转成 404。
+ */
+export async function updateCategory(prisma: PrismaClient, id: number, input: UpdateCategoryInput) {
+  const existing = await prisma.productCategory.findFirst({ where: { id, deletedAt: null } });
+  if (!existing) return null;
   return prisma.productCategory.update({ where: { id }, data: input });
 }
 

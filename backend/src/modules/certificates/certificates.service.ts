@@ -44,7 +44,13 @@ export function createCertificate(prisma: PrismaClient, input: CreateCertificate
   return prisma.certificate.create({ data: input });
 }
 
-export function updateCertificate(prisma: PrismaClient, id: number, input: UpdateCertificateInput) {
+/**
+ * 更新前先确认证书仍然存在且未被软删除，避免并发场景下"复活"一个已经被删除的证书
+ * （做法同 products.service.ts 的 updateProduct，见那里的注释）。返回 null 交给 controller 转成 404。
+ */
+export async function updateCertificate(prisma: PrismaClient, id: number, input: UpdateCertificateInput) {
+  const existing = await prisma.certificate.findFirst({ where: { id, deletedAt: null } });
+  if (!existing) return null;
   return prisma.certificate.update({ where: { id }, data: input });
 }
 
