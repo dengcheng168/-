@@ -10,6 +10,9 @@ export const createBlogPostSchema = z.object({
   categoryId: z.number().int(),
   authorName: z.string().optional(),
   status: z.enum(['DRAFT', 'PUBLISHED']).optional(),
+  // 手动指定发布时间（datetime-local 输入的本地时间字符串，如 "2026-07-28T14:30"）；
+  // 不传时沿用原有的"首次发布自动盖时间戳"逻辑，见 blog.service.ts createPost/updatePost。
+  publishedAt: z.string().optional(),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
   tagIds: z.array(z.number().int()).default([]),

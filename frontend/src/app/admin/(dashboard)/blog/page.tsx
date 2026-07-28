@@ -15,6 +15,11 @@ interface Row {
   category?: { name: string };
 }
 
+function formatPublishedAt(value: string | null) {
+  if (!value) return '-';
+  return new Date(value).toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
 export default async function AdminBlogPage() {
   const { data } = await adminFetch<Row[]>('/blog?pageSize=100');
 
@@ -36,13 +41,14 @@ export default async function AdminBlogPage() {
 
       <div>
         <AdminTable>
-          <AdminTableHead columns={['标题', '分类', '状态', '操作']} />
+          <AdminTableHead columns={['标题', '分类', '发布时间', '状态', '操作']} />
           <tbody>
-            {data.length === 0 && <AdminEmptyRow colSpan={4} />}
+            {data.length === 0 && <AdminEmptyRow colSpan={5} />}
             {data.map((row) => (
               <tr key={row.id} className="border-b border-grey-100 last:border-none">
                 <td className="px-4 py-3 font-medium text-navy-950">{row.title}</td>
                 <td className="px-4 py-3 text-grey-500">{row.category?.name ?? '-'}</td>
+                <td className="px-4 py-3 text-grey-500">{formatPublishedAt(row.publishedAt)}</td>
                 <td className="px-4 py-3">
                   <StatusBadge status={row.status} />
                 </td>

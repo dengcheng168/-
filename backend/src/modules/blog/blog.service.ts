@@ -100,7 +100,14 @@ export async function listAdminPosts(
   };
 
   const [items, total] = await Promise.all([
-    prisma.blogPost.findMany({ where, orderBy: { createdAt: 'desc' }, include: includeRelations, ...toSkipTake(query) }),
+    // 优先按发布时间新到旧排（草稿没有发布时间，SQLite 里 NULL 在 DESC 排序下自然排到最后，
+    // 同为 NULL 或发布时间相同时再按创建时间新到旧兜底排序，保持顺序稳定）
+    prisma.blogPost.findMany({
+      where,
+      orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
+      include: includeRelations,
+      ...toSkipTake(query),
+    }),
     prisma.blogPost.count({ where }),
   ]);
 
@@ -113,13 +120,19 @@ export async function getAdminPostById(prisma: PrismaClient, id: number) {
 }
 
 export async function createPost(prisma: PrismaClient, input: CreateBlogPostInput) {
-  const { tagIds, body, ...rest } = input;
+  const { tagIds, body, publishedAt: publishedAtInput, ...rest } = input;
   const slug = await generateUniqueSlug(input.slug ?? input.title, async (candidate) => {
     const found = await prisma.blogPost.findUnique({ where: { slug: candidate } });
     return !!found;
   });
 
-  const publishedAt = rest.status === 'PUBLISHED' ? new Date() : undefined;
+  // 手动指定了发布时间就用手动值（哪怕是草稿也允许提前填好，方便按计划时间排序）；
+  // 没手动指定时保留原逻辑：首次直接创建为已发布状态才自动盖当前时间戳。
+  const publishedAt = publishedAtInput
+    ? new Date(publishedAtInput)
+    : rest.status === 'PUBLISHED'
+      ? new Date()
+      : undefined;
 
   const post = await prisma.blogPost.create({
     data: {
@@ -136,11 +149,17 @@ export async function createPost(prisma: PrismaClient, input: CreateBlogPostInpu
 }
 
 export async function updatePost(prisma: PrismaClient, id: number, input: UpdateBlogPostInput) {
-  const { tagIds, body, ...rest } = input;
+  const { tagIds, body, publishedAt: publishedAtInput, ...rest } = input;
 
   const existing = await prisma.blogPost.findUnique({ where: { id } });
-  const publishedAt =
-    rest.status === 'PUBLISHED' && existing?.publishedAt == null ? new Date() : undefined;
+  // 手动指定了发布时间就用手动值（可以用来给文章改到任意时间点，从而调整"最新到最旧"的排序位置）；
+  // 没手动指定时保留原逻辑：只有从没发布过的文章第一次转为已发布，才自动盖当前时间戳，
+  // 已经发布过的文章后续再保存不会被自动改动发布时间。
+  const publishedAt = publishedAtInput
+    ? new Date(publishedAtInput)
+    : rest.status === 'PUBLISHED' && existing?.publishedAt == null
+      ? new Date()
+      : undefined;
 
   const post = await prisma.$transaction(async (tx) => {
     if (tagIds !== undefined) {

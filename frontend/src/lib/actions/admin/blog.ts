@@ -24,6 +24,7 @@ function buildPayload(formData: FormData) {
     categoryId: Number(formData.get('categoryId')),
     authorName: textOrUndefined(formData, 'authorName'),
     status: formData.get('status'),
+    publishedAt: textOrUndefined(formData, 'publishedAt'),
     seoTitle: textOrUndefined(formData, 'seoTitle'),
     seoDescription: textOrUndefined(formData, 'seoDescription'),
     tagIds,

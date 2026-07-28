@@ -14,6 +14,7 @@ interface PostDetail {
   categoryId: number;
   authorName: string;
   status: string;
+  publishedAt: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
   tags: { id: number; name: string }[];

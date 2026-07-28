@@ -26,9 +26,20 @@ interface FormValues {
   categoryId?: number;
   authorName?: string;
   status?: string;
+  publishedAt?: string | null;
   seoTitle?: string | null;
   seoDescription?: string | null;
   tags?: { id: number }[];
+}
+
+// <input type="datetime-local"> 需要不带时区的本地时间字符串（YYYY-MM-DDTHH:mm），
+// 数据库存的是 UTC ISO 字符串，这里按浏览器本地时区转换一次，提交时再由浏览器原样按本地时区解析回 Date。
+function toDatetimeLocalValue(iso?: string | null): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 interface TranslationValues {
@@ -112,12 +123,27 @@ export function BlogPostForm({
         </FormField>
       )}
 
-      <FormField label="发布状态" htmlFor="status">
-        <select id="status" name="status" defaultValue={initialValues?.status ?? 'DRAFT'} className={fieldInputClasses}>
-          <option value="DRAFT">草稿</option>
-          <option value="PUBLISHED">已发布</option>
-        </select>
-      </FormField>
+      <div className="grid grid-cols-2 gap-4">
+        <FormField label="发布状态" htmlFor="status">
+          <select id="status" name="status" defaultValue={initialValues?.status ?? 'DRAFT'} className={fieldInputClasses}>
+            <option value="DRAFT">草稿</option>
+            <option value="PUBLISHED">已发布</option>
+          </select>
+        </FormField>
+        <FormField
+          label="发布时间"
+          htmlFor="publishedAt"
+          hint="留空则首次发布时自动使用当前时间；手动修改可以调整文章在列表中按时间新到旧的排序位置"
+        >
+          <input
+            id="publishedAt"
+            name="publishedAt"
+            type="datetime-local"
+            defaultValue={toDatetimeLocalValue(initialValues?.publishedAt)}
+            className={fieldInputClasses}
+          />
+        </FormField>
+      </div>
 
       <FormField label="SEO 标题" htmlFor="seoTitle">
         <input id="seoTitle" name="seoTitle" defaultValue={initialValues?.seoTitle ?? ''} className={fieldInputClasses} />
