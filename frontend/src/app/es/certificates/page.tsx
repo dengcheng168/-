@@ -45,15 +45,16 @@ export default async function SpanishCertificatesPage() {
           {certificates.map((cert) => (
             <div
               key={cert.id}
-              className="group flex w-full max-w-xs flex-col overflow-hidden rounded-lg border border-grey-200 bg-white text-center transition-shadow hover:shadow-lg sm:w-72"
+              className="group flex w-[calc(50%-12px)] flex-col overflow-hidden rounded-lg border border-grey-200 bg-white text-center transition-shadow hover:shadow-lg sm:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)]"
             >
-              <div className="relative aspect-square w-full overflow-hidden bg-grey-50">
+              <div className="overflow-hidden bg-grey-50">
                 <Image
                   src={cert.imageUrl}
                   alt={cert.name}
-                  fill
-                  sizes="288px"
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  width={0}
+                  height={0}
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                  className="h-auto w-full transition-transform duration-300 group-hover:scale-105"
                 />
               </div>
               <div className="flex flex-1 flex-col items-center p-4">

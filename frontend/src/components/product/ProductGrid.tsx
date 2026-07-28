@@ -9,9 +9,11 @@ export function ProductGrid({ products, locale = 'en' }: { products: Product[]; 
   }
 
   return (
-    <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+    <div className="flex flex-wrap justify-center gap-6">
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} locale={locale} />
+        <div key={product.id} className="w-[calc(50%-12px)] sm:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)]">
+          <ProductCard product={product} locale={locale} />
+        </div>
       ))}
     </div>
   );
