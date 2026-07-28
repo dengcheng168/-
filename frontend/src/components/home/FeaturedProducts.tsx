@@ -15,7 +15,7 @@ export function FeaturedProducts({ products, locale = 'en' }: { products: Produc
       <Container>
         <SectionHeading eyebrow={t(locale, 'sectionFeaturedProductsEyebrow')} title={t(locale, 'sectionFeaturedProductsTitle')} />
         <div className="mt-10">
-          <ProductGrid products={products} locale={locale} />
+          <ProductGrid products={products} locale={locale} center />
         </div>
         <div className="mt-10 text-center">
           <Button href={localeHref('/products', locale)} variant="outline">
