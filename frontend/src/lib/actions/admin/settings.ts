@@ -43,8 +43,6 @@ export async function updateContactSettingsAction(_prevState: AdminFormState, fo
     // （字段整个没提交）才转成 undefined，空字符串会正常传下去清空数据库字段
     faviconUrl: formData.get('faviconUrl') ?? undefined,
     companyAddress: textOrUndefined(formData, 'companyAddress'),
-    // 同 faviconUrl：用 ?? undefined 保证清空图片能正常保存
-    addressMapImage: formData.get('addressMapImage') ?? undefined,
     companyEmail: textOrUndefined(formData, 'companyEmail'),
     companyPhone: textOrUndefined(formData, 'companyPhone'),
   });

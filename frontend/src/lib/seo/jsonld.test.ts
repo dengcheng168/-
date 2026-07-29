@@ -55,7 +55,6 @@ const settings: PublicSiteSettings = {
   companyLogoUrl: null,
   faviconUrl: null,
   companyAddress: null,
-  addressMapImage: null,
   companyEmail: null,
   companyPhone: null,
   whatsappNumber: null,

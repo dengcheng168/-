@@ -12,7 +12,6 @@ const FALLBACK_SETTINGS: PublicSiteSettings = {
   companyLogoUrl: null,
   faviconUrl: null,
   companyAddress: null,
-  addressMapImage: null,
   companyEmail: null,
   companyPhone: null,
   whatsappNumber: null,
@@ -54,7 +53,6 @@ function resolveSettingsMedia(settings: PublicSiteSettings): PublicSiteSettings 
     heroDesktopImage: settings.heroDesktopImage ? resolveMediaUrl(settings.heroDesktopImage) : settings.heroDesktopImage,
     heroMobileImage: settings.heroMobileImage ? resolveMediaUrl(settings.heroMobileImage) : settings.heroMobileImage,
     defaultOgImage: settings.defaultOgImage ? resolveMediaUrl(settings.defaultOgImage) : settings.defaultOgImage,
-    addressMapImage: settings.addressMapImage ? resolveMediaUrl(settings.addressMapImage) : settings.addressMapImage,
     factoryPhotos: settings.factoryPhotos.map((p) => resolveMediaUrl(p)),
   };
 }

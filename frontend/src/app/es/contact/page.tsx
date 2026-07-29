@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import { Container } from '@/components/ui/Container';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { InquiryForm } from '@/components/forms/InquiryForm';
@@ -80,27 +79,20 @@ export default async function SpanishContactPage() {
           </div>
         </div>
 
-        {settings.addressMapImage ? (
-          <div className="mt-10 border-t border-grey-200 pt-6">
+        {settings.companyAddress && (
+          <div className="mt-10 border-t border-grey-200 pt-6 text-sm">
             <div className="font-semibold text-navy-950">{t('es', 'addressLabel')}</div>
-            <div className="mt-3 max-w-xl overflow-hidden rounded-lg border border-grey-200">
-              <Image
-                src={settings.addressMapImage}
-                alt="Mapa de ubicación de la fábrica"
-                width={0}
-                height={0}
-                sizes="(min-width: 1024px) 576px, 100vw"
-                className="h-auto w-full"
+            <div className="mt-1 text-grey-500">{settings.companyAddress}</div>
+            <div className="mt-3 aspect-video max-w-xl overflow-hidden rounded-lg border border-grey-200">
+              <iframe
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(settings.companyAddress)}&output=embed`}
+                title="Mapa de ubicación de la fábrica"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="h-full w-full border-0"
               />
             </div>
           </div>
-        ) : (
-          settings.companyAddress && (
-            <div className="mt-10 border-t border-grey-200 pt-6 text-sm">
-              <div className="font-semibold text-navy-950">{t('es', 'addressLabel')}</div>
-              <div className="mt-1 text-grey-500">{settings.companyAddress}</div>
-            </div>
-          )
         )}
       </Container>
     </>
