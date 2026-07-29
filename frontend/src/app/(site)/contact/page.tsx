@@ -79,13 +79,13 @@ export default async function ContactPage() {
         {settings.addressMapImage ? (
           <div className="mt-10 border-t border-grey-200 pt-6">
             <div className="font-semibold text-navy-950">Address</div>
-            <div className="mt-3 overflow-hidden rounded-lg border border-grey-200">
+            <div className="mt-3 max-w-xl overflow-hidden rounded-lg border border-grey-200">
               <Image
                 src={settings.addressMapImage}
                 alt="Factory address map"
                 width={0}
                 height={0}
-                sizes="100vw"
+                sizes="(min-width: 1024px) 576px, 100vw"
                 className="h-auto w-full"
               />
             </div>
