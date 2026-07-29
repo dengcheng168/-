@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { Container } from '@/components/ui/Container';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { InquiryForm } from '@/components/forms/InquiryForm';
@@ -75,11 +76,27 @@ export default async function ContactPage() {
           </div>
         </div>
 
-        {settings.companyAddress && (
-          <div className="mt-10 border-t border-grey-200 pt-6 text-sm">
+        {settings.addressMapImage ? (
+          <div className="mt-10 border-t border-grey-200 pt-6">
             <div className="font-semibold text-navy-950">Address</div>
-            <div className="mt-1 text-grey-500">{settings.companyAddress}</div>
+            <div className="mt-3 overflow-hidden rounded-lg border border-grey-200">
+              <Image
+                src={settings.addressMapImage}
+                alt="Factory address map"
+                width={0}
+                height={0}
+                sizes="100vw"
+                className="h-auto w-full"
+              />
+            </div>
           </div>
+        ) : (
+          settings.companyAddress && (
+            <div className="mt-10 border-t border-grey-200 pt-6 text-sm">
+              <div className="font-semibold text-navy-950">Address</div>
+              <div className="mt-1 text-grey-500">{settings.companyAddress}</div>
+            </div>
+          )
         )}
       </Container>
     </>

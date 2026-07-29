@@ -496,6 +496,8 @@ model SiteSetting {
   companyLogoUrl        String?
   faviconUrl            String?
   companyAddress        String?
+  // Contact 页面用地图/厂区实景照片替代纯文字地址时使用，留空则回退显示 companyAddress 文字
+  addressMapImage       String?
   companyEmail          String?
   companyPhone          String?
   whatsappNumber        String?

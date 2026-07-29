@@ -7,6 +7,7 @@ interface Settings {
   companyLogoUrl: string | null;
   faviconUrl: string | null;
   companyAddress: string | null;
+  addressMapImage: string | null;
   companyEmail: string | null;
   companyPhone: string | null;
 }
