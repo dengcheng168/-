@@ -9,8 +9,6 @@ export const dynamic = 'force-dynamic';
 const staticPaths = [
   '',
   '/products',
-  '/oem-odm',
-  '/factory',
   '/certificates',
   '/about',
   '/blog',
