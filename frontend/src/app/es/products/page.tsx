@@ -36,12 +36,29 @@ export default async function SpanishProductsPage({
   return (
     <>
       {hasHero && (
-        <PageHeroBanner image={pageContent?.heroImage} imageMobile={pageContent?.heroImageMobile} title={t('es', 'productsPageTitle')} />
+        <PageHeroBanner image={pageContent?.heroImage} imageMobile={pageContent?.heroImageMobile} title={pageContent?.title ?? t('es', 'productsPageTitle')}>
+          {pageContent?.bodyHtml && (
+            <div
+              className="prose prose-sm prose-invert mt-4 max-w-2xl text-grey-100/90"
+              dangerouslySetInnerHTML={{ __html: pageContent.bodyHtml }}
+            />
+          )}
+        </PageHeroBanner>
       )}
 
       <Container className="py-12">
         <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'breadcrumbProducts') }]} locale="es" />
-        {!hasHero && <h1 className="mt-4 text-3xl font-semibold text-navy-950">{t('es', 'productsPageTitle')}</h1>}
+        {!hasHero && (
+          <>
+            <h1 className="mt-4 text-3xl font-semibold text-navy-950">{pageContent?.title ?? t('es', 'productsPageTitle')}</h1>
+            {pageContent?.bodyHtml && (
+              <div
+                className="prose prose-sm mt-4 max-w-2xl text-grey-500"
+                dangerouslySetInnerHTML={{ __html: pageContent.bodyHtml }}
+              />
+            )}
+          </>
+        )}
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[240px_1fr]">
           <aside>

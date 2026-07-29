@@ -8,11 +8,14 @@ import { PageHeroBanner } from '@/components/site/PageHeroBanner';
 import { listBlogPosts, listBlogCategories, listBlogTags } from '@/lib/api/blog';
 import { getPageBySlug } from '@/lib/api/content';
 
-export const metadata: Metadata = {
-  title: 'Blog',
-  description: 'News and insights from our water purifier factory.',
-  alternates: { canonical: '/blog', languages: { en: '/blog', es: '/es/blog', 'x-default': '/blog' } },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getPageBySlug('blog');
+  return {
+    title: page?.seoTitle ?? page?.title ?? 'Blog',
+    description: page?.seoDescription ?? 'News and insights from our water purifier factory.',
+    alternates: { canonical: '/blog', languages: { en: '/blog', es: '/es/blog', 'x-default': '/blog' } },
+  };
+}
 
 export default async function BlogListPage({
   searchParams,
@@ -32,11 +35,30 @@ export default async function BlogListPage({
 
   return (
     <>
-      {hasHero && <PageHeroBanner image={pageContent?.heroImage} imageMobile={pageContent?.heroImageMobile} title="Blog" />}
+      {hasHero && (
+        <PageHeroBanner image={pageContent?.heroImage} imageMobile={pageContent?.heroImageMobile} title={pageContent?.title ?? 'Blog'}>
+          {pageContent?.bodyHtml && (
+            <div
+              className="prose prose-sm prose-invert mt-4 max-w-2xl text-grey-100/90"
+              dangerouslySetInnerHTML={{ __html: pageContent.bodyHtml }}
+            />
+          )}
+        </PageHeroBanner>
+      )}
 
       <Container className="py-12">
         <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Blog' }]} />
-        {!hasHero && <h1 className="mt-4 text-3xl font-semibold text-navy-950">Blog</h1>}
+        {!hasHero && (
+          <>
+            <h1 className="mt-4 text-3xl font-semibold text-navy-950">{pageContent?.title ?? 'Blog'}</h1>
+            {pageContent?.bodyHtml && (
+              <div
+                className="prose prose-sm mt-4 max-w-2xl text-grey-500"
+                dangerouslySetInnerHTML={{ __html: pageContent.bodyHtml }}
+              />
+            )}
+          </>
+        )}
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[240px_1fr]">
           <BlogSidebar categories={categories} tags={tags} />

@@ -8,11 +8,14 @@ import { PageHeroBanner } from '@/components/site/PageHeroBanner';
 import { listProducts, listProductCategories } from '@/lib/api/products';
 import { getPageBySlug } from '@/lib/api/content';
 
-export const metadata: Metadata = {
-  title: 'Products',
-  description: 'Browse our full range of OEM/ODM water purifier products.',
-  alternates: { canonical: '/products', languages: { en: '/products', es: '/es/products', 'x-default': '/products' } },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getPageBySlug('products');
+  return {
+    title: page?.seoTitle ?? page?.title ?? 'Products',
+    description: page?.seoDescription ?? 'Browse our full range of OEM/ODM water purifier products.',
+    alternates: { canonical: '/products', languages: { en: '/products', es: '/es/products', 'x-default': '/products' } },
+  };
+}
 
 export default async function ProductsPage({
   searchParams,
@@ -31,11 +34,30 @@ export default async function ProductsPage({
 
   return (
     <>
-      {hasHero && <PageHeroBanner image={pageContent?.heroImage} imageMobile={pageContent?.heroImageMobile} title="Products" />}
+      {hasHero && (
+        <PageHeroBanner image={pageContent?.heroImage} imageMobile={pageContent?.heroImageMobile} title={pageContent?.title ?? 'Products'}>
+          {pageContent?.bodyHtml && (
+            <div
+              className="prose prose-sm prose-invert mt-4 max-w-2xl text-grey-100/90"
+              dangerouslySetInnerHTML={{ __html: pageContent.bodyHtml }}
+            />
+          )}
+        </PageHeroBanner>
+      )}
 
       <Container className="py-12">
         <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Products' }]} />
-        {!hasHero && <h1 className="mt-4 text-3xl font-semibold text-navy-950">Products</h1>}
+        {!hasHero && (
+          <>
+            <h1 className="mt-4 text-3xl font-semibold text-navy-950">{pageContent?.title ?? 'Products'}</h1>
+            {pageContent?.bodyHtml && (
+              <div
+                className="prose prose-sm mt-4 max-w-2xl text-grey-500"
+                dangerouslySetInnerHTML={{ __html: pageContent.bodyHtml }}
+              />
+            )}
+          </>
+        )}
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[240px_1fr]">
           <aside>
