@@ -30,17 +30,18 @@ export function BlogSidebar({
           >
             {t(locale, 'allPosts')}
           </Link>
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              href={localeHref(`/blog/category/${category.slug}`, locale)}
-              className={`block rounded-md px-3 py-2 text-sm font-medium ${
-                activeCategorySlug === category.slug ? 'bg-navy-900 text-white' : 'text-navy-900 hover:bg-grey-100'
-              }`}
-            >
-              {category.name}
-            </Link>
-          ))}
+          {categories.length > 1 &&
+            categories.map((category) => (
+              <Link
+                key={category.id}
+                href={localeHref(`/blog/category/${category.slug}`, locale)}
+                className={`block rounded-md px-3 py-2 text-sm font-medium ${
+                  activeCategorySlug === category.slug ? 'bg-navy-900 text-white' : 'text-navy-900 hover:bg-grey-100'
+                }`}
+              >
+                {category.name}
+              </Link>
+            ))}
         </nav>
       </div>
 
