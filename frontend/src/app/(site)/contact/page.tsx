@@ -79,9 +79,9 @@ export default async function ContactPage() {
           <div className="mt-10 border-t border-grey-200 pt-6 text-sm">
             <div className="font-semibold text-navy-950">Address</div>
             <div className="mt-1 text-grey-500">{settings.companyAddress}</div>
-            <div className="mt-3 aspect-video max-w-xl overflow-hidden rounded-lg border border-grey-200">
+            <div className="mt-3 h-[450px] w-full overflow-hidden">
               <iframe
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(settings.companyAddress)}&output=embed&hl=en`}
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(`${settings.companyName} ${settings.companyAddress}`)}&output=embed&hl=en`}
                 title="Factory address map"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
