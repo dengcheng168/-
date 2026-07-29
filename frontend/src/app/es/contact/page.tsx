@@ -85,7 +85,7 @@ export default async function SpanishContactPage() {
             <div className="mt-1 text-grey-500">{settings.companyAddress}</div>
             <div className="mt-3 h-[450px] w-full overflow-hidden">
               <iframe
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(`${settings.companyName} ${settings.companyAddress}`)}&output=embed&hl=es`}
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(settings.companyAddress)}&output=embed&hl=es`}
                 title="Mapa de ubicación de la fábrica"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
