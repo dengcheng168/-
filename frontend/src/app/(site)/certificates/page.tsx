@@ -42,7 +42,7 @@ export default async function CertificatesPage() {
           </>
         )}
 
-        <div className="mt-10 flex flex-wrap justify-center gap-6">
+        <div className="mt-10 flex flex-wrap gap-6">
           {certificates.map((cert) => (
             <div
               key={cert.id}
