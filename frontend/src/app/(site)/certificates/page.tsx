@@ -5,21 +5,22 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { PageHeroBanner } from '@/components/site/PageHeroBanner';
 import { listCertificates, getPageBySlug } from '@/lib/api/content';
 
-export const metadata: Metadata = {
-  title: 'Certificates',
-  description: 'Quality and compliance certificates for our water purifier products.',
-  alternates: {
-    canonical: '/certificates',
-    languages: { en: '/certificates', es: '/es/certificates', 'x-default': '/certificates' },
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getPageBySlug('certificates');
+  return {
+    title: page?.seoTitle ?? page?.title ?? 'Certificates',
+    description: page?.seoDescription ?? 'Quality and compliance certificates for our water purifier products.',
+    alternates: {
+      canonical: '/certificates',
+      languages: { en: '/certificates', es: '/es/certificates', 'x-default': '/certificates' },
+    },
+  };
+}
 
 function formatDate(dateStr: string | null) {
   if (!dateStr) return null;
   return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
-
-const INTRO_TEXT = 'We maintain compliance with relevant international quality and safety standards.';
 
 export default async function CertificatesPage() {
   const [certificates, page] = await Promise.all([listCertificates(), getPageBySlug('certificates')]);
@@ -28,8 +29,13 @@ export default async function CertificatesPage() {
   return (
     <>
       {hasHero && (
-        <PageHeroBanner image={page?.heroImage} imageMobile={page?.heroImageMobile} title="Certificates">
-          <p className="mt-3 max-w-2xl text-grey-100/90">{INTRO_TEXT}</p>
+        <PageHeroBanner image={page?.heroImage} imageMobile={page?.heroImageMobile} title={page?.title ?? 'Certificates'}>
+          {page?.bodyHtml && (
+            <div
+              className="prose prose-sm prose-invert mt-4 max-w-2xl text-grey-100/90"
+              dangerouslySetInnerHTML={{ __html: page.bodyHtml }}
+            />
+          )}
         </PageHeroBanner>
       )}
 
@@ -37,8 +43,13 @@ export default async function CertificatesPage() {
         <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Certificates' }]} />
         {!hasHero && (
           <>
-            <h1 className="mt-4 text-3xl font-semibold text-navy-950">Certificates</h1>
-            <p className="mt-3 max-w-2xl text-grey-500">{INTRO_TEXT}</p>
+            <h1 className="mt-4 text-3xl font-semibold text-navy-950">{page?.title ?? 'Certificates'}</h1>
+            {page?.bodyHtml && (
+              <div
+                className="prose prose-sm mt-4 max-w-2xl text-grey-500"
+                dangerouslySetInnerHTML={{ __html: page.bodyHtml }}
+              />
+            )}
           </>
         )}
 

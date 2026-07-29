@@ -27,8 +27,15 @@ export default async function SpanishCertificatesPage() {
   return (
     <>
       {hasHero && (
-        <PageHeroBanner image={page?.heroImage} imageMobile={page?.heroImageMobile} title={t('es', 'certificatesPageTitle')}>
-          <p className="mt-3 max-w-2xl text-grey-100/90">{t('es', 'certificatesIntro')}</p>
+        <PageHeroBanner image={page?.heroImage} imageMobile={page?.heroImageMobile} title={page?.title ?? t('es', 'certificatesPageTitle')}>
+          {page?.bodyHtml ? (
+            <div
+              className="prose prose-sm prose-invert mt-4 max-w-2xl text-grey-100/90"
+              dangerouslySetInnerHTML={{ __html: page.bodyHtml }}
+            />
+          ) : (
+            <p className="mt-3 max-w-2xl text-grey-100/90">{t('es', 'certificatesIntro')}</p>
+          )}
         </PageHeroBanner>
       )}
 
@@ -36,8 +43,15 @@ export default async function SpanishCertificatesPage() {
         <Breadcrumbs items={[{ label: t('es', 'breadcrumbHome'), href: '/es' }, { label: t('es', 'breadcrumbCertificates') }]} locale="es" />
         {!hasHero && (
           <>
-            <h1 className="mt-4 text-3xl font-semibold text-navy-950">{t('es', 'certificatesPageTitle')}</h1>
-            <p className="mt-3 max-w-2xl text-grey-500">{t('es', 'certificatesIntro')}</p>
+            <h1 className="mt-4 text-3xl font-semibold text-navy-950">{page?.title ?? t('es', 'certificatesPageTitle')}</h1>
+            {page?.bodyHtml ? (
+              <div
+                className="prose prose-sm mt-4 max-w-2xl text-grey-500"
+                dangerouslySetInnerHTML={{ __html: page.bodyHtml }}
+              />
+            ) : (
+              <p className="mt-3 max-w-2xl text-grey-500">{t('es', 'certificatesIntro')}</p>
+            )}
           </>
         )}
 
