@@ -14,16 +14,26 @@ function textOrUndefined(formData: FormData, key: string): string | undefined {
   return typeof v === 'string' && v.trim() !== '' ? v.trim() : undefined;
 }
 
-export async function updatePageAction(slug: string, _prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
-  const sectionsRaw = textOrUndefined(formData, 'sectionsJson');
-  let sections: unknown;
-  if (sectionsRaw) {
-    try {
-      sections = JSON.parse(sectionsRaw);
-    } catch {
-      return { message: '结构化区块内容不是合法的 JSON 格式' };
-    }
+/**
+ * 只有 Factory / OEM-ODM 页面的"结构化区块"字段是真正的 JSON（工厂数据、流程步骤数组）。
+ * 其余页面（比如 About）这个字段被复用成一段自由 HTML 字符串——见 PageForm.tsx 的
+ * STRUCTURED_JSON_SLUGS，两边必须保持一致，否则表单展示的是 HTML 模式、这里却按 JSON 解析会报错。
+ */
+const STRUCTURED_JSON_SLUGS = new Set(['factory', 'oem-odm']);
+
+function parseSections(slug: string, sectionsRaw: string | undefined): { sections?: unknown; error?: string } {
+  if (!sectionsRaw) return {};
+  if (!STRUCTURED_JSON_SLUGS.has(slug)) return { sections: sectionsRaw };
+  try {
+    return { sections: JSON.parse(sectionsRaw) };
+  } catch {
+    return { error: '结构化区块内容不是合法的 JSON 格式' };
   }
+}
+
+export async function updatePageAction(slug: string, _prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
+  const { sections, error } = parseSections(slug, textOrUndefined(formData, 'sectionsJson'));
+  if (error) return { message: error };
 
   try {
     await adminFetch(`/pages/${slug}`, {
@@ -57,15 +67,8 @@ export async function updatePageTranslationAction(
   _prevState: TranslationFormState,
   formData: FormData,
 ): Promise<TranslationFormState> {
-  const sectionsRaw = textOrUndefined(formData, 'sectionsJson');
-  let sections: unknown;
-  if (sectionsRaw) {
-    try {
-      sections = JSON.parse(sectionsRaw);
-    } catch {
-      return { message: '结构化区块内容不是合法的 JSON 格式' };
-    }
-  }
+  const { sections, error } = parseSections(slug, textOrUndefined(formData, 'sectionsJson'));
+  if (error) return { message: error };
 
   const payload = {
     title: textOrUndefined(formData, 'title'),

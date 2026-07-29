@@ -35,6 +35,7 @@ export default async function EditPagePage({ params }: { params: Promise<{ slug:
       <h1 className="text-2xl font-semibold text-navy-950">编辑页面：{page.title}</h1>
       <div className="mt-6">
         <PageForm
+          slug={slug}
           action={boundAction}
           initialValues={page}
           translationAction={boundTranslationAction}

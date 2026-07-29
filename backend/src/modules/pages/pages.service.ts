@@ -29,6 +29,16 @@ export async function getPageBySlug(prisma: PrismaClient, slug: string, locale?:
   return { ...base, translation: published ? serializePageTranslation(translation) : null };
 }
 
+/**
+ * sections 字段兼两种用途：Factory/OEM-ODM 页面存结构化 JSON（对象/数组，不经过富文本清洗，
+ * 因为从不作为 HTML 渲染）；About 等页面存一段自由 HTML 字符串（用于后台"补充内容"区块，
+ * 前台走 dangerouslySetInnerHTML 渲染），这种情况必须和 bodyHtml 一样过 sanitizeRichText，
+ * 否则就是一个绕过 XSS 白名单的漏洞。
+ */
+function sanitizeSections(sections: unknown): unknown {
+  return typeof sections === 'string' ? sanitizeRichText(sections) : sections;
+}
+
 export async function updatePage(prisma: PrismaClient, slug: string, input: UpdatePageInput) {
   const { sections, bodyHtml, ...rest } = input;
   const page = await prisma.page.update({
@@ -36,7 +46,7 @@ export async function updatePage(prisma: PrismaClient, slug: string, input: Upda
     data: {
       ...rest,
       ...(bodyHtml !== undefined ? { bodyHtml: sanitizeRichText(bodyHtml) } : {}),
-      ...(sections !== undefined ? { sections: toJsonString(sections) } : {}),
+      ...(sections !== undefined ? { sections: toJsonString(sanitizeSections(sections)) } : {}),
     } as Prisma.PageUpdateInput,
   });
   return serializePage(page);
@@ -66,7 +76,7 @@ export async function upsertPageTranslationBySlug(
   const data = {
     ...rest,
     ...(bodyHtml !== undefined ? { bodyHtml: sanitizeRichText(bodyHtml) } : {}),
-    ...(sections !== undefined ? { sections: toJsonString(sections) } : {}),
+    ...(sections !== undefined ? { sections: toJsonString(sanitizeSections(sections)) } : {}),
     updatedBy,
   };
   const translation = await prisma.pageTranslation.upsert({

@@ -44,6 +44,10 @@ export default async function SpanishAboutPage() {
             )}
           </>
         )}
+
+        {typeof page?.sections === 'string' && page.sections && (
+          <div className="mt-10" dangerouslySetInnerHTML={{ __html: page.sections }} />
+        )}
       </Container>
     </>
   );

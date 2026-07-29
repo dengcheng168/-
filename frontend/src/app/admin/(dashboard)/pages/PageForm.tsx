@@ -29,12 +29,17 @@ interface TranslationValues {
   updatedBy?: number | null;
 }
 
+/** 只有这两个页面的"结构化区块"是真正的 JSON——见 lib/actions/admin/pages.ts 的同名常量，两边要保持一致 */
+const STRUCTURED_JSON_SLUGS = new Set(['factory', 'oem-odm']);
+
 export function PageForm({
+  slug,
   action,
   initialValues,
   translationAction,
   translation,
 }: {
+  slug: string;
   action: (prevState: AdminFormState, formData: FormData) => Promise<AdminFormState>;
   initialValues?: FormValues;
   translationAction?: (prevState: TranslationFormState, formData: FormData) => Promise<TranslationFormState>;
@@ -42,8 +47,13 @@ export function PageForm({
 }) {
   const [state, formAction, pending] = useActionState(action, {});
   const [esState, esFormAction, esPending] = useActionState(translationAction ?? action, {});
-  const sectionsJson = initialValues?.sections != null ? JSON.stringify(initialValues.sections, null, 2) : '';
-  const esSectionsJson = translation?.sections != null ? JSON.stringify(translation.sections, null, 2) : '';
+  const isStructuredJson = STRUCTURED_JSON_SLUGS.has(slug);
+  const sectionsJson = isStructuredJson
+    ? (initialValues?.sections != null ? JSON.stringify(initialValues.sections, null, 2) : '')
+    : (typeof initialValues?.sections === 'string' ? initialValues.sections : '');
+  const esSectionsJson = isStructuredJson
+    ? (translation?.sections != null ? JSON.stringify(translation.sections, null, 2) : '')
+    : (typeof translation?.sections === 'string' ? translation.sections : '');
 
   const englishForm = (
     <form action={formAction} className="max-w-3xl space-y-4">
@@ -70,12 +80,24 @@ export function PageForm({
         aspectRatio={0.8}
       />
 
-      {initialValues?.sections !== undefined && (
-        <FormField label="结构化区块（JSON，谨慎编辑）" htmlFor="sectionsJson" hint="仅特定页面使用，例如工厂数据、OEM 流程步骤">
+      {isStructuredJson ? (
+        initialValues?.sections !== undefined && (
+          <FormField label="结构化区块（JSON，谨慎编辑）" htmlFor="sectionsJson" hint="仅特定页面使用，例如工厂数据、OEM 流程步骤">
+            <textarea
+              id="sectionsJson"
+              name="sectionsJson"
+              rows={8}
+              defaultValue={sectionsJson}
+              className={`${fieldInputClasses} font-mono text-xs`}
+            />
+          </FormField>
+        )
+      ) : (
+        <FormField label="补充内容（HTML，显示在正文下方）" htmlFor="sectionsJson" hint="支持完整 HTML/CSS（含 <style> 标签），可用于自定义排版、图片网格等">
           <textarea
             id="sectionsJson"
             name="sectionsJson"
-            rows={8}
+            rows={12}
             defaultValue={sectionsJson}
             className={`${fieldInputClasses} font-mono text-xs`}
           />
@@ -134,16 +156,32 @@ export function PageForm({
             </details>
           )}
 
-          {initialValues?.sections !== undefined && (
+          {isStructuredJson ? (
+            initialValues?.sections !== undefined && (
+              <FormField
+                label="结构化区块（西班牙语 JSON，整段覆盖）"
+                htmlFor="es_sectionsJson"
+                hint="留空则前台自动回退显示英文原始区块；填写需为完整合法 JSON，结构需与英文原文一致"
+              >
+                <textarea
+                  id="es_sectionsJson"
+                  name="sectionsJson"
+                  rows={8}
+                  defaultValue={esSectionsJson}
+                  className={`${fieldInputClasses} font-mono text-xs`}
+                />
+              </FormField>
+            )
+          ) : (
             <FormField
-              label="结构化区块（西班牙语 JSON，整段覆盖）"
+              label="补充内容（西班牙语 HTML，整段覆盖）"
               htmlFor="es_sectionsJson"
-              hint="留空则前台自动回退显示英文原始区块；填写需为完整合法 JSON，结构需与英文原文一致"
+              hint="留空则前台自动回退显示英文原文"
             >
               <textarea
                 id="es_sectionsJson"
                 name="sectionsJson"
-                rows={8}
+                rows={12}
                 defaultValue={esSectionsJson}
                 className={`${fieldInputClasses} font-mono text-xs`}
               />
@@ -151,8 +189,12 @@ export function PageForm({
           )}
           {initialValues?.sections !== undefined && (
             <details className="rounded-md border border-border bg-muted/30 p-3 text-sm">
-              <summary className="cursor-pointer font-medium text-muted-foreground">查看英文原文（结构化区块）</summary>
-              <pre className="mt-2 overflow-x-auto text-xs">{sectionsJson}</pre>
+              <summary className="cursor-pointer font-medium text-muted-foreground">查看英文原文（{isStructuredJson ? '结构化区块' : '补充内容'}）</summary>
+              {isStructuredJson ? (
+                <pre className="mt-2 overflow-x-auto text-xs">{sectionsJson}</pre>
+              ) : (
+                <div className="prose prose-sm mt-2 max-w-none" dangerouslySetInnerHTML={{ __html: sectionsJson }} />
+              )}
             </details>
           )}
 
