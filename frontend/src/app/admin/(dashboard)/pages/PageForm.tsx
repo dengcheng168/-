@@ -29,8 +29,8 @@ interface TranslationValues {
   updatedBy?: number | null;
 }
 
-/** 只有这两个页面的"结构化区块"是真正的 JSON——见 lib/actions/admin/pages.ts 的同名常量，两边要保持一致 */
-const STRUCTURED_JSON_SLUGS = new Set(['factory', 'oem-odm']);
+/** 结构化区块规则：曾用于 Factory / OEM-ODM 页面，对应页面已下线，规则随之退役，保留为空集合——见 lib/actions/admin/pages.ts 的同名常量，两边要保持一致 */
+const STRUCTURED_JSON_SLUGS = new Set<string>([]);
 
 export function PageForm({
   slug,

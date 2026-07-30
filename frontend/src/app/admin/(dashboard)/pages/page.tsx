@@ -10,8 +10,6 @@ interface Row {
 
 const PAGE_LABELS: Record<string, string> = {
   about: '关于我们',
-  factory: '工厂实力',
-  'oem-odm': 'OEM/ODM 服务',
   'privacy-policy': '隐私政策',
   'terms-of-use': '使用条款',
   contact: '联系我们',

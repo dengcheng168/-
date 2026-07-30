@@ -15,11 +15,11 @@ function textOrUndefined(formData: FormData, key: string): string | undefined {
 }
 
 /**
- * 只有 Factory / OEM-ODM 页面的"结构化区块"字段是真正的 JSON（工厂数据、流程步骤数组）。
- * 其余页面（比如 About）这个字段被复用成一段自由 HTML 字符串——见 PageForm.tsx 的
- * STRUCTURED_JSON_SLUGS，两边必须保持一致，否则表单展示的是 HTML 模式、这里却按 JSON 解析会报错。
+ * 结构化 JSON 区块规则：曾用于 Factory / OEM-ODM 页面（工厂数据、流程步骤数组），
+ * 对应前台路由已下线，规则随之退役，保留为空集合。其余页面（如 About）这个字段
+ * 继续复用成一段自由 HTML 字符串——见 PageForm.tsx 的 STRUCTURED_JSON_SLUGS，两边必须保持一致。
  */
-const STRUCTURED_JSON_SLUGS = new Set(['factory', 'oem-odm']);
+const STRUCTURED_JSON_SLUGS = new Set<string>([]);
 
 function parseSections(slug: string, sectionsRaw: string | undefined): { sections?: unknown; error?: string } {
   if (!sectionsRaw) return {};
