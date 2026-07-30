@@ -317,9 +317,9 @@ async function main() {
       companyAddress: 'Placeholder Industrial Zone, Placeholder City, China',
       whatsappNumber: '+86 000 0000 0000',
       coreAdvantages: toJsonString([
-        { title: 'OEM/ODM Expertise', description: 'Placeholder — years of OEM/ODM manufacturing experience.' },
-        { title: 'Quality Control', description: 'Placeholder — multi-stage quality inspection process.' },
-        { title: 'Global Shipping', description: 'Placeholder — reliable export logistics worldwide.' },
+        { title: 'OEM/ODM Expertise', description: 'We support water purifier customization for distributors, project suppliers and brands, including functions, finishes, logos and packaging.' },
+        { title: 'Quality Control', description: 'From incoming materials and assembly to functional testing and final inspection, every order follows a defined quality-control process before shipment.' },
+        { title: 'Global Shipping', description: 'We prepare export packaging and shipping documentation for international orders and coordinate delivery based on the destination and order requirements.' },
       ]),
       stats: toJsonString([
         { label: 'Years in Business', value: '10+' },
