@@ -8,6 +8,7 @@ export interface ProductCategory {
   published: boolean;
   seoTitle: string | null;
   seoDescription: string | null;
+  updatedAt: string;
 }
 
 export interface ProductSpec {
@@ -51,4 +52,5 @@ export interface Product {
   seoDescription: string | null;
   seoKeywords: string | null;
   ogImage: string | null;
+  updatedAt: string;
 }

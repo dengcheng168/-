@@ -30,6 +30,7 @@ const product: Product = {
   seoDescription: null,
   seoKeywords: null,
   ogImage: null,
+  updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
 const post: BlogPost = {
@@ -46,6 +47,7 @@ const post: BlogPost = {
   seoTitle: null,
   seoDescription: null,
   tags: [],
+  updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
 const faqs: Faq[] = [{ id: 1, question: 'What is RO?', answer: 'Reverse osmosis.', category: null }];
@@ -65,6 +67,7 @@ const settings: PublicSiteSettings = {
   defaultSeoTitle: null,
   defaultSeoDescription: null,
   defaultOgImage: null,
+  googleSiteVerification: null,
   heroHeadline: '',
   heroSubheadline: '',
   heroButton1Text: '',

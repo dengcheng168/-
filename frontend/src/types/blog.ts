@@ -26,4 +26,5 @@ export interface BlogPost {
   seoTitle: string | null;
   seoDescription: string | null;
   tags: BlogTag[];
+  updatedAt: string;
 }
