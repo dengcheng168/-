@@ -24,7 +24,7 @@ export function PageHeroBanner({
   const mobileSrc = imageMobile ?? image;
 
   return (
-    <div className="relative isolate flex min-h-[280px] items-center overflow-hidden bg-navy-950">
+    <div className="relative isolate flex min-h-[400px] items-center overflow-hidden bg-navy-950">
       {desktopSrc && <Image src={desktopSrc} alt="" fill priority sizes="100vw" className="hidden object-cover sm:block" />}
       {mobileSrc && <Image src={mobileSrc} alt="" fill priority sizes="100vw" className="block object-cover sm:hidden" />}
       <div className="absolute inset-0 bg-navy-950/70" />
