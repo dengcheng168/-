@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="h-full text-[106.25%] antialiased">
+    <html lang="en" className="h-full text-[112.5%] antialiased">
       <body className="flex min-h-full flex-col">
         <AnalyticsPixels />
         <PageViewTracker />
