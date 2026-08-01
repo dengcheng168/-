@@ -11,6 +11,13 @@ export interface Certificate {
   description: string | null;
 }
 
+export interface FactoryGalleryItem {
+  id: number;
+  imageUrl: string | null;
+  title: string;
+  description: string | null;
+}
+
 export interface Faq {
   id: number;
   question: string;

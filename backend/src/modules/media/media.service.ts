@@ -188,6 +188,12 @@ export async function findMediaUsage(prisma: PrismaClient, media: MediaUrls) {
   });
   usages.push(...certs.map((c) => ({ type: 'certificate', id: c.id, name: c.name })));
 
+  const galleryItems = await prisma.factoryGalleryItem.findMany({
+    where: { deletedAt: null, imageUrl: { in: urls } },
+    select: { id: true, title: true },
+  });
+  usages.push(...galleryItems.map((g) => ({ type: 'factory-gallery-item', id: g.id, name: g.title })));
+
   const pages = await prisma.page.findMany({
     where: {
       OR: [

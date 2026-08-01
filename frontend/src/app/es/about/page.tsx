@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { Container } from '@/components/ui/Container';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { PageHeroBanner } from '@/components/site/PageHeroBanner';
-import { getPageBySlug } from '@/lib/api/content';
+import { FactoryGallery } from '@/components/site/FactoryGallery';
+import { getPageBySlug, listFactoryGalleryItems } from '@/lib/api/content';
 import { t } from '@/lib/i18n/site-strings';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -15,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SpanishAboutPage() {
-  const page = await getPageBySlug('about', 'es');
+  const [page, galleryItems] = await Promise.all([getPageBySlug('about', 'es'), listFactoryGalleryItems('es')]);
   const hasHero = Boolean(page?.heroImage || page?.heroImageMobile);
 
   return (
@@ -49,6 +50,8 @@ export default async function SpanishAboutPage() {
           <div className="mt-10" dangerouslySetInnerHTML={{ __html: page.sections }} />
         )}
       </Container>
+
+      <FactoryGallery items={galleryItems} locale="es" />
     </>
   );
 }

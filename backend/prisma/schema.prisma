@@ -374,6 +374,41 @@ model CertificateTranslation {
   @@map("certificate_translations")
 }
 
+/// 工厂展示图：About 页面下方的图文展示墙（原来是手工写死的一段 HTML，改成结构化数据后
+/// 管理员可以在后台直接上传图片、改标题描述，不用再编辑 HTML）
+model FactoryGalleryItem {
+  id           Int                          @id @default(autoincrement())
+  imageUrl     String?
+  title        String
+  description  String?
+  sortOrder    Int                          @default(0)
+  published    Boolean                      @default(true)
+  deletedAt    DateTime?
+  createdAt    DateTime                     @default(now())
+  updatedAt    DateTime                     @updatedAt
+  translations FactoryGalleryItemTranslation[]
+
+  @@index([published])
+  @@map("factory_gallery_items")
+}
+
+model FactoryGalleryItemTranslation {
+  id                Int                @id @default(autoincrement())
+  itemId            Int
+  item              FactoryGalleryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  locale            String
+  title             String?
+  description       String?
+  translationStatus String             @default("DRAFT")
+  updatedBy         Int?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@unique([itemId, locale])
+  @@index([locale])
+  @@map("factory_gallery_item_translations")
+}
+
 model Faq {
   id           Int              @id @default(autoincrement())
   question     String

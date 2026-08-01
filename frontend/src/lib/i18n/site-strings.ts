@@ -35,6 +35,10 @@ const SITE_STRINGS = {
     sectionVideoTitle: 'See Our Manufacturing Process',
     sectionCoreAdvantagesEyebrow: 'Why Choose Us',
     sectionCoreAdvantagesTitle: 'Core Advantages',
+    sectionFactoryGalleryEyebrow: 'Factory Capability',
+    sectionFactoryGalleryTitle: 'Factory Testing & Customer Visits',
+    sectionFactoryGalleryDescription:
+      'Discover our testing facilities, production lines, quality-control process and international customer visits at KoiGate Tech.',
     faqPageTitle: 'Frequently Asked Questions',
     faqPageDescription: 'Frequently asked questions about our water purifier products and OEM/ODM services.',
     faqBreadcrumb: 'FAQ',
@@ -149,6 +153,10 @@ const SITE_STRINGS = {
     sectionVideoTitle: 'Conozca Nuestro Proceso de Fabricación',
     sectionCoreAdvantagesEyebrow: 'Por Qué Elegirnos',
     sectionCoreAdvantagesTitle: 'Ventajas Principales',
+    sectionFactoryGalleryEyebrow: 'Capacidad de Fábrica',
+    sectionFactoryGalleryTitle: 'Pruebas de Fábrica y Visitas de Clientes',
+    sectionFactoryGalleryDescription:
+      'Conozca nuestras instalaciones de prueba, líneas de producción, proceso de control de calidad y visitas de clientes internacionales en KoiGate Tech.',
     faqPageTitle: 'Preguntas Frecuentes',
     faqPageDescription: 'Preguntas frecuentes sobre nuestros productos purificadores de agua y servicios OEM/ODM.',
     faqBreadcrumb: 'Preguntas Frecuentes',

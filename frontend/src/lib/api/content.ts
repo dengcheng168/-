@@ -1,7 +1,7 @@
 import { apiFetch } from './client';
 import { getTranslationMap } from './translations';
 import { resolveMediaUrl } from '@/lib/utils/media';
-import type { Certificate, Faq, Page } from '@/types/content';
+import type { Certificate, FactoryGalleryItem, Faq, Page } from '@/types/content';
 import type { Locale, SupportedLocale } from '@/lib/i18n/locales';
 import { resolveLocalizedEntity, localeQueryParam, localizedTag } from '@/lib/i18n/localize';
 import { resolveFaqListContent } from '@/lib/i18n/faq-source';
@@ -9,6 +9,7 @@ import { resolveFaqListContent } from '@/lib/i18n/faq-source';
 type WithTranslation<T> = T & { translation?: Partial<T> | null };
 
 const CERTIFICATE_TRANSLATABLE_FIELDS: (keyof Certificate)[] = ['name', 'description'];
+const FACTORY_GALLERY_TRANSLATABLE_FIELDS: (keyof FactoryGalleryItem)[] = ['title', 'description'];
 const PAGE_TRANSLATABLE_FIELDS: (keyof Page)[] = ['title', 'bodyHtml', 'sections', 'seoTitle', 'seoDescription'];
 
 function localizeCertificate(cert: WithTranslation<Certificate>): Certificate {
@@ -27,6 +28,15 @@ function resolveCertificateMedia(cert: Certificate): Certificate {
     imageUrl: resolveMediaUrl(cert.imageUrl),
     pdfUrl: cert.pdfUrl ? resolveMediaUrl(cert.pdfUrl) : cert.pdfUrl,
   };
+}
+
+function localizeFactoryGalleryItem(item: WithTranslation<FactoryGalleryItem>): FactoryGalleryItem {
+  const { translation, ...base } = item;
+  return resolveLocalizedEntity(base as FactoryGalleryItem, translation, FACTORY_GALLERY_TRANSLATABLE_FIELDS);
+}
+
+function resolveFactoryGalleryItemMedia(item: FactoryGalleryItem): FactoryGalleryItem {
+  return { ...item, imageUrl: item.imageUrl ? resolveMediaUrl(item.imageUrl) : item.imageUrl };
 }
 
 function omitTranslation<T>(item: WithTranslation<T>): T {
@@ -54,6 +64,19 @@ export async function listCertificates(locale: Locale = 'en'): Promise<Certifica
       { revalidate: 300, tags: ['certificates', ...localizedTag('certificates', locale)] },
     );
     return data.map((c) => resolveCertificateMedia(localizeCertificate(c)));
+  } catch {
+    return [];
+  }
+}
+
+export async function listFactoryGalleryItems(locale: Locale = 'en'): Promise<FactoryGalleryItem[]> {
+  const localeParam = localeQueryParam(locale);
+  try {
+    const { data } = await apiFetch<WithTranslation<FactoryGalleryItem>[]>(
+      `/factory-gallery${localeParam ? `?locale=${localeParam}` : ''}`,
+      { revalidate: 300, tags: ['factory-gallery', ...localizedTag('factory-gallery', locale)] },
+    );
+    return data.map((i) => resolveFactoryGalleryItemMedia(localizeFactoryGalleryItem(i)));
   } catch {
     return [];
   }

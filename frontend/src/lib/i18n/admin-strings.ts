@@ -46,6 +46,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { label: '导航菜单', href: '/admin/navigation' },
       { label: '页脚设置', href: '/admin/footer' },
       { label: '证书管理', href: '/admin/certificates' },
+      { label: '工厂展示图', href: '/admin/factory-gallery' },
       { label: '301 重定向', href: '/admin/redirects' },
     ],
   },
