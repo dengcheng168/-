@@ -52,7 +52,7 @@ export async function updateCertificateAction(
   }
   revalidatePath('/admin/certificates');
   updateTag('certificates');
-  redirect('/admin/certificates');
+  return { success: true, message: '已保存' };
 }
 
 /**

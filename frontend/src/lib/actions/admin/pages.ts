@@ -1,7 +1,6 @@
 'use server';
 
 import { revalidatePath, updateTag } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { adminFetch } from '@/lib/api/admin-client';
 import { ApiError } from '@/lib/api/client';
 import type { AdminFormState } from './categories';
@@ -58,7 +57,7 @@ export async function updatePageAction(slug: string, _prevState: AdminFormState,
   // 不刷新的话编辑内容要等 5 分钟 ISR 窗口自然过期才会出现在前台，编辑者会以为没保存成功
   updateTag('pages');
   updateTag(`page:${slug}`);
-  redirect('/admin/pages');
+  return { success: true, message: '已保存' };
 }
 
 export async function deletePageAction(formData: FormData): Promise<void> {

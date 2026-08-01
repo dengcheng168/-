@@ -61,7 +61,7 @@ export async function updateCategoryAction(
   }
   revalidatePath('/admin/product-categories');
   updateTag('product-categories');
-  redirect('/admin/product-categories');
+  return { success: true, message: '已保存' };
 }
 
 /**

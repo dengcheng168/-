@@ -51,7 +51,7 @@ export async function updateBlogCategoryAction(
   }
   revalidatePath('/admin/blog-categories');
   updateTag('blog-categories');
-  redirect('/admin/blog-categories');
+  return { success: true, message: '已保存' };
 }
 
 export async function deleteBlogCategoryAction(formData: FormData): Promise<void> {

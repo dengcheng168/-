@@ -99,7 +99,7 @@ export function CertificateForm({
         </label>
       </div>
 
-      {state.message && <p className="text-sm text-red-600">{state.message}</p>}
+      {state.message && <p className={`text-sm ${state.success ? 'text-green-600' : 'text-red-600'}`}>{state.message}</p>}
 
       <button
         type="submit"

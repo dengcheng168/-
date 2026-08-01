@@ -52,7 +52,7 @@ export async function updateBlogPostAction(id: number, _prevState: AdminFormStat
   } catch (err) {
     return { message: err instanceof ApiError ? err.message : '保存失败' };
   }
-  redirect('/admin/blog');
+  return { success: true, message: '已保存' };
 }
 
 export async function deleteBlogPostAction(formData: FormData): Promise<void> {

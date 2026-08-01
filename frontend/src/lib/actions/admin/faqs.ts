@@ -49,7 +49,7 @@ export async function updateFaqAction(id: number, _prevState: AdminFormState, fo
   }
   revalidatePath('/admin/faqs');
   updateTag('faqs');
-  redirect('/admin/faqs');
+  return { success: true, message: '已保存' };
 }
 
 export async function deleteFaqAction(formData: FormData): Promise<void> {
