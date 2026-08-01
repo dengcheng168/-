@@ -11,6 +11,7 @@ interface Settings {
   defaultSeoTitle: string | null;
   defaultSeoDescription: string | null;
   defaultOgImage: string | null;
+  googleSiteVerification: string | null;
   siteBaseUrl: string | null;
 }
 

@@ -515,6 +515,9 @@ model SiteSetting {
   defaultSeoTitle       String?
   defaultSeoDescription String?
   defaultOgImage        String?
+  // Google Search Console HTML 标签验证方式的 content 值（只存 content，不存完整 <meta> 标签），
+  // 渲染时输出到 <head> 的 <meta name="google-site-verification">，见 lib/seo/base-metadata.ts
+  googleSiteVerification String?
   heroHeadline          String   @default("OEM & ODM Water Purifier Manufacturer")
   heroSubheadline       String   @default("Reliable water purification solutions for global brands, distributors and commercial projects.")
   heroButton1Text       String   @default("Get a Quote")

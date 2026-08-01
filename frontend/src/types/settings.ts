@@ -40,6 +40,7 @@ export interface PublicSiteSettings {
   defaultSeoTitle: string | null;
   defaultSeoDescription: string | null;
   defaultOgImage: string | null;
+  googleSiteVerification: string | null;
   heroHeadline: string;
   heroSubheadline: string;
   heroButton1Text: string;

@@ -9,6 +9,7 @@ interface Values {
   defaultSeoTitle: string | null;
   defaultSeoDescription: string | null;
   defaultOgImage: string | null;
+  googleSiteVerification: string | null;
 }
 
 export function SeoSettingsForm({ initialValues }: { initialValues: Values }) {
@@ -29,6 +30,19 @@ export function SeoSettingsForm({ initialValues }: { initialValues: Values }) {
         recommendedSize="建议 1200×630px（Open Graph 标准尺寸）"
         aspectRatio={1200 / 630}
       />
+      <FormField
+        label="Google Search Console 验证码"
+        htmlFor="googleSiteVerification"
+        hint='在 Search Console 添加资源时选择"HTML 标签"验证方式，只需粘贴 content="..." 里引号内的那一串代码，不要粘贴整个 <meta> 标签。'
+      >
+        <input
+          id="googleSiteVerification"
+          name="googleSiteVerification"
+          defaultValue={initialValues.googleSiteVerification ?? ''}
+          placeholder="例如：abcDEF123..."
+          className={fieldInputClasses}
+        />
+      </FormField>
 
       {state.message && <p className={`text-sm ${state.success ? 'text-green-600' : 'text-red-600'}`}>{state.message}</p>}
       <button type="submit" disabled={pending} className="rounded-md bg-water-500 px-5 py-2.5 text-sm font-medium text-white hover:bg-water-600 disabled:opacity-60">

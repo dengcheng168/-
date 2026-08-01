@@ -31,6 +31,9 @@ export async function updateSeoSettingsAction(_prevState: AdminFormState, formDa
     defaultSeoTitle: textOrUndefined(formData, 'defaultSeoTitle'),
     defaultSeoDescription: textOrUndefined(formData, 'defaultSeoDescription'),
     defaultOgImage: textOrUndefined(formData, 'defaultOgImage'),
+    // 用 ?? 而不是 textOrUndefined：验证码允许清空（比如换绑了 GSC 账号要先移除旧验证码），
+    // textOrUndefined 会把清空后的空字符串当成"没填"而跳过，导致清空操作保存不掉
+    googleSiteVerification: formData.get('googleSiteVerification') ?? undefined,
   });
 }
 

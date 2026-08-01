@@ -22,6 +22,7 @@ const FALLBACK_SETTINGS: PublicSiteSettings = {
   defaultSeoTitle: null,
   defaultSeoDescription: null,
   defaultOgImage: null,
+  googleSiteVerification: null,
   heroHeadline: 'OEM & ODM Water Purifier Manufacturer',
   heroSubheadline: 'Reliable water purification solutions for global brands, distributors and commercial projects.',
   heroButton1Text: 'Get a Quote',

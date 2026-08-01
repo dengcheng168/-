@@ -4,6 +4,7 @@ export const seoSettingsSchema = z.object({
   defaultSeoTitle: z.string().optional(),
   defaultSeoDescription: z.string().optional(),
   defaultOgImage: z.string().optional(),
+  googleSiteVerification: z.string().optional(),
 });
 
 export const contactSettingsSchema = z.object({
