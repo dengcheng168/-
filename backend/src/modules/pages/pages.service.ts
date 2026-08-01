@@ -39,6 +39,11 @@ function sanitizeSections(sections: unknown): unknown {
   return typeof sections === 'string' ? sanitizeRichText(sections) : sections;
 }
 
+/** 硬删除：PageTranslation 通过外键 onDelete: Cascade 会一并删除，不需要单独清理 */
+export function deletePage(prisma: PrismaClient, slug: string) {
+  return prisma.page.delete({ where: { slug } });
+}
+
 export async function updatePage(prisma: PrismaClient, slug: string, input: UpdatePageInput) {
   const { sections, bodyHtml, ...rest } = input;
   const page = await prisma.page.update({

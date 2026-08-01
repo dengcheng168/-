@@ -6,6 +6,7 @@ import {
   adminListHandler,
   adminDetailHandler,
   adminUpdateHandler,
+  adminDeleteHandler,
   adminGetTranslationHandler,
   adminUpsertTranslationHandler,
 } from './pages.controller.js';
@@ -21,6 +22,7 @@ export async function adminPageRoutes(app: FastifyInstance) {
   app.get('/pages', adminListHandler);
   app.get('/pages/:slug', adminDetailHandler);
   app.patch('/pages/:slug', adminUpdateHandler);
+  app.delete('/pages/:slug', adminDeleteHandler);
   app.get('/pages/:slug/translations/:locale', adminGetTranslationHandler);
   app.patch('/pages/:slug/translations/:locale', adminUpsertTranslationHandler);
 }

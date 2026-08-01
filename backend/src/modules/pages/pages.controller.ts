@@ -5,6 +5,7 @@ import {
   listPages,
   getPageBySlug,
   updatePage,
+  deletePage,
   getPageTranslationBySlug,
   upsertPageTranslationBySlug,
 } from './pages.service.js';
@@ -42,6 +43,20 @@ export async function adminUpdateHandler(request: FastifyRequest<{ Params: { slu
     after: { title: page.title, seoTitle: page.seoTitle },
   });
   return ok(page);
+}
+
+export async function adminDeleteHandler(request: FastifyRequest<{ Params: { slug: string } }>, reply: FastifyReply) {
+  const { slug } = request.params;
+  const existing = await getPageBySlug(request.server.prisma, slug);
+  if (!existing) return reply.status(404).send(fail('页面不存在', 'NOT_FOUND'));
+  await deletePage(request.server.prisma, slug);
+  await auditLogFromRequest(request.server.prisma, request, {
+    action: 'page.delete',
+    resourceType: 'page',
+    resourceId: slug,
+    summary: `删除页面 ${existing.title}`,
+  });
+  return ok({ deleted: true });
 }
 
 export async function adminGetTranslationHandler(

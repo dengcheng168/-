@@ -61,6 +61,14 @@ export async function updatePageAction(slug: string, _prevState: AdminFormState,
   redirect('/admin/pages');
 }
 
+export async function deletePageAction(formData: FormData): Promise<void> {
+  const slug = formData.get('slug');
+  await adminFetch(`/pages/${slug}`, { method: 'DELETE' });
+  revalidatePath('/admin/pages');
+  updateTag('pages');
+  updateTag(`page:${slug}`);
+}
+
 export async function updatePageTranslationAction(
   slug: string,
   locale: Locale,
