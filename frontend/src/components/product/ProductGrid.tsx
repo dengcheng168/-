@@ -21,7 +21,7 @@ export function ProductGrid({
   return (
     <div className={`flex flex-wrap gap-6 ${center ? 'justify-center' : ''}`}>
       {products.map((product) => (
-        <div key={product.id} className="w-[calc(50%-12px)] sm:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)]">
+        <div key={product.id} className="w-[calc(50%-0.75rem)] sm:w-[calc(33.333%-1rem)] lg:w-[calc(25%-1.125rem)]">
           <ProductCard product={product} locale={locale} />
         </div>
       ))}

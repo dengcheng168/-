@@ -59,7 +59,7 @@ export default async function SpanishCertificatesPage() {
           {certificates.map((cert) => (
             <div
               key={cert.id}
-              className="group flex w-[calc(50%-12px)] flex-col overflow-hidden rounded-lg border border-grey-200 bg-white text-center transition-shadow hover:shadow-lg sm:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)]"
+              className="group flex w-[calc(50%-0.75rem)] flex-col overflow-hidden rounded-lg border border-grey-200 bg-white text-center transition-shadow hover:shadow-lg sm:w-[calc(33.333%-1rem)] lg:w-[calc(25%-1.125rem)]"
             >
               <div className="overflow-hidden bg-grey-50">
                 <Image
