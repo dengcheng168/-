@@ -34,7 +34,7 @@ export function HeroBanner({ settings, locale = 'en' }: { settings: PublicSiteSe
       )}
       <div className="absolute inset-0 bg-navy-950/70" />
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl animate-fade-up">
           <h1 className="text-4xl font-bold leading-tight text-white sm:text-5xl">{settings.heroHeadline}</h1>
           <p className="mt-5 text-lg text-grey-100/90">{settings.heroSubheadline}</p>
