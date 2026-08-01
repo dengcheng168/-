@@ -87,7 +87,6 @@ export default async function SpanishContactPage() {
               <iframe
                 src={`https://maps.google.com/maps?q=${encodeURIComponent(settings.companyAddress)}&output=embed&hl=es`}
                 title="Mapa de ubicación de la fábrica"
-                loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 className="h-full w-full border-0"
               />

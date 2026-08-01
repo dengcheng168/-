@@ -83,7 +83,6 @@ export default async function ContactPage() {
               <iframe
                 src={`https://maps.google.com/maps?q=${encodeURIComponent(settings.companyAddress)}&output=embed&hl=en`}
                 title="Factory address map"
-                loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 className="h-full w-full border-0"
               />
