@@ -33,11 +33,6 @@ const FALLBACK_SETTINGS: PublicSiteSettings = {
   heroMobileImage: null,
   homepageVideoUrl: null,
   coreAdvantages: [],
-  stats: [],
-  oemProcessSteps: [],
-  factoryStats: [],
-  factoryPhotos: [],
-  partnerRegions: [],
   footerText: null,
   footerColumns: null,
   footerCompanyIntro: null,
@@ -55,7 +50,6 @@ function resolveSettingsMedia(settings: PublicSiteSettings): PublicSiteSettings 
     heroDesktopImage: settings.heroDesktopImage ? resolveMediaUrl(settings.heroDesktopImage) : settings.heroDesktopImage,
     heroMobileImage: settings.heroMobileImage ? resolveMediaUrl(settings.heroMobileImage) : settings.heroMobileImage,
     defaultOgImage: settings.defaultOgImage ? resolveMediaUrl(settings.defaultOgImage) : settings.defaultOgImage,
-    factoryPhotos: settings.factoryPhotos.map((p) => resolveMediaUrl(p)),
   };
 }
 

@@ -16,11 +16,6 @@ interface Values {
   heroMobileImage: string | null;
   homepageVideoUrl: string | null;
   coreAdvantages: unknown;
-  stats: unknown;
-  oemProcessSteps: unknown;
-  factoryStats: unknown;
-  factoryPhotos: unknown;
-  partnerRegions: unknown;
 }
 
 function toJsonText(value: unknown) {
@@ -89,24 +84,9 @@ export function HomepageForm({ initialValues }: { initialValues: Values }) {
       </section>
 
       <section className="space-y-4 rounded-lg border border-grey-200 bg-white p-5">
-        <h2 className="font-semibold text-navy-950">结构化区块（JSON 格式，谨慎编辑）</h2>
+        <h2 className="font-semibold text-navy-950">核心优势（JSON 格式，谨慎编辑）</h2>
         <FormField label="核心优势" htmlFor="coreAdvantagesJson" hint='格式：[{"title":"...","description":"..."}]'>
           <textarea id="coreAdvantagesJson" name="coreAdvantagesJson" rows={4} defaultValue={toJsonText(initialValues.coreAdvantages)} className={`${fieldInputClasses} font-mono text-xs`} />
-        </FormField>
-        <FormField label="数据统计" htmlFor="statsJson" hint='格式：[{"label":"...","value":"..."}]'>
-          <textarea id="statsJson" name="statsJson" rows={4} defaultValue={toJsonText(initialValues.stats)} className={`${fieldInputClasses} font-mono text-xs`} />
-        </FormField>
-        <FormField label="OEM 流程步骤" htmlFor="oemProcessStepsJson" hint='格式：["步骤一","步骤二",...]'>
-          <textarea id="oemProcessStepsJson" name="oemProcessStepsJson" rows={4} defaultValue={toJsonText(initialValues.oemProcessSteps)} className={`${fieldInputClasses} font-mono text-xs`} />
-        </FormField>
-        <FormField label="工厂数据" htmlFor="factoryStatsJson" hint='格式：[{"label":"...","value":"..."}]'>
-          <textarea id="factoryStatsJson" name="factoryStatsJson" rows={4} defaultValue={toJsonText(initialValues.factoryStats)} className={`${fieldInputClasses} font-mono text-xs`} />
-        </FormField>
-        <FormField label="工厂图片地址" htmlFor="factoryPhotosJson" hint='格式：["/uploads/...","/uploads/..."]，请先在媒体库上传后复制地址'>
-          <textarea id="factoryPhotosJson" name="factoryPhotosJson" rows={4} defaultValue={toJsonText(initialValues.factoryPhotos)} className={`${fieldInputClasses} font-mono text-xs`} />
-        </FormField>
-        <FormField label="全球合作区域" htmlFor="partnerRegionsJson" hint='格式：["North America","Europe",...]'>
-          <textarea id="partnerRegionsJson" name="partnerRegionsJson" rows={3} defaultValue={toJsonText(initialValues.partnerRegions)} className={`${fieldInputClasses} font-mono text-xs`} />
         </FormField>
       </section>
 

@@ -52,11 +52,6 @@ export const homepageSettingsSchema = z.object({
   heroMobileImage: z.string().optional(),
   homepageVideoUrl: z.string().optional(),
   coreAdvantages: z.array(z.unknown()).optional(),
-  stats: z.array(z.unknown()).optional(),
-  oemProcessSteps: z.array(z.unknown()).optional(),
-  factoryStats: z.array(z.unknown()).optional(),
-  factoryPhotos: z.array(z.unknown()).optional(),
-  partnerRegions: z.array(z.unknown()).optional(),
 });
 
 export const footerSettingsSchema = z.object({

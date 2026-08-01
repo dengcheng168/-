@@ -3,16 +3,6 @@ export interface CoreAdvantage {
   description?: string;
 }
 
-export interface StatItem {
-  label: string;
-  value: string;
-}
-
-export interface FactoryStat {
-  label: string;
-  value: string;
-}
-
 export interface FooterColumn {
   title: string;
   links: { label: string; url: string }[];
@@ -51,11 +41,6 @@ export interface PublicSiteSettings {
   heroMobileImage: string | null;
   homepageVideoUrl: string | null;
   coreAdvantages: CoreAdvantage[];
-  stats: StatItem[];
-  oemProcessSteps: string[];
-  factoryStats: FactoryStat[];
-  factoryPhotos: string[];
-  partnerRegions: string[];
   footerText: string | null;
   footerColumns: FooterColumn[] | null;
   footerCompanyIntro: string | null;

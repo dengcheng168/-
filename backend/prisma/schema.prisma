@@ -530,11 +530,6 @@ model SiteSetting {
   // 前端渲染时统一解析成 embed 地址，见 frontend/src/lib/utils/youtube.ts；留空则该板块不显示
   homepageVideoUrl      String?
   coreAdvantages        String   @default("[]") // JSON 字符串
-  stats                 String   @default("[]") // JSON 字符串
-  oemProcessSteps       String   @default("[]") // JSON 字符串
-  factoryStats          String   @default("[]") // JSON 字符串
-  factoryPhotos         String   @default("[]") // JSON 字符串
-  partnerRegions        String   @default("[]") // JSON 字符串
   footerText            String?
   footerColumns         String? // JSON 字符串
   // 页脚 Logo 下方的公司简介，独立于网站基础设置里的 companyAddress，管理员单独填写

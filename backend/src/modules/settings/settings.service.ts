@@ -6,11 +6,6 @@ import { isProduction } from '../../config/env.js';
 const JSON_FIELDS = [
   'socialLinks',
   'coreAdvantages',
-  'stats',
-  'oemProcessSteps',
-  'factoryStats',
-  'factoryPhotos',
-  'partnerRegions',
   'footerColumns',
 ] as const;
 

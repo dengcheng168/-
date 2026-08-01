@@ -93,14 +93,7 @@ export async function updateHomepageSettingsAction(_prevState: AdminFormState, f
   // 之前这里 JSON.parse 失败会被静默吞掉、直接跳过该字段，导致整份表单显示"已保存"成功提示，
   // 但填错格式的那个字段其实完全没有写入数据库——用户会以为是 bug（"保存不了"），
   // 其实是不知道 JSON 语法错在哪。现在改成：任何一个字段解析失败就整体中止保存并指出是哪一项、错在哪。
-  const jsonFields: { key: string; label: string }[] = [
-    { key: 'coreAdvantagesJson', label: '核心优势' },
-    { key: 'statsJson', label: '数据统计' },
-    { key: 'oemProcessStepsJson', label: 'OEM 流程步骤' },
-    { key: 'factoryStatsJson', label: '工厂数据' },
-    { key: 'factoryPhotosJson', label: '工厂图片地址' },
-    { key: 'partnerRegionsJson', label: '全球合作区域' },
-  ];
+  const jsonFields: { key: string; label: string }[] = [{ key: 'coreAdvantagesJson', label: '核心优势' }];
 
   const parsed: Record<string, unknown> = {};
   for (const { key, label } of jsonFields) {
@@ -126,11 +119,6 @@ export async function updateHomepageSettingsAction(_prevState: AdminFormState, f
     // 用 ?? undefined 而不是 textOrUndefined：清空输入框后保存要能真正清空数据库字段（隐藏视频板块）
     homepageVideoUrl: formData.get('homepageVideoUrl') ?? undefined,
     coreAdvantages: parsed.coreAdvantagesJson,
-    stats: parsed.statsJson,
-    oemProcessSteps: parsed.oemProcessStepsJson,
-    factoryStats: parsed.factoryStatsJson,
-    factoryPhotos: parsed.factoryPhotosJson,
-    partnerRegions: parsed.partnerRegionsJson,
   }, '/admin/homepage');
 }
 

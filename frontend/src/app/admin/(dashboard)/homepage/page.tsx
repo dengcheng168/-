@@ -13,11 +13,6 @@ interface Settings {
   heroMobileImage: string | null;
   homepageVideoUrl: string | null;
   coreAdvantages: unknown;
-  stats: unknown;
-  oemProcessSteps: unknown;
-  factoryStats: unknown;
-  factoryPhotos: unknown;
-  partnerRegions: unknown;
 }
 
 export default async function AdminHomepagePage() {
@@ -25,7 +20,7 @@ export default async function AdminHomepagePage() {
 
   return (
     <div>
-      <PageHeader title="首页模块" description="编辑首页 Banner、核心优势、数据统计、OEM 流程、工厂数据与合作区域等模块内容。" />
+      <PageHeader title="首页模块" description="编辑首页 Banner、视频与核心优势模块内容。" />
       <div>
         <HomepageForm initialValues={data} />
       </div>
