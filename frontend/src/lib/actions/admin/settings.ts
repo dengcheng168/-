@@ -5,11 +5,7 @@ import { adminFetch } from '@/lib/api/admin-client';
 import { ApiError } from '@/lib/api/client';
 import { SOCIAL_PLATFORMS } from '@/lib/constants/social-platforms';
 import type { AdminFormState } from './categories';
-
-function textOrUndefined(formData: FormData, key: string): string | undefined {
-  const v = formData.get(key);
-  return typeof v === 'string' && v.trim() !== '' ? v.trim() : undefined;
-}
+import { textOrUndefined } from './form-utils';
 
 async function patchSettings(
   section: string,
@@ -31,9 +27,7 @@ export async function updateSeoSettingsAction(_prevState: AdminFormState, formDa
     defaultSeoTitle: textOrUndefined(formData, 'defaultSeoTitle'),
     defaultSeoDescription: textOrUndefined(formData, 'defaultSeoDescription'),
     defaultOgImage: textOrUndefined(formData, 'defaultOgImage'),
-    // 用 ?? 而不是 textOrUndefined：验证码允许清空（比如换绑了 GSC 账号要先移除旧验证码），
-    // textOrUndefined 会把清空后的空字符串当成"没填"而跳过，导致清空操作保存不掉
-    googleSiteVerification: formData.get('googleSiteVerification') ?? undefined,
+    googleSiteVerification: textOrUndefined(formData, 'googleSiteVerification'),
   });
 }
 
@@ -41,10 +35,7 @@ export async function updateContactSettingsAction(_prevState: AdminFormState, fo
   return patchSettings('contact', {
     companyName: textOrUndefined(formData, 'companyName'),
     companyLogoUrl: textOrUndefined(formData, 'companyLogoUrl'),
-    // 用 ?? undefined 而不是 textOrUndefined：后者把"移除图片后保存"的空字符串也当成
-    // "没填"直接跳过，导致清空操作在后台悄悄失效（数据库里还是旧值）。这里只保留 null
-    // （字段整个没提交）才转成 undefined，空字符串会正常传下去清空数据库字段
-    faviconUrl: formData.get('faviconUrl') ?? undefined,
+    faviconUrl: textOrUndefined(formData, 'faviconUrl'),
     companyAddress: textOrUndefined(formData, 'companyAddress'),
     companyEmail: textOrUndefined(formData, 'companyEmail'),
     companyPhone: textOrUndefined(formData, 'companyPhone'),
@@ -116,8 +107,7 @@ export async function updateHomepageSettingsAction(_prevState: AdminFormState, f
     heroButton2Link: formData.get('heroButton2Link'),
     heroDesktopImage: textOrUndefined(formData, 'heroDesktopImage'),
     heroMobileImage: textOrUndefined(formData, 'heroMobileImage'),
-    // 用 ?? undefined 而不是 textOrUndefined：清空输入框后保存要能真正清空数据库字段（隐藏视频板块）
-    homepageVideoUrl: formData.get('homepageVideoUrl') ?? undefined,
+    homepageVideoUrl: textOrUndefined(formData, 'homepageVideoUrl'),
     coreAdvantages: parsed.coreAdvantagesJson,
   }, '/admin/homepage');
 }

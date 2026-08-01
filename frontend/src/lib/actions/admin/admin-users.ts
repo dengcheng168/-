@@ -5,11 +5,7 @@ import { redirect } from 'next/navigation';
 import { adminFetch } from '@/lib/api/admin-client';
 import { ApiError } from '@/lib/api/client';
 import type { AdminFormState } from './categories';
-
-function textOrUndefined(formData: FormData, key: string): string | undefined {
-  const v = formData.get(key);
-  return typeof v === 'string' && v.trim() !== '' ? v.trim() : undefined;
-}
+import { textOrUndefined } from './form-utils';
 
 export async function createAdminUserAction(_prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
   try {

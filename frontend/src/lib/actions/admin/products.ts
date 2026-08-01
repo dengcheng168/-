@@ -9,11 +9,7 @@ import type { AdminFormState } from './categories';
 import { saveTranslation, localeCacheTags, translationStatusFromForm } from './translations-shared';
 import type { TranslationFormState } from './translations-shared';
 import type { Locale } from '@/lib/i18n/locales';
-
-function textOrUndefined(formData: FormData, key: string): string | undefined {
-  const v = formData.get(key);
-  return typeof v === 'string' && v.trim() !== '' ? v.trim() : undefined;
-}
+import { textOrUndefined } from './form-utils';
 
 /** 每行 "标签: 值" 格式，解析成 [{label, value}] */
 function parseSpecs(text: string) {

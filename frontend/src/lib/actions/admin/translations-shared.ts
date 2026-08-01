@@ -47,13 +47,8 @@ export function localeCacheTags(baseTag: string, locale: Locale): string[] {
   return localizedTag(baseTag, locale);
 }
 
-function textOrUndefined(formData: FormData, key: string): string | undefined {
-  const v = formData.get(key);
-  return typeof v === 'string' && v.trim() !== '' ? v.trim() : undefined;
-}
-
 export function translationStatusFromForm(formData: FormData): string {
   return formData.get('translationStatus') === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT';
 }
 
-export { textOrUndefined };
+export { textOrUndefined } from './form-utils';

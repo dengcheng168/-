@@ -7,15 +7,11 @@ import { ApiError } from '@/lib/api/client';
 import { saveTranslation, localeCacheTags, translationStatusFromForm } from './translations-shared';
 import type { TranslationFormState } from './translations-shared';
 import type { Locale } from '@/lib/i18n/locales';
+import { textOrUndefined } from './form-utils';
 
 export interface AdminFormState {
   message?: string;
   success?: boolean;
-}
-
-function textOrUndefined(formData: FormData, key: string): string | undefined {
-  const v = formData.get(key);
-  return typeof v === 'string' && v.trim() !== '' ? v.trim() : undefined;
 }
 
 export async function createCategoryAction(_prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {

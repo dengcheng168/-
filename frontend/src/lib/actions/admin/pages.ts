@@ -7,11 +7,7 @@ import type { AdminFormState } from './categories';
 import { saveTranslation, localeCacheTags, translationStatusFromForm } from './translations-shared';
 import type { TranslationFormState } from './translations-shared';
 import type { Locale } from '@/lib/i18n/locales';
-
-function textOrUndefined(formData: FormData, key: string): string | undefined {
-  const v = formData.get(key);
-  return typeof v === 'string' && v.trim() !== '' ? v.trim() : undefined;
-}
+import { textOrUndefined } from './form-utils';
 
 /**
  * 结构化 JSON 区块规则：曾用于 Factory / OEM-ODM 页面（工厂数据、流程步骤数组），
@@ -21,7 +17,10 @@ function textOrUndefined(formData: FormData, key: string): string | undefined {
 const STRUCTURED_JSON_SLUGS = new Set<string>([]);
 
 function parseSections(slug: string, sectionsRaw: string | undefined): { sections?: unknown; error?: string } {
-  if (!sectionsRaw) return {};
+  // undefined = 表单里根本没这个字段（不会发生在真实提交里，兜底当"不改动"）；
+  // 空字符串 = 用户主动清空了，要真正传给后端清空数据库字段，不能当成"不改动"
+  if (sectionsRaw === undefined) return {};
+  if (sectionsRaw === '') return { sections: '' };
   if (!STRUCTURED_JSON_SLUGS.has(slug)) return { sections: sectionsRaw };
   try {
     return { sections: JSON.parse(sectionsRaw) };
