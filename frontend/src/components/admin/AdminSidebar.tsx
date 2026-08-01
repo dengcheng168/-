@@ -17,6 +17,8 @@ import {
   IconImage,
   IconSettings,
   IconShieldCheck,
+  IconBuilding,
+  IconSearch,
   IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
@@ -31,6 +33,8 @@ const GROUP_ICONS: Record<AdminNavIcon, (props: { className?: string }) => React
   image: IconImage,
   settings: IconSettings,
   shield: IconShieldCheck,
+  building: IconBuilding,
+  search: IconSearch,
 };
 
 interface AdminSidebarProps {

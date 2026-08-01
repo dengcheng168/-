@@ -43,7 +43,7 @@ export default async function AdminSeoSettingsPage() {
 
   return (
     <div>
-      <PageHeader title="SEO 设置" description="配置全站默认的搜索引擎标题、描述与分享图片。" />
+      <PageHeader title="SEO 与站点域名" description="配置正式站点域名、Sitemap，以及全站默认的搜索引擎标题、描述与分享图片。" />
       <div className="space-y-6">
         <SiteDomainForm
           currentValue={data.siteBaseUrl}

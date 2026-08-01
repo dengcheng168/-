@@ -5,7 +5,7 @@ export interface AdminNavItem {
   disabled?: boolean;
 }
 
-export type AdminNavIcon = 'grid' | 'file-text' | 'layout' | 'inbox' | 'image' | 'settings' | 'shield';
+export type AdminNavIcon = 'grid' | 'file-text' | 'layout' | 'inbox' | 'image' | 'settings' | 'shield' | 'building' | 'search';
 
 export interface AdminNavGroup {
   title: string;
@@ -47,7 +47,6 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { label: '页脚设置', href: '/admin/footer' },
       { label: '证书管理', href: '/admin/certificates' },
       { label: '工厂展示图', href: '/admin/factory-gallery' },
-      { label: '301 重定向', href: '/admin/redirects' },
     ],
   },
   {
@@ -73,17 +72,30 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     ],
   },
   {
-    title: '全站设置',
-    icon: 'settings',
+    title: '公司信息',
+    icon: 'building',
     items: [
       { label: '网站基础设置', href: '/admin/settings/contact' },
-      { label: 'SEO 与追踪', href: '/admin/settings/seo' },
-      { label: '像素设置', href: '/admin/settings/pixels' },
       { label: '社交媒体', href: '/admin/settings/social' },
       { label: 'WhatsApp', href: '/admin/settings/whatsapp' },
+    ],
+  },
+  {
+    title: 'SEO 与营销',
+    icon: 'search',
+    items: [
+      { label: 'SEO 与站点域名', href: '/admin/settings/seo' },
+      { label: '像素设置', href: '/admin/settings/pixels' },
+      { label: '301 重定向', href: '/admin/redirects' },
+    ],
+  },
+  {
+    title: '系统设置',
+    icon: 'settings',
+    items: [
       { label: 'SMTP 邮件', href: '/admin/settings/smtp' },
-      { label: '缓存管理', href: '/admin/settings/cache' },
       { label: '多语言设置', href: '/admin/settings/i18n' },
+      { label: '缓存管理', href: '/admin/settings/cache' },
     ],
   },
   {
