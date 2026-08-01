@@ -37,6 +37,7 @@ export async function updateContactSettingsAction(_prevState: AdminFormState, fo
     companyLogoUrl: textOrUndefined(formData, 'companyLogoUrl'),
     faviconUrl: textOrUndefined(formData, 'faviconUrl'),
     companyAddress: textOrUndefined(formData, 'companyAddress'),
+    companyMapImage: textOrUndefined(formData, 'companyMapImage'),
     companyEmail: textOrUndefined(formData, 'companyEmail'),
     companyPhone: textOrUndefined(formData, 'companyPhone'),
   });

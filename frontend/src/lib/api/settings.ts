@@ -12,6 +12,7 @@ const FALLBACK_SETTINGS: PublicSiteSettings = {
   companyLogoUrl: null,
   faviconUrl: null,
   companyAddress: null,
+  companyMapImage: null,
   companyEmail: null,
   companyPhone: null,
   whatsappNumber: null,
@@ -50,6 +51,7 @@ function resolveSettingsMedia(settings: PublicSiteSettings): PublicSiteSettings 
     heroDesktopImage: settings.heroDesktopImage ? resolveMediaUrl(settings.heroDesktopImage) : settings.heroDesktopImage,
     heroMobileImage: settings.heroMobileImage ? resolveMediaUrl(settings.heroMobileImage) : settings.heroMobileImage,
     defaultOgImage: settings.defaultOgImage ? resolveMediaUrl(settings.defaultOgImage) : settings.defaultOgImage,
+    companyMapImage: settings.companyMapImage ? resolveMediaUrl(settings.companyMapImage) : settings.companyMapImage,
   };
 }
 

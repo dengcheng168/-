@@ -531,6 +531,9 @@ model SiteSetting {
   companyLogoUrl        String?
   faviconUrl            String?
   companyAddress        String?
+  // 联系页地址下方展示的静态地图截图，替代直接嵌入 Google 地图 iframe（后者加载慢）；
+  // 留空则联系页只显示"在地图中打开"链接，不显示图片
+  companyMapImage       String?
   companyEmail          String?
   companyPhone          String?
   whatsappNumber        String?

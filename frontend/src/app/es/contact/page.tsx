@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { Container } from '@/components/ui/Container';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { InquiryForm } from '@/components/forms/InquiryForm';
@@ -83,13 +84,24 @@ export default async function SpanishContactPage() {
           <div className="mt-10 border-t border-grey-200 pt-6 text-sm">
             <div className="font-semibold text-navy-950">{t('es', 'addressLabel')}</div>
             <div className="mt-1 text-grey-500">{settings.companyAddress}</div>
-            <div className="mt-3 h-[450px] w-full overflow-hidden">
-              <iframe
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(settings.companyAddress)}&output=embed&hl=es`}
-                title="Mapa de ubicación de la fábrica"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="h-full w-full border-0"
-              />
+            <div className="relative mt-3 h-[350px] w-full overflow-hidden rounded-lg bg-grey-100 sm:h-[450px]">
+              {settings.companyMapImage && (
+                <Image
+                  src={settings.companyMapImage}
+                  alt="Mapa de ubicación de la fábrica"
+                  fill
+                  sizes="(min-width: 1024px) 60vw, 100vw"
+                  className="object-cover"
+                />
+              )}
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.companyAddress)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-2 text-sm font-medium text-navy-950 shadow hover:bg-grey-50"
+              >
+                {t('es', 'openInMapsLabel')}
+              </a>
             </div>
           </div>
         )}

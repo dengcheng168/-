@@ -12,6 +12,7 @@ export const contactSettingsSchema = z.object({
   companyLogoUrl: z.string().optional(),
   faviconUrl: z.string().optional(),
   companyAddress: z.string().optional(),
+  companyMapImage: z.string().optional(),
   companyEmail: z.string().optional(),
   companyPhone: z.string().optional(),
 });
