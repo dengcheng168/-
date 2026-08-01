@@ -13,7 +13,7 @@ export function FaqPreview({ faqs, locale = 'en' }: { faqs: Faq[]; locale?: Loca
 
   return (
     <section className="bg-grey-50 py-16">
-      <Container className="max-w-3xl">
+      <Container>
         <SectionHeading eyebrow={t(locale, 'sectionFaqEyebrow')} title={t(locale, 'sectionFaqTitle')} />
         <div className="mt-10">
           <FaqAccordion faqs={preview} />
