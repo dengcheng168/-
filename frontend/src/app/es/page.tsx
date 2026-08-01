@@ -71,11 +71,11 @@ export default async function SpanishHomePage() {
       <HeroBanner settings={localizedSettings} locale="es" />
       <CoreAdvantages items={localizedCoreAdvantages} locale="es" />
       <ProductCategories categories={categories} locale="es" />
+      <InquirySection locale="es" videoUrl={settings.homepageVideoUrl} />
       <FeaturedProducts products={featuredProducts.items} locale="es" />
       <CertificatesShowcase certificates={certificates} locale="es" />
       <LatestBlogPosts posts={latestPosts.items} locale="es" />
       <FaqPreview faqs={faqs} locale="es" />
-      <InquirySection locale="es" />
     </>
   );
 }

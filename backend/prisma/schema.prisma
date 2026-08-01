@@ -523,6 +523,9 @@ model SiteSetting {
   heroButton2Link       String   @default("/products")
   heroDesktopImage      String?
   heroMobileImage       String?
+  // 首页"查看视频"板块的 YouTube 视频链接：原始输入（支持完整观看链接/分享短链/embed 链接/纯视频 ID），
+  // 前端渲染时统一解析成 embed 地址，见 frontend/src/lib/utils/youtube.ts；留空则该板块不显示
+  homepageVideoUrl      String?
   coreAdvantages        String   @default("[]") // JSON 字符串
   stats                 String   @default("[]") // JSON 字符串
   oemProcessSteps       String   @default("[]") // JSON 字符串

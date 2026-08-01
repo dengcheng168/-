@@ -48,6 +48,7 @@ export interface PublicSiteSettings {
   heroButton2Link: string;
   heroDesktopImage: string | null;
   heroMobileImage: string | null;
+  homepageVideoUrl: string | null;
   coreAdvantages: CoreAdvantage[];
   stats: StatItem[];
   oemProcessSteps: string[];

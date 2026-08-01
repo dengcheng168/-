@@ -11,6 +11,7 @@ interface Settings {
   heroButton2Link: string;
   heroDesktopImage: string | null;
   heroMobileImage: string | null;
+  homepageVideoUrl: string | null;
   coreAdvantages: unknown;
   stats: unknown;
   oemProcessSteps: unknown;

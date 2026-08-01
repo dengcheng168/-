@@ -49,6 +49,7 @@ export const homepageSettingsSchema = z.object({
   heroButton2Link: z.string().optional(),
   heroDesktopImage: z.string().optional(),
   heroMobileImage: z.string().optional(),
+  homepageVideoUrl: z.string().optional(),
   coreAdvantages: z.array(z.unknown()).optional(),
   stats: z.array(z.unknown()).optional(),
   oemProcessSteps: z.array(z.unknown()).optional(),

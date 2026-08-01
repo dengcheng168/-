@@ -73,6 +73,7 @@ const settings: PublicSiteSettings = {
   heroButton2Link: '',
   heroDesktopImage: null,
   heroMobileImage: null,
+  homepageVideoUrl: null,
   coreAdvantages: [],
   stats: [],
   oemProcessSteps: [],

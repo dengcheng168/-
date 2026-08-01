@@ -46,11 +46,11 @@ export default async function HomePage() {
       <HeroBanner settings={settings} />
       <CoreAdvantages items={settings.coreAdvantages} />
       <ProductCategories categories={categories} />
+      <InquirySection videoUrl={settings.homepageVideoUrl} />
       <FeaturedProducts products={featuredProducts.items} />
       <CertificatesShowcase certificates={certificates} />
       <LatestBlogPosts posts={latestPosts.items} />
       <FaqPreview faqs={faqs} />
-      <InquirySection />
     </>
   );
 }

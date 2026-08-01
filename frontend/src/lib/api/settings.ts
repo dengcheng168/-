@@ -30,6 +30,7 @@ const FALLBACK_SETTINGS: PublicSiteSettings = {
   heroButton2Link: '/products',
   heroDesktopImage: null,
   heroMobileImage: null,
+  homepageVideoUrl: null,
   coreAdvantages: [],
   stats: [],
   oemProcessSteps: [],

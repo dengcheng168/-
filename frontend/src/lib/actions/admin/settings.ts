@@ -120,6 +120,8 @@ export async function updateHomepageSettingsAction(_prevState: AdminFormState, f
     heroButton2Link: formData.get('heroButton2Link'),
     heroDesktopImage: textOrUndefined(formData, 'heroDesktopImage'),
     heroMobileImage: textOrUndefined(formData, 'heroMobileImage'),
+    // 用 ?? undefined 而不是 textOrUndefined：清空输入框后保存要能真正清空数据库字段（隐藏视频板块）
+    homepageVideoUrl: formData.get('homepageVideoUrl') ?? undefined,
     coreAdvantages: parsed.coreAdvantagesJson,
     stats: parsed.statsJson,
     oemProcessSteps: parsed.oemProcessStepsJson,

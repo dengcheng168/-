@@ -14,6 +14,7 @@ interface Values {
   heroButton2Link: string;
   heroDesktopImage: string | null;
   heroMobileImage: string | null;
+  homepageVideoUrl: string | null;
   coreAdvantages: unknown;
   stats: unknown;
   oemProcessSteps: unknown;
@@ -67,6 +68,24 @@ export function HomepageForm({ initialValues }: { initialValues: Values }) {
           recommendedSize="建议 1080×1350px（竖版）"
           aspectRatio={4 / 5}
         />
+      </section>
+
+      <section className="space-y-4 rounded-lg border border-grey-200 bg-white p-5">
+        <h2 className="font-semibold text-navy-950">首页视频</h2>
+        <FormField
+          label="YouTube 视频链接"
+          htmlFor="homepageVideoUrl"
+          hint="支持粘贴 YouTube 观看链接、分享短链（youtu.be/...）、embed 链接、视频 ID，或 YouTube「分享 → 嵌入」给出的完整 <iframe> 代码，留空则首页不展示该板块"
+        >
+          <textarea
+            id="homepageVideoUrl"
+            name="homepageVideoUrl"
+            rows={3}
+            defaultValue={initialValues.homepageVideoUrl ?? ''}
+            placeholder="https://www.youtube.com/watch?v=... 或 <iframe ...></iframe>"
+            className={`${fieldInputClasses} font-mono text-xs`}
+          />
+        </FormField>
       </section>
 
       <section className="space-y-4 rounded-lg border border-grey-200 bg-white p-5">
