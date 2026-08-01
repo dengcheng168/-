@@ -32,9 +32,9 @@ export function BlogCard({ post, locale = 'en' }: { post: BlogPost; locale?: Loc
       </div>
       <div className="flex flex-1 flex-col p-5">
         {post.category && (
-          <span className="text-xs font-medium uppercase tracking-wide text-water-600">{post.category.name}</span>
+          <span className="block truncate text-xs font-medium uppercase tracking-wide text-water-600">{post.category.name}</span>
         )}
-        <h3 className="mt-1 text-base font-semibold text-navy-950">{post.title}</h3>
+        <h3 className="mt-1 line-clamp-2 min-h-[2.75rem] text-base font-semibold leading-snug text-navy-950">{post.title}</h3>
         {post.excerpt && <p className="mt-2 line-clamp-2 text-sm text-grey-500">{post.excerpt}</p>}
         <p className="mt-3 text-xs text-grey-500">{formatDate(post.publishedAt, locale)}</p>
       </div>

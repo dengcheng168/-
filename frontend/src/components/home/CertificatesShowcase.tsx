@@ -33,9 +33,9 @@ export function CertificatesShowcase({ certificates, locale = 'en' }: { certific
               </div>
               <div className="flex flex-1 flex-col items-center p-4">
                 {cert.issuingAuthority && (
-                  <span className="text-xs font-medium uppercase tracking-wide text-water-600">{cert.issuingAuthority}</span>
+                  <span className="block w-full truncate text-xs font-medium uppercase tracking-wide text-water-600">{cert.issuingAuthority}</span>
                 )}
-                <h3 className="mt-1 text-base font-semibold text-navy-950">{cert.name}</h3>
+                <h3 className="mt-1 line-clamp-2 min-h-[2.75rem] text-base font-semibold leading-snug text-navy-950">{cert.name}</h3>
                 {cert.description && <p className="mt-2 line-clamp-2 text-sm text-grey-500">{cert.description}</p>}
               </div>
             </div>
