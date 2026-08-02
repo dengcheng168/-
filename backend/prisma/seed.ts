@@ -234,50 +234,22 @@ async function main() {
   const navItems = [
     { label: 'Home', url: '/', sortOrder: 1 },
     { label: 'Products', url: '/products', sortOrder: 2 },
-    { label: 'OEM / ODM', url: '/oem-odm', sortOrder: 3 },
-    { label: 'Factory', url: '/factory', sortOrder: 4 },
-    { label: 'Certificates', url: '/certificates', sortOrder: 5 },
-    { label: 'About Us', url: '/about', sortOrder: 6 },
-    { label: 'Blog', url: '/blog', sortOrder: 7 },
-    { label: 'Contact', url: '/contact', sortOrder: 8 },
+    { label: 'Certificates', url: '/certificates', sortOrder: 3 },
+    { label: 'About Us', url: '/about', sortOrder: 4 },
+    { label: 'Blog', url: '/blog', sortOrder: 5 },
+    { label: 'Contact', url: '/contact', sortOrder: 6 },
   ];
   for (const n of navItems) {
     const existing = await prisma.navigationItem.findFirst({ where: { label: n.label, url: n.url } });
     if (!existing) await prisma.navigationItem.create({ data: n });
   }
 
-  // ---- 页面文案（About / Factory / OEM-ODM / Privacy / Terms / Contact）----
+  // ---- 页面文案（About / Privacy / Terms / Contact）----
   const pages = [
     {
       slug: 'about',
       title: 'About Us',
       bodyHtml: '<p>Placeholder About Us content. Replace with real company history, mission, and values.</p>',
-    },
-    {
-      slug: 'factory',
-      title: 'Factory Strength',
-      bodyHtml: '<p>Placeholder factory strength introduction.</p>',
-      sections: toJsonString({
-        factoryArea: '20,000 sqm (placeholder)',
-        employeeCount: '150+ (placeholder)',
-        productionLines: '6 (placeholder)',
-        annualCapacity: '500,000 units/year (placeholder)',
-      }),
-    },
-    {
-      slug: 'oem-odm',
-      title: 'OEM / ODM Services',
-      bodyHtml: '<p>Placeholder OEM/ODM service introduction. Describe customizable logo, appearance, packaging, and functions here.</p>',
-      sections: toJsonString({
-        processSteps: [
-          'Requirement Discussion',
-          'Solution Design',
-          'Sample Confirmation',
-          'Mass Production',
-          'Quality Inspection',
-          'Global Delivery',
-        ],
-      }),
     },
     {
       slug: 'privacy-policy',

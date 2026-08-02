@@ -193,31 +193,6 @@ const pageTranslations: Record<
     bodyHtml:
       '<p>Contenido de muestra para la página Sobre Nosotros. Sustituir por la historia real de la empresa, misión y valores.</p>',
   },
-  factory: {
-    title: 'Fortaleza de Fábrica',
-    bodyHtml: '<p>Introducción de muestra sobre la fortaleza de la fábrica.</p>',
-    sections: {
-      factoryArea: '20,000 m² (marcador de posición)',
-      employeeCount: '150+ (marcador de posición)',
-      productionLines: '6 (marcador de posición)',
-      annualCapacity: '500,000 unidades/año (marcador de posición)',
-    },
-  },
-  'oem-odm': {
-    title: 'Servicios OEM / ODM',
-    bodyHtml:
-      '<p>Introducción de muestra sobre servicios OEM/ODM. Describa aquí el logotipo personalizable, la apariencia, el empaque y las funciones.</p>',
-    sections: {
-      processSteps: [
-        'Discusión de Requisitos',
-        'Diseño de la Solución',
-        'Confirmación de Muestra',
-        'Producción en Masa',
-        'Inspección de Calidad',
-        'Entrega Global',
-      ],
-    },
-  },
   'privacy-policy': {
     title: 'Política de Privacidad',
     bodyHtml:
