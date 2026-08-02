@@ -11,8 +11,10 @@ import { Button } from '@/components/admin/ui/button';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/admin/ui/table';
 import { EmptyState } from '@/components/admin/EmptyState';
 import { SortOrderInput } from '@/components/admin/SortOrderInput';
-import { setProductStatusAction, setProductSortOrderAction } from '@/lib/actions/admin/products';
+import { ConfirmSubmitButton } from '@/components/admin/ConfirmSubmitButton';
+import { setProductStatusAction, setProductSortOrderAction, deleteProductAction } from '@/lib/actions/admin/products';
 import { resolveMediaUrl } from '@/lib/utils/media';
+import { buttonVariants } from '@/components/admin/ui/button';
 
 export interface ProductRow {
   id: number;
@@ -163,6 +165,15 @@ export function ProductListClient({ rows, total }: { rows: ProductRow[]; total: 
                         </Button>
                       )}
                       <StatusToggleButton id={row.id} status={row.status} />
+                      <form action={deleteProductAction}>
+                        <input type="hidden" name="id" value={row.id} />
+                        <ConfirmSubmitButton
+                          confirmMessage={`确定要删除产品"${row.name}"吗？删除后前台将无法访问，且不再出现在此列表中。`}
+                          className={buttonVariants({ variant: 'destructive', size: 'sm' })}
+                        >
+                          删除
+                        </ConfirmSubmitButton>
+                      </form>
                     </div>
                   </TableCell>
                 </TableRow>
