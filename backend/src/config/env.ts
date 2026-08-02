@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { z } from 'zod';
 import { assertDatabaseSafety } from '../lib/database-safety.js';
+import { isWeakSecret } from '../lib/secret-safety.js';
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -65,6 +66,14 @@ if (!parsed.success) {
 export const env = parsed.data;
 
 export const isProduction = env.NODE_ENV === 'production';
+
+// Secret 安全门禁：生产环境不能带着 .env.example 里那种示例占位密钥启动——它们是任何人
+// clone 这个仓库都能看到的公开字符串，用它签发的 JWT 等于没有签名保护。必须在这里、
+// 任何请求处理逻辑跑起来之前拒绝启动，不是等到真的被人拿这个默认值伪造 token 时才发现。
+if (isProduction && isWeakSecret(env.JWT_SECRET)) {
+  console.error('生产环境的 JWT_SECRET 是已知的弱默认值，拒绝启动。请设置一个强随机的 JWT_SECRET 环境变量。');
+  process.exit(1);
+}
 
 // 数据库安全门禁：test 环境只允许连接系统临时目录下的隔离测试库，production 环境禁止连接
 // 任何看起来是测试库/临时目录的路径。校验必须在这里（env 模块顶层、任何 PrismaClient 构造之前）

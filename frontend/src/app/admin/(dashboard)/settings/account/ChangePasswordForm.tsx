@@ -17,8 +17,8 @@ export function ChangePasswordForm() {
       <FormField label="当前密码" htmlFor="currentPassword" required>
         <input id="currentPassword" name="currentPassword" type="password" required autoComplete="current-password" className={fieldInputClasses} />
       </FormField>
-      <FormField label="新密码" htmlFor="newPassword" required hint="至少 8 位">
-        <input id="newPassword" name="newPassword" type="password" required minLength={8} autoComplete="new-password" className={fieldInputClasses} />
+      <FormField label="新密码" htmlFor="newPassword" required hint="至少 10 位">
+        <input id="newPassword" name="newPassword" type="password" required minLength={10} autoComplete="new-password" className={fieldInputClasses} />
       </FormField>
       <FormField label="确认新密码" htmlFor="confirmPassword" required>
         <input id="confirmPassword" name="confirmPassword" type="password" required autoComplete="new-password" className={fieldInputClasses} />

@@ -6,7 +6,7 @@ export const updateProfileSchema = z.object({
 
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, '请输入当前密码'),
-  newPassword: z.string().min(8, '新密码至少需要 8 位'),
+  newPassword: z.string().min(10, '新密码至少需要 10 位'),
 });
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

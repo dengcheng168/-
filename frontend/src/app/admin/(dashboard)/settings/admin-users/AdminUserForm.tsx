@@ -42,8 +42,8 @@ export function AdminUserForm({
       </FormField>
 
       {mode === 'create' && (
-        <FormField label="初始密码" htmlFor="password" required hint="至少 8 位，管理员登录后可以自行修改">
-          <input id="password" name="password" type="password" required minLength={8} autoComplete="new-password" className={fieldInputClasses} />
+        <FormField label="初始密码" htmlFor="password" required hint="至少 10 位，管理员登录后可以自行修改">
+          <input id="password" name="password" type="password" required minLength={10} autoComplete="new-password" className={fieldInputClasses} />
         </FormField>
       )}
 
