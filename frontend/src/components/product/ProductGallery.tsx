@@ -16,7 +16,7 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
           alt={allImages[active]?.alt ?? name}
           fill
           sizes="(min-width: 1024px) 40vw, 100vw"
-          className="object-cover"
+          className="object-contain p-4"
           priority
         />
       </div>
