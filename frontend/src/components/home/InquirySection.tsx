@@ -12,7 +12,7 @@ export function InquirySection({ locale = 'en', videoUrl }: { locale?: Locale; v
     <section className="py-16">
       <Container>
         <SectionHeading eyebrow={t(locale, 'sectionVideoEyebrow')} title={t(locale, 'sectionVideoTitle')} />
-        <div className="mt-10 aspect-video w-full overflow-hidden rounded-lg">
+        <div className="mx-auto mt-10 aspect-video w-full max-w-6xl overflow-hidden rounded-lg">
           <iframe
             src={embedUrl}
             title="YouTube video player"
