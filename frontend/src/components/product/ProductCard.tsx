@@ -13,7 +13,7 @@ export function ProductCard({ product, locale = 'en' }: { product: Product; loca
       <div className="overflow-hidden bg-grey-50">
         <Image
           src={product.mainImage}
-          alt={product.galleryImages[0]?.alt ?? product.name}
+          alt={product.galleryImages[0]?.alt?.trim() || product.name}
           width={0}
           height={0}
           sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"

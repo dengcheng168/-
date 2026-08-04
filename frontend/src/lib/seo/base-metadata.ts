@@ -31,9 +31,15 @@ export async function getPublicBaseMetadata(locale: Locale): Promise<Metadata> {
     },
     description: 'Reliable water purification solutions for global brands, distributors and commercial projects.',
     openGraph: {
+      type: 'website',
       locale,
       alternateLocale: locale === 'en' ? 'es' : 'en',
       siteName: settings.companyName || 'Water Purifier Factory',
+      images: settings.defaultOgImage ? [settings.defaultOgImage] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      images: settings.defaultOgImage ? [settings.defaultOgImage] : undefined,
     },
     // 在根 layout 声明后会随普通 metadata 合并规则向下游所有页面传播（不像 metadataBase/icons
     // 需要跨根重复声明那样受限），Google Search Console 只需要在任意一个已抓取到的页面上
