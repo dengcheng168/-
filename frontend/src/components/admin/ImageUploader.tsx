@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { resolveMediaUrl } from '@/lib/utils/media';
 import { ImageCropper } from './ImageCropper';
 import { MediaLibraryPicker } from './MediaLibraryPicker';
+import { Dialog, DialogContent, DialogTitle } from './ui/dialog';
 
 const RASTER_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
 
@@ -27,6 +28,7 @@ export function ImageUploader({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   async function uploadFile(fileOrBlob: File | Blob, filename: string) {
     setUploading(true);
@@ -73,9 +75,13 @@ export function ImageUploader({
 
       <div className="flex items-center gap-4">
         {url ? (
-          <div className="relative h-20 w-20 overflow-hidden rounded-md border border-grey-200 bg-grey-50">
+          <button
+            type="button"
+            onClick={() => setPreviewOpen(true)}
+            className="relative h-20 w-20 cursor-zoom-in overflow-hidden rounded-md border border-grey-200 bg-grey-50"
+          >
             <Image src={resolveMediaUrl(url)} alt="" fill sizes="80px" className="object-cover" />
-          </div>
+          </button>
         ) : (
           <div className="flex h-20 w-20 items-center justify-center rounded-md border border-dashed border-grey-200 text-xs text-grey-500">
             无图片
@@ -103,16 +109,24 @@ export function ImageUploader({
         </div>
       </div>
 
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogTitle className="sr-only">图片预览</DialogTitle>
+          {url && (
+            // eslint-disable-next-line @next/next/no-img-element -- 原图预览需要按图片原始尺寸展示，不适合用 next/image
+            <img src={resolveMediaUrl(url)} alt="" className="max-h-[75vh] w-full rounded-md object-contain" />
+          )}
+        </DialogContent>
+      </Dialog>
+
       {pendingFile && aspectRatio && (
         <ImageCropper
           file={pendingFile}
           aspectRatio={aspectRatio}
           onCancel={() => setPendingFile(null)}
           onConfirm={(blob) => {
-            // "跳过裁剪"时 onConfirm 会直接收到原始 File（保留原文件名和格式）；
-            // 真正裁剪后的结果固定输出成 webp，需要把文件名后缀换掉
-            const filename = blob instanceof File ? blob.name : pendingFile.name.replace(/\.\w+$/, '.webp');
-            void uploadFile(blob, filename);
+            // 裁剪结果固定输出成 webp，需要把文件名后缀换掉
+            void uploadFile(blob, pendingFile.name.replace(/\.\w+$/, '.webp'));
             setPendingFile(null);
           }}
         />

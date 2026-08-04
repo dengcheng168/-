@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { resolveMediaUrl } from '@/lib/utils/media';
 import { ImageCropper } from './ImageCropper';
+import { Dialog, DialogContent, DialogTitle } from './ui/dialog';
 
 const RASTER_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
 
@@ -29,6 +30,18 @@ export function MultiImageUploader({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  function moveImage(from: number, to: number) {
+    if (from === to) return;
+    setImages((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  }
 
   async function uploadFile(fileOrBlob: File | Blob, filename: string) {
     setUploading(true);
@@ -71,20 +84,55 @@ export function MultiImageUploader({
       {recommendedSize && <p className="mb-1 text-xs text-grey-500">{recommendedSize}</p>}
       <input type="hidden" name={name} value={JSON.stringify(images)} />
 
+      {images.length > 1 && <p className="mb-1.5 text-xs text-grey-500">拖动缩略图可调整顺序，点击图片可查看原图</p>}
       <div className="flex flex-wrap gap-3">
         {images.map((img, i) => (
-          <div key={`${img.url}-${i}`} className="relative h-20 w-20 overflow-hidden rounded-md border border-grey-200 bg-grey-50">
-            <Image src={resolveMediaUrl(img.url)} alt="" fill sizes="80px" className="object-cover" />
+          <div
+            key={`${img.url}-${i}`}
+            draggable
+            onDragStart={() => setDragIndex(i)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (dragIndex !== null) moveImage(dragIndex, i);
+              setDragIndex(null);
+            }}
+            onDragEnd={() => setDragIndex(null)}
+            className={`relative h-20 w-20 shrink-0 cursor-move overflow-hidden rounded-md border bg-grey-50 transition-opacity ${
+              dragIndex === i ? 'border-water-500 opacity-40' : 'border-grey-200'
+            }`}
+          >
+            <button
+              type="button"
+              onClick={() => setPreviewUrl(img.url)}
+              className="relative block h-full w-full cursor-zoom-in"
+            >
+              <Image src={resolveMediaUrl(img.url)} alt="" fill sizes="80px" className="object-cover" />
+            </button>
             <button
               type="button"
               onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
-              className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-xs text-white"
+              className="absolute right-0.5 top-0.5 z-30 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-xs text-white"
             >
               ×
             </button>
           </div>
         ))}
       </div>
+
+      <Dialog open={previewUrl !== null} onOpenChange={(open) => !open && setPreviewUrl(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogTitle className="sr-only">图片预览</DialogTitle>
+          {previewUrl && (
+            // eslint-disable-next-line @next/next/no-img-element -- 原图预览需要按图片原始尺寸展示，不适合用 next/image
+            <img
+              src={resolveMediaUrl(previewUrl)}
+              alt=""
+              className="max-h-[75vh] w-full rounded-md object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       <div className="mt-2">
         <input
@@ -104,8 +152,7 @@ export function MultiImageUploader({
           aspectRatio={aspectRatio}
           onCancel={() => setPendingFile(null)}
           onConfirm={(blob) => {
-            const filename = blob instanceof File ? blob.name : pendingFile.name.replace(/\.\w+$/, '.webp');
-            void uploadFile(blob, filename);
+            void uploadFile(blob, pendingFile.name.replace(/\.\w+$/, '.webp'));
             setPendingFile(null);
           }}
         />

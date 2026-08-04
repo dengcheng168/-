@@ -106,8 +106,8 @@ export function ProductForm({
         <input id="shortDescription" name="shortDescription" defaultValue={initialValues?.shortDescription ?? ''} className={fieldInputClasses} />
       </FormField>
 
-      <FormField label="详细描述（HTML）" htmlFor="description" required hint="支持 HTML 标签，如 <p> <strong> <ul><li>">
-        <textarea id="description" name="description" rows={6} defaultValue={initialValues?.description} required className={fieldInputClasses} />
+      <FormField label="详细描述（HTML）" htmlFor="description" hint="支持 HTML 标签，如 <p> <strong> <ul><li>">
+        <textarea id="description" name="description" rows={6} defaultValue={initialValues?.description} className={fieldInputClasses} />
       </FormField>
 
       <ImageUploader

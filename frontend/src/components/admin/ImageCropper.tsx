@@ -85,11 +85,6 @@ export function ImageCropper({ file, aspectRatio, onCancel, onConfirm }: Props) 
     onCancel();
   }
 
-  function handleSkip() {
-    URL.revokeObjectURL(imgUrl);
-    onConfirm(file);
-  }
-
   function handleConfirm() {
     if (!natural) return;
     const scale = baseScale(natural.width, natural.height) * zoom;
@@ -175,9 +170,6 @@ export function ImageCropper({ file, aspectRatio, onCancel, onConfirm }: Props) 
             取消
           </button>
           <div className="flex gap-3">
-            <button type="button" onClick={handleSkip} className="text-sm text-grey-600 hover:underline">
-              跳过裁剪，直接上传原图
-            </button>
             <button
               type="button"
               onClick={handleConfirm}

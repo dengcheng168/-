@@ -163,7 +163,9 @@ export async function createProduct(prisma: PrismaClient, input: CreateProductIn
     return !!found;
   });
 
-  const product = await prisma.product.create({ data: { ...toDbData(input), slug } });
+  const product = await prisma.product.create({
+    data: { ...toDbData(input), slug, description: sanitizeRichText(input.description ?? '') },
+  });
   return serializeProduct(product);
 }
 

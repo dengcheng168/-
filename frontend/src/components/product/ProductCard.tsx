@@ -10,14 +10,13 @@ export function ProductCard({ product, locale = 'en' }: { product: Product; loca
       href={localeHref(`/products/${product.slug}`, locale)}
       className="group flex flex-col overflow-hidden rounded-lg border border-grey-200 bg-white transition-shadow hover:shadow-lg"
     >
-      <div className="overflow-hidden bg-grey-50">
+      <div className="relative aspect-square w-full overflow-hidden bg-grey-50">
         <Image
           src={product.mainImage}
           alt={product.galleryImages[0]?.alt?.trim() || product.name}
-          width={0}
-          height={0}
+          fill
           sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-          className="h-auto w-full transition-transform duration-300 group-hover:scale-105"
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
       </div>
       <div className="flex flex-1 flex-col p-4">

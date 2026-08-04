@@ -15,7 +15,7 @@ export const createProductSchema = z.object({
   sku: z.string().optional(),
   categoryId: z.number().int(),
   shortDescription: z.string().optional(),
-  description: z.string().min(1, '产品详细描述不能为空'),
+  description: z.string().optional(),
   mainImage: z.string().min(1, '请上传主图'),
   galleryImages: z.array(imageItemSchema).default([]),
   specs: z.array(specItemSchema).default([]),
