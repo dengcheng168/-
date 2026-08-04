@@ -176,13 +176,15 @@ export default async function SpanishProductDetailPage({
         </section>
       )}
 
-      <section className="mt-16">
-        <SectionHeading title={t('es', 'productDescription')} align="left" />
-        <div
-          className="prose prose-sm mt-6 max-w-none text-grey-700"
-          dangerouslySetInnerHTML={{ __html: product.description }}
-        />
-      </section>
+      {product.description && (
+        <section className="mt-16">
+          <SectionHeading title={t('es', 'productDescription')} align="left" />
+          <div
+            className="prose prose-sm mt-6 max-w-none text-grey-700"
+            dangerouslySetInnerHTML={{ __html: product.description }}
+          />
+        </section>
+      )}
 
       <RelatedProducts products={related} locale="es" />
 

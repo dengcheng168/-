@@ -168,13 +168,15 @@ export default async function ProductDetailPage({
         </section>
       )}
 
-      <section className="mt-16">
-        <SectionHeading title="Product Description" align="left" />
-        <div
-          className="prose prose-sm mt-6 max-w-none text-grey-700"
-          dangerouslySetInnerHTML={{ __html: product.description }}
-        />
-      </section>
+      {product.description && (
+        <section className="mt-16">
+          <SectionHeading title="Product Description" align="left" />
+          <div
+            className="prose prose-sm mt-6 max-w-none text-grey-700"
+            dangerouslySetInnerHTML={{ __html: product.description }}
+          />
+        </section>
+      )}
 
       <RelatedProducts products={related} />
 
