@@ -45,6 +45,13 @@ export async function buildApp() {
     // 改用 middleware/request-logger.ts 输出的单行结构化日志。
     // Fastify 5 中该选项仍可用（会打印 deprecation 提示），Fastify 6 移除后需改用 logController。
     disableRequestLogging: true,
+    // Fastify 默认单个路由参数（如 /blog/:slug）最长 100 字符，实际博客 slug 是标题自动生成的，
+    // 超过 100 字符时请求会被直接拒绝（FST_ERR_MAX_PARAM_LENGTH，414），导致该文章对访客和搜索引擎
+    // 都变成404——即使它明明存在于数据库、也出现在 sitemap.xml 里。放宽到 200，覆盖长标题场景。
+    // 用 routerOptions 嵌套写法而不是顶层 maxParamLength：后者在 Fastify 5 已标记 FSTDEP022 弃用。
+    routerOptions: {
+      maxParamLength: 200,
+    },
   });
 
   await app.register(sensiblePlugin);
