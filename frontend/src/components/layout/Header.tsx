@@ -44,7 +44,7 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
           )}
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-6 lg:flex">
           {navItems.map((item) => (
             <Link
               key={item.id}
@@ -57,7 +57,7 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-4 md:ml-6 md:flex">
+        <div className="hidden items-center gap-4 lg:ml-6 lg:flex">
           <LanguageSwitcher locale={locale} />
           <Button href={localeHref('/contact', locale)} className="!px-4 !py-2">
             {t(locale, 'headerCta')}

@@ -14,7 +14,7 @@ export function CoreAdvantages({ items, locale = 'en' }: { items: CoreAdvantage[
           eyebrow={t(locale, 'sectionCoreAdvantagesEyebrow')}
           title={t(locale, 'sectionCoreAdvantagesTitle')}
         />
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
           {items.map((item, i) => (
             <div
               key={item.title}

@@ -4,7 +4,7 @@
  * 也支持直接粘贴 YouTube「分享 → 嵌入」给出的完整 <iframe> 代码（自动提取其中的 src）。
  * 无法识别时返回 null（不渲染视频）。
  */
-export function getYoutubeEmbedUrl(input: string | null | undefined): string | null {
+export function getYoutubeVideoId(input: string | null | undefined): string | null {
   if (!input) return null;
   let trimmed = input.trim();
   if (!trimmed) return null;
@@ -16,27 +16,31 @@ export function getYoutubeEmbedUrl(input: string | null | undefined): string | n
   }
 
   if (/^[\w-]{11}$/.test(trimmed)) {
-    return `https://www.youtube.com/embed/${trimmed}`;
+    return trimmed;
   }
 
   try {
     const url = new URL(trimmed.startsWith('//') ? `https:${trimmed}` : trimmed);
-    let id: string | null = null;
 
     if (url.hostname.includes('youtu.be')) {
-      id = url.pathname.slice(1).split('/')[0] || null;
-    } else if (url.hostname.includes('youtube.com')) {
-      if (url.pathname.startsWith('/embed/')) {
-        id = url.pathname.replace('/embed/', '').split('/')[0] || null;
-      } else if (url.pathname.startsWith('/shorts/')) {
-        id = url.pathname.replace('/shorts/', '').split('/')[0] || null;
-      } else {
-        id = url.searchParams.get('v');
-      }
+      return url.pathname.slice(1).split('/')[0] || null;
     }
-
-    return id ? `https://www.youtube.com/embed/${id}` : null;
+    if (url.hostname.includes('youtube.com')) {
+      if (url.pathname.startsWith('/embed/')) {
+        return url.pathname.replace('/embed/', '').split('/')[0] || null;
+      }
+      if (url.pathname.startsWith('/shorts/')) {
+        return url.pathname.replace('/shorts/', '').split('/')[0] || null;
+      }
+      return url.searchParams.get('v');
+    }
+    return null;
   } catch {
     return null;
   }
+}
+
+export function getYoutubeEmbedUrl(input: string | null | undefined): string | null {
+  const id = getYoutubeVideoId(input);
+  return id ? `https://www.youtube.com/embed/${id}` : null;
 }

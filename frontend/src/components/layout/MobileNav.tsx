@@ -13,7 +13,7 @@ export function MobileNav({ items, locale = 'en' }: { items: NavigationItem[]; l
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <button
         type="button"
         aria-label={open ? t(locale, 'closeMenuLabel') : t(locale, 'openMenuLabel')}
