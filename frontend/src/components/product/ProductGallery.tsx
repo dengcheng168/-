@@ -10,12 +10,12 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
 
   return (
     <div>
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg border border-grey-200 bg-grey-50">
+      <div className="relative aspect-[2/1] w-full overflow-hidden rounded-lg border border-grey-200 bg-grey-50">
         <Image
           src={allImages[active]?.url ?? mainImage}
           alt={allImages[active]?.alt ?? name}
           fill
-          sizes="(min-width: 1024px) 40vw, 100vw"
+          sizes="100vw"
           className="object-cover"
           priority
         />

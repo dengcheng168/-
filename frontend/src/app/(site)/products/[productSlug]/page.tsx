@@ -93,10 +93,10 @@ export default async function ProductDetailPage({
         ]}
       />
 
-      <div className="mt-6 grid gap-10 lg:grid-cols-2">
+      <div className="mt-6">
         <ProductGallery mainImage={product.mainImage} images={product.galleryImages} name={product.name} />
 
-        <div>
+        <div className="mt-8">
           <h1 className="text-3xl font-semibold text-navy-950">{product.name}</h1>
           {product.sku && <p className="mt-1 text-sm text-grey-500">SKU: {product.sku}</p>}
           {product.shortDescription && <p className="mt-4 text-grey-700">{product.shortDescription}</p>}
