@@ -32,7 +32,7 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
             <span className="relative block h-9 w-40">
               <Image
                 src={settings.companyLogoUrl}
-                alt={settings.companyName || 'Water Purifier Factory'}
+                alt={settings.brandName || settings.companyName || 'Li-Men'}
                 fill
                 sizes="160px"
                 className="object-contain object-left"
@@ -40,7 +40,7 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
               />
             </span>
           ) : (
-            settings.companyName || 'Water Purifier Factory'
+            settings.brandName || settings.companyName || 'Li-Men'
           )}
         </Link>
 

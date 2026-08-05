@@ -69,11 +69,14 @@ export default async function SpanishProductDetailPage({
   const nextProduct =
     currentIndex >= 0 && currentIndex < allProducts.length - 1 ? allProducts[currentIndex + 1] : null;
 
-  const whatsappHref = getWhatsappHref(settings);
+  const whatsappHref = getWhatsappHref(
+    settings,
+    `Hola, estoy interesado en ${product.name}${product.sku ? ` (${product.sku})` : ''}. Envíeme el MOQ, el precio, el plazo de entrega y las opciones de OEM.`,
+  );
 
   return (
     <Container className="py-12">
-      <JsonLd data={productJsonLd(product, siteUrl, 'es')} />
+      <JsonLd data={productJsonLd(product, siteUrl, 'es', settings.brandName || settings.companyName)} />
       <JsonLd
         data={breadcrumbListJsonLd(
           [

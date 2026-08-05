@@ -21,6 +21,8 @@ export function organizationJsonLd(settings: PublicSiteSettings, siteUrl: string
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: settings.companyName,
+    legalName: settings.companyName,
+    alternateName: settings.brandName ?? undefined,
     url: toAbsolute(siteUrl, '/'),
     logo: settings.companyLogoUrl ? toAbsolute(siteUrl, settings.companyLogoUrl) : undefined,
     email: settings.companyEmail ?? undefined,
@@ -52,7 +54,7 @@ export function breadcrumbListJsonLd(items: { label: string; href: string }[], s
   };
 }
 
-export function productJsonLd(product: Product, siteUrl: string, locale: Locale = 'en') {
+export function productJsonLd(product: Product, siteUrl: string, locale: Locale = 'en', brandName?: string | null) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -60,6 +62,7 @@ export function productJsonLd(product: Product, siteUrl: string, locale: Locale 
     description: product.shortDescription ?? product.seoDescription ?? undefined,
     image: product.mainImage ? toAbsolute(siteUrl, product.mainImage) : undefined,
     sku: product.sku ?? undefined,
+    brand: brandName ? { '@type': 'Brand', name: brandName } : undefined,
     url: toAbsolute(siteUrl, localeHref(`/products/${product.slug}`, locale)),
     inLanguage: locale,
   };

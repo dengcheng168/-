@@ -68,11 +68,14 @@ export default async function ProductDetailPage({
   const nextProduct =
     currentIndex >= 0 && currentIndex < allProducts.length - 1 ? allProducts[currentIndex + 1] : null;
 
-  const whatsappHref = getWhatsappHref(settings);
+  const whatsappHref = getWhatsappHref(
+    settings,
+    `Hello, I am interested in ${product.name}${product.sku ? ` (${product.sku})` : ''}. Please send me the MOQ, price, lead time and OEM options.`,
+  );
 
   return (
     <Container className="py-12">
-      <JsonLd data={productJsonLd(product, siteUrl)} />
+      <JsonLd data={productJsonLd(product, siteUrl, 'en', settings.brandName || settings.companyName)} />
       <JsonLd
         data={breadcrumbListJsonLd(
           [

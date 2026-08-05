@@ -65,14 +65,14 @@ export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
             <span className="relative block h-9 w-40">
               <Image
                 src={settings.companyLogoUrl}
-                alt={settings.companyName || 'Water Purifier Factory'}
+                alt={settings.brandName || settings.companyName || 'Li-Men'}
                 fill
                 sizes="160px"
                 className="object-contain object-left"
               />
             </span>
           ) : (
-            <div className="text-lg font-semibold text-white">{settings.companyName || 'Water Purifier Factory'}</div>
+            <div className="text-lg font-semibold text-white">{settings.brandName || settings.companyName || 'Li-Men'}</div>
           )}
           {settings.footerCompanyIntro && (
             <p className="mt-3 text-sm leading-relaxed text-grey-200/80">{settings.footerCompanyIntro}</p>
@@ -175,7 +175,7 @@ export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
 
       <div className="border-t border-white/10 py-4">
         <Container className="flex flex-col items-center justify-between gap-3 text-xs text-grey-200/60 sm:flex-row">
-          <p>{settings.footerText || `© ${year} ${settings.companyName || 'Water Purifier Factory'}. ${t(locale, 'footerRightsReserved')}`}</p>
+          <p>{settings.footerText || `© ${year} ${settings.companyName || 'Li-Men'}. ${t(locale, 'footerRightsReserved')}`}</p>
           <div className="flex items-center gap-4">
             <Link href={localeHref('/privacy-policy', locale)} className="hover:text-white">
               {t(locale, 'footerPrivacyPolicy')}

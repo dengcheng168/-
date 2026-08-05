@@ -41,7 +41,7 @@ const post: BlogPost = {
   body: 'Body text.',
   coverImage: null,
   categoryId: 1,
-  authorName: 'KoiGate Tech',
+  authorName: 'Li-Men',
   status: 'PUBLISHED',
   publishedAt: '2026-01-01T00:00:00.000Z',
   seoTitle: null,
@@ -53,10 +53,12 @@ const post: BlogPost = {
 const faqs: Faq[] = [{ id: 1, question: 'What is RO?', answer: 'Reverse osmosis.', category: null }];
 
 const settings: PublicSiteSettings = {
-  companyName: 'KoiGate Tech',
+  companyName: 'Li-Men',
+  brandName: 'Li-Men',
   companyLogoUrl: null,
   faviconUrl: null,
   companyAddress: null,
+  companyMapImage: null,
   companyEmail: null,
   companyPhone: null,
   whatsappNumber: null,

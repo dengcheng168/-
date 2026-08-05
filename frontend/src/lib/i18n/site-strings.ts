@@ -38,7 +38,7 @@ const SITE_STRINGS = {
     sectionFactoryGalleryEyebrow: 'Factory Capability',
     sectionFactoryGalleryTitle: 'Factory Testing & Customer Visits',
     sectionFactoryGalleryDescription:
-      'Discover our testing facilities, production lines, quality-control process and international customer visits at KoiGate Tech.',
+      'Discover our testing facilities, production lines, quality-control process and international customer visits at Li-Men.',
     faqPageTitle: 'Frequently Asked Questions',
     faqPageDescription: 'Frequently asked questions about our water purifier products and OEM/ODM services.',
     faqBreadcrumb: 'FAQ',
@@ -159,7 +159,7 @@ const SITE_STRINGS = {
     sectionFactoryGalleryEyebrow: 'Capacidad de Fábrica',
     sectionFactoryGalleryTitle: 'Pruebas de Fábrica y Visitas de Clientes',
     sectionFactoryGalleryDescription:
-      'Conozca nuestras instalaciones de prueba, líneas de producción, proceso de control de calidad y visitas de clientes internacionales en KoiGate Tech.',
+      'Conozca nuestras instalaciones de prueba, líneas de producción, proceso de control de calidad y visitas de clientes internacionales en Li-Men.',
     faqPageTitle: 'Preguntas Frecuentes',
     faqPageDescription: 'Preguntas frecuentes sobre nuestros productos purificadores de agua y servicios OEM/ODM.',
     faqBreadcrumb: 'Preguntas Frecuentes',

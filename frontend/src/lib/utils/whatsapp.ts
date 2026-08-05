@@ -3,8 +3,14 @@ interface WhatsappSettings {
   whatsappNumber: string | null;
 }
 
-export function getWhatsappHref(settings: WhatsappSettings): string | null {
-  if (settings.whatsappLink) return settings.whatsappLink;
-  if (settings.whatsappNumber) return `https://wa.me/${settings.whatsappNumber.replace(/[^\d]/g, '')}`;
-  return null;
+export function getWhatsappHref(settings: WhatsappSettings, message?: string): string | null {
+  const base = settings.whatsappLink
+    ? settings.whatsappLink
+    : settings.whatsappNumber
+      ? `https://wa.me/${settings.whatsappNumber.replace(/[^\d]/g, '')}`
+      : null;
+  if (!base) return null;
+  if (!message) return base;
+  const separator = base.includes('?') ? '&' : '?';
+  return `${base}${separator}text=${encodeURIComponent(message)}`;
 }

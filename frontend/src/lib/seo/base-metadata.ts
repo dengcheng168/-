@@ -26,15 +26,15 @@ export async function getPublicBaseMetadata(locale: Locale): Promise<Metadata> {
   return {
     ...base,
     title: {
-      default: 'OEM & ODM Water Purifier Manufacturer',
-      template: '%s | Water Purifier Factory',
+      default: 'OEM & ODM Water Purifier Manufacturer | Li-Men',
+      template: `%s | ${settings.brandName || 'Li-Men'}`,
     },
     description: 'Reliable water purification solutions for global brands, distributors and commercial projects.',
     openGraph: {
       type: 'website',
       locale,
       alternateLocale: locale === 'en' ? 'es' : 'en',
-      siteName: settings.companyName || 'Water Purifier Factory',
+      siteName: settings.brandName || settings.companyName || 'Li-Men',
       images: settings.defaultOgImage ? [settings.defaultOgImage] : undefined,
     },
     twitter: {
