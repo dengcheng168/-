@@ -80,6 +80,28 @@ export async function listProducts(
   }
 }
 
+// 与后端 backend/src/config/constants.ts 的 MAX_PAGE_SIZE 保持一致——
+// 单页最多只能取这么多条，超过要翻页取，不能直接传更大的 pageSize（会被后端 schema 拒绝）。
+const PUBLIC_PRODUCTS_MAX_PAGE_SIZE = 100;
+
+/**
+ * 取全部已发布产品（跨全部分页，不只是默认第一页/前100条），用于 Previous/Next 等
+ * 需要在完整产品池里做相邻计算的场景。已发布产品数量在合理范围内增长时，这里通常只需
+ * 请求一页；一旦超过单页上限，会按后端已有的 page/pageSize 分页参数继续翻页取全，
+ * 不新增任何接口、不改分页合同。
+ */
+export async function listAllProducts(locale: Locale = 'en'): Promise<Product[]> {
+  const first = await listProducts({ pageSize: PUBLIC_PRODUCTS_MAX_PAGE_SIZE }, locale);
+  const totalPages = first.meta?.totalPages ?? 1;
+  if (totalPages <= 1) return first.items;
+
+  const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
+  const rest = await Promise.all(
+    remainingPages.map((page) => listProducts({ page, pageSize: PUBLIC_PRODUCTS_MAX_PAGE_SIZE }, locale)),
+  );
+  return [first.items, ...rest.map((r) => r.items)].flat();
+}
+
 export async function getProductBySlug(
   slug: string,
   locale: Locale = 'en',

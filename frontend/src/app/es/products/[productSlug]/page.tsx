@@ -14,7 +14,7 @@ import { ProductPrevNextNav } from '@/components/product/ProductPrevNextNav';
 import { InquiryForm } from '@/components/forms/InquiryForm';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { SOCIAL_ICONS } from '@/components/layout/SocialIcons';
-import { getProductBySlug, listProducts } from '@/lib/api/products';
+import { getProductBySlug, listAllProducts } from '@/lib/api/products';
 import { getPublicSettings } from '@/lib/api/settings';
 import { productJsonLd, breadcrumbListJsonLd } from '@/lib/seo/jsonld';
 import { getSiteUrl } from '@/lib/seo/site';
@@ -61,11 +61,11 @@ export default async function SpanishProductDetailPage({
   params: Promise<{ productSlug: string }>;
 }) {
   const { productSlug } = await params;
-  const [result, settings, siteUrl, { items: allProducts }] = await Promise.all([
+  const [result, settings, siteUrl, allProducts] = await Promise.all([
     getProductBySlug(productSlug, 'es'),
     getPublicSettings(),
     getSiteUrl(),
-    listProducts({ pageSize: 100 }, 'es'),
+    listAllProducts('es'),
   ]);
 
   if (!result) notFound();
