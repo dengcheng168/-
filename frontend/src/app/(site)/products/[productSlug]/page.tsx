@@ -87,7 +87,7 @@ export default async function ProductDetailPage({
   const hasDescription = Boolean(product.description);
 
   return (
-    <Container className="max-w-[1240px] py-8 lg:py-10">
+    <Container className="max-w-[1400px] py-8 lg:py-10">
       <JsonLd data={productJsonLd(product, siteUrl, 'en', settings.brandName || settings.companyName)} />
       <JsonLd
         data={breadcrumbListJsonLd(
