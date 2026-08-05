@@ -68,6 +68,7 @@ function buildPayload(formData: FormData) {
     featured: formData.get('featured') === 'on',
     seoTitle: textOrUndefined(formData, 'seoTitle'),
     seoDescription: textOrUndefined(formData, 'seoDescription'),
+    seoKeywords: textOrUndefined(formData, 'seoKeywords'),
   };
 }
 

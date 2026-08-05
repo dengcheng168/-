@@ -33,6 +33,7 @@ interface FormValues {
   featured?: boolean;
   seoTitle?: string | null;
   seoDescription?: string | null;
+  seoKeywords?: string | null;
 }
 
 interface TranslationValues {
@@ -178,6 +179,9 @@ export function ProductForm({
       </FormField>
       <FormField label="SEO 描述" htmlFor="seoDescription">
         <textarea id="seoDescription" name="seoDescription" rows={2} defaultValue={initialValues?.seoDescription ?? ''} className={fieldInputClasses} />
+      </FormField>
+      <FormField label="SEO 关键词" htmlFor="seoKeywords">
+        <input id="seoKeywords" name="seoKeywords" defaultValue={initialValues?.seoKeywords ?? ''} className={fieldInputClasses} />
       </FormField>
 
       {state.message && <p className={`text-sm ${state.success ? 'text-green-600' : 'text-red-600'}`}>{state.message}</p>}

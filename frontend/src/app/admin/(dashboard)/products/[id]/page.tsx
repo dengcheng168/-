@@ -25,6 +25,7 @@ interface ProductDetail {
   featured: boolean;
   seoTitle: string | null;
   seoDescription: string | null;
+  seoKeywords: string | null;
 }
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
