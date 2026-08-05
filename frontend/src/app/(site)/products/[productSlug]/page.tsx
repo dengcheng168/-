@@ -7,9 +7,10 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { ProductGallery } from '@/components/product/ProductGallery';
 import { ProductSpecTable } from '@/components/product/ProductSpecTable';
 import { RelatedProducts } from '@/components/product/RelatedProducts';
+import { ProductPrevNextNav } from '@/components/product/ProductPrevNextNav';
 import { InquiryForm } from '@/components/forms/InquiryForm';
 import { JsonLd } from '@/components/seo/JsonLd';
-import { getProductBySlug } from '@/lib/api/products';
+import { getProductBySlug, listProducts } from '@/lib/api/products';
 import { getPublicSettings } from '@/lib/api/settings';
 import { productJsonLd, breadcrumbListJsonLd } from '@/lib/seo/jsonld';
 import { getSiteUrl } from '@/lib/seo/site';
@@ -52,10 +53,20 @@ export default async function ProductDetailPage({
   params: Promise<{ productSlug: string }>;
 }) {
   const { productSlug } = await params;
-  const [result, settings, siteUrl] = await Promise.all([getProductBySlug(productSlug), getPublicSettings(), getSiteUrl()]);
+  const [result, settings, siteUrl, { items: allProducts }] = await Promise.all([
+    getProductBySlug(productSlug),
+    getPublicSettings(),
+    getSiteUrl(),
+    listProducts({ pageSize: 100 }),
+  ]);
 
   if (!result) notFound();
   const { product, related } = result;
+
+  const currentIndex = allProducts.findIndex((p) => p.slug === product.slug);
+  const prevProduct = currentIndex > 0 ? allProducts[currentIndex - 1] : null;
+  const nextProduct =
+    currentIndex >= 0 && currentIndex < allProducts.length - 1 ? allProducts[currentIndex + 1] : null;
 
   const whatsappHref = getWhatsappHref(settings);
 
@@ -135,6 +146,8 @@ export default async function ProductDetailPage({
           )}
         </div>
       </div>
+
+      <ProductPrevNextNav prev={prevProduct} next={nextProduct} />
 
       {product.features.length > 0 && (
         <section className="mt-16">
