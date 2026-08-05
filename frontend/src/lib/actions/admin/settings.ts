@@ -34,6 +34,7 @@ export async function updateSeoSettingsAction(_prevState: AdminFormState, formDa
 export async function updateContactSettingsAction(_prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
   return patchSettings('contact', {
     companyName: textOrUndefined(formData, 'companyName'),
+    brandName: textOrUndefined(formData, 'brandName'),
     companyLogoUrl: textOrUndefined(formData, 'companyLogoUrl'),
     faviconUrl: textOrUndefined(formData, 'faviconUrl'),
     companyAddress: textOrUndefined(formData, 'companyAddress'),

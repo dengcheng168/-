@@ -7,6 +7,7 @@ import { updateContactSettingsAction } from '@/lib/actions/admin/settings';
 
 interface Values {
   companyName: string;
+  brandName: string | null;
   companyLogoUrl: string | null;
   faviconUrl: string | null;
   companyAddress: string | null;
@@ -20,7 +21,10 @@ export function ContactSettingsForm({ initialValues }: { initialValues: Values }
 
   return (
     <form action={formAction} className="max-w-xl space-y-4">
-      <FormField label="公司名称" htmlFor="companyName">
+      <FormField label="品牌名称" htmlFor="brandName" hint="用于 Logo 旁文字、页脚品牌标题等对外品牌展示位置，例如 Li-Men；留空则回退显示公司名称">
+        <input id="brandName" name="brandName" defaultValue={initialValues.brandName ?? ''} className={fieldInputClasses} />
+      </FormField>
+      <FormField label="公司名称（正式法律主体）" htmlFor="companyName" hint="用于 About/Contact/Footer 版权/隐私政策/JSON-LD 等法律主体展示位置，例如 Zhongshan Li-Men Technology Co., Ltd.">
         <input id="companyName" name="companyName" defaultValue={initialValues.companyName} className={fieldInputClasses} />
       </FormField>
       <ImageUploader

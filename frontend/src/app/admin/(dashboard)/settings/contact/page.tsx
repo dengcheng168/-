@@ -4,6 +4,7 @@ import { ContactSettingsForm } from './ContactSettingsForm';
 
 interface Settings {
   companyName: string;
+  brandName: string | null;
   companyLogoUrl: string | null;
   faviconUrl: string | null;
   companyAddress: string | null;

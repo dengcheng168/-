@@ -8,7 +8,8 @@ import type { PublicSiteSettings } from '@/types/settings';
  * 页面会先用占位内容完成预渲染，容器启动后由 ISR（revalidate）在首次真实请求时刷新为最新内容。
  */
 const FALLBACK_SETTINGS: PublicSiteSettings = {
-  companyName: 'Water Purifier Factory',
+  companyName: 'Li-Men',
+  brandName: 'Li-Men',
   companyLogoUrl: null,
   faviconUrl: null,
   companyAddress: null,

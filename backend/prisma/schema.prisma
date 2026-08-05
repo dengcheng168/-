@@ -528,6 +528,12 @@ model NavigationItem {
 model SiteSetting {
   id                    Int      @id @default(1)
   companyName           String   @default("")
+  // 对外品牌短名（如 "Li-Men"），用于 Header/Footer Logo 文字、JSON-LD alternateName、
+  // 产品 Schema 的 brand 字段等"品牌"位置；companyName 存放正式法律实体全称（如
+  // "Zhongshan Li-Men Technology Co., Ltd."），用于 About/Contact/Footer 版权/法律页面/
+  // JSON-LD legalName 等"公司主体"位置。为空时各处一律回退到 companyName，不引入新的
+  // 必填约束。
+  brandName             String?
   companyLogoUrl        String?
   faviconUrl            String?
   companyAddress        String?

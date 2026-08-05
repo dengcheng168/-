@@ -17,6 +17,9 @@ export interface SocialLink {
 
 export interface PublicSiteSettings {
   companyName: string;
+  /** 对外品牌短名（如 "Li-Men"），用于 Logo 文字/页脚品牌标题/JSON-LD alternateName 等品牌位置；
+   * 为空时回退到 companyName（正式法律主体全称）。 */
+  brandName: string | null;
   companyLogoUrl: string | null;
   faviconUrl: string | null;
   companyAddress: string | null;
