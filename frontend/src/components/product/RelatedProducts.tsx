@@ -9,7 +9,7 @@ export function RelatedProducts({ products, locale = 'en' }: { products: Product
 
   return (
     <section className="mt-16">
-      <SectionHeading title={t(locale, 'relatedProducts')} align="left" />
+      <SectionHeading title={t(locale, 'relatedProducts')} />
       <div className="mt-6">
         <ProductGrid products={products} locale={locale} />
       </div>

@@ -146,7 +146,7 @@ export default async function SpanishProductDetailPage({
 
       {product.features.length > 0 && (
         <section className="mt-16">
-          <SectionHeading title={t('es', 'productFeatures')} align="left" />
+          <SectionHeading title={t('es', 'productFeatures')} />
           <ul className="mt-6 grid gap-3 sm:grid-cols-2">
             {product.features.map((feature, i) => {
               const label = typeof feature === 'string' ? feature : feature.title;
@@ -164,7 +164,7 @@ export default async function SpanishProductDetailPage({
 
       {product.applications.length > 0 && (
         <section className="mt-16">
-          <SectionHeading title={t('es', 'applicationScenarios')} align="left" />
+          <SectionHeading title={t('es', 'applicationScenarios')} />
           <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {product.applications.map((app) => (
               <div key={app.title} className="rounded-lg border border-grey-200 bg-white p-5">
