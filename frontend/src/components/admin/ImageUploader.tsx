@@ -29,6 +29,12 @@ export function ImageUploader({
   const [error, setError] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [dimensions, setDimensions] = useState<{ width: number; height: number } | null>(null);
+
+  function updateUrl(next: string) {
+    setDimensions(null);
+    setUrl(next);
+  }
 
   async function uploadFile(fileOrBlob: File | Blob, filename: string) {
     setUploading(true);
@@ -46,7 +52,7 @@ export function ImageUploader({
         return;
       }
 
-      setUrl(body.data.webpUrl || body.data.url);
+      updateUrl(body.data.webpUrl || body.data.url);
     } catch {
       setError('上传失败，请检查网络连接');
     } finally {
@@ -75,13 +81,30 @@ export function ImageUploader({
 
       <div className="flex items-center gap-4">
         {url ? (
-          <button
-            type="button"
-            onClick={() => setPreviewOpen(true)}
-            className="relative h-20 w-20 cursor-zoom-in overflow-hidden rounded-md border border-grey-200 bg-grey-50"
-          >
-            <Image src={resolveMediaUrl(url)} alt="" fill sizes="80px" className="object-cover" />
-          </button>
+          <div>
+            <button
+              type="button"
+              onClick={() => setPreviewOpen(true)}
+              className="relative h-20 w-20 cursor-zoom-in overflow-hidden rounded-md border border-grey-200 bg-grey-50"
+            >
+              <Image
+                src={resolveMediaUrl(url)}
+                alt=""
+                fill
+                sizes="80px"
+                className="object-cover"
+                onLoad={(e) => {
+                  const img = e.currentTarget;
+                  setDimensions({ width: img.naturalWidth, height: img.naturalHeight });
+                }}
+              />
+            </button>
+            {dimensions && (
+              <p className="mt-1 text-center text-[11px] text-grey-500">
+                {dimensions.width}×{dimensions.height}px
+              </p>
+            )}
+          </div>
         ) : (
           <div className="flex h-20 w-20 items-center justify-center rounded-md border border-dashed border-grey-200 text-xs text-grey-500">
             无图片
@@ -99,9 +122,9 @@ export function ImageUploader({
           {uploading && <p className="mt-1 text-xs text-grey-500">上传中...</p>}
           {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
           <div className="mt-1 flex items-center gap-3">
-            <MediaLibraryPicker onSelect={setUrl} />
+            <MediaLibraryPicker onSelect={updateUrl} />
             {url && (
-              <button type="button" onClick={() => setUrl('')} className="text-xs text-red-600 hover:underline">
+              <button type="button" onClick={() => updateUrl('')} className="text-xs text-red-600 hover:underline">
                 移除图片
               </button>
             )}

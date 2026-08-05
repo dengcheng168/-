@@ -115,15 +115,13 @@ export function ProductForm({
         name="mainImage"
         label="主图"
         defaultValue={initialValues?.mainImage}
-        recommendedSize="建议 1000×1000px（正方形）"
-        aspectRatio={1}
+        recommendedSize="展示区为正方形，支持任意比例的图片、不会被裁切；完整营销海报图（含标题/卖点/参数）建议竖版约3:4（如1080×1440px），产品实拍图可用正方形（1200×1200px起），宽度不低于1000px"
       />
       <MultiImageUploader
         name="galleryImages"
         label="详情图片（多张）"
         defaultValue={initialValues?.galleryImages}
-        recommendedSize="建议 1000×1000px（正方形），可上传多张"
-        aspectRatio={1}
+        recommendedSize="支持任意比例，可上传多张，展示时不会被裁切；建议宽度不低于800px"
       />
 
       <FormField label="参数表" htmlFor="specsText" hint="每行一条，格式：标签: 值，例如 Daily Output: 50 GPD">

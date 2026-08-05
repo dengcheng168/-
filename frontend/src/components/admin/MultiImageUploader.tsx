@@ -32,6 +32,8 @@ export function MultiImageUploader({
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  /** 每张图实际加载出来的原始像素尺寸，key 是图片 URL，用来在缩略图下方标出真实尺寸 */
+  const [dimensionsByUrl, setDimensionsByUrl] = useState<Record<string, { width: number; height: number }>>({});
 
   function moveImage(from: number, to: number) {
     if (from === to) return;
@@ -87,35 +89,54 @@ export function MultiImageUploader({
       {images.length > 1 && <p className="mb-1.5 text-xs text-grey-500">拖动缩略图可调整顺序，点击图片可查看原图</p>}
       <div className="flex flex-wrap gap-3">
         {images.map((img, i) => (
-          <div
-            key={`${img.url}-${i}`}
-            draggable
-            onDragStart={() => setDragIndex(i)}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => {
-              e.preventDefault();
-              if (dragIndex !== null) moveImage(dragIndex, i);
-              setDragIndex(null);
-            }}
-            onDragEnd={() => setDragIndex(null)}
-            className={`relative h-20 w-20 shrink-0 cursor-move overflow-hidden rounded-md border bg-grey-50 transition-opacity ${
-              dragIndex === i ? 'border-water-500 opacity-40' : 'border-grey-200'
-            }`}
-          >
-            <button
-              type="button"
-              onClick={() => setPreviewUrl(img.url)}
-              className="relative block h-full w-full cursor-zoom-in"
+          <div key={`${img.url}-${i}`} className="shrink-0">
+            <div
+              draggable
+              onDragStart={() => setDragIndex(i)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (dragIndex !== null) moveImage(dragIndex, i);
+                setDragIndex(null);
+              }}
+              onDragEnd={() => setDragIndex(null)}
+              className={`relative h-20 w-20 cursor-move overflow-hidden rounded-md border bg-grey-50 transition-opacity ${
+                dragIndex === i ? 'border-water-500 opacity-40' : 'border-grey-200'
+              }`}
             >
-              <Image src={resolveMediaUrl(img.url)} alt="" fill sizes="80px" className="object-cover" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
-              className="absolute right-0.5 top-0.5 z-30 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-xs text-white"
-            >
-              ×
-            </button>
+              <button
+                type="button"
+                onClick={() => setPreviewUrl(img.url)}
+                className="relative block h-full w-full cursor-zoom-in"
+              >
+                <Image
+                  src={resolveMediaUrl(img.url)}
+                  alt=""
+                  fill
+                  sizes="80px"
+                  className="object-cover"
+                  onLoad={(e) => {
+                    const el = e.currentTarget;
+                    setDimensionsByUrl((prev) => ({
+                      ...prev,
+                      [img.url]: { width: el.naturalWidth, height: el.naturalHeight },
+                    }));
+                  }}
+                />
+              </button>
+              <button
+                type="button"
+                onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
+                className="absolute right-0.5 top-0.5 z-30 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-xs text-white"
+              >
+                ×
+              </button>
+            </div>
+            {dimensionsByUrl[img.url] && (
+              <p className="mt-1 text-center text-[11px] text-grey-500">
+                {dimensionsByUrl[img.url].width}×{dimensionsByUrl[img.url].height}px
+              </p>
+            )}
           </div>
         ))}
       </div>
