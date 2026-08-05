@@ -15,13 +15,13 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
 
   return (
     <div>
-      <div className="relative aspect-square w-full overflow-hidden rounded-lg border border-grey-200 bg-grey-50">
+      <div className="relative mx-auto aspect-square max-h-[500px] w-full overflow-hidden rounded-lg border border-grey-200 bg-white min-[1440px]:max-h-[560px]">
         <Image
           src={allImages[active]?.url ?? mainImage}
           alt={allImages[active]?.alt ?? name}
           fill
           sizes="(min-width: 1024px) 40vw, 100vw"
-          className="object-cover object-top"
+          className="object-contain"
           priority
         />
         {hasMultiple && (
@@ -30,7 +30,7 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
               type="button"
               onClick={() => goTo(-1)}
               aria-label="Previous image"
-              className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-navy-950 shadow hover:bg-white"
+              className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-navy-950 shadow transition-colors hover:bg-white"
             >
               &lsaquo;
             </button>
@@ -38,7 +38,7 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
               type="button"
               onClick={() => goTo(1)}
               aria-label="Next image"
-              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-navy-950 shadow hover:bg-white"
+              className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-navy-950 shadow transition-colors hover:bg-white"
             >
               &rsaquo;
             </button>
@@ -46,14 +46,16 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
         )}
       </div>
       {allImages.length > 1 && (
-        <div className="mt-4 flex gap-3">
+        <div className="mt-3 flex gap-2.5 overflow-x-auto pb-1" aria-label="Product thumbnails">
           {allImages.map((img, i) => (
             <button
               key={`${img.url}-${i}`}
               type="button"
               onClick={() => setActive(i)}
-              className={`relative h-16 w-16 overflow-hidden rounded-md border-2 ${
-                active === i ? 'border-water-500' : 'border-grey-200'
+              aria-label={`${name} image ${i + 1}`}
+              aria-current={active === i ? 'true' : undefined}
+              className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-md border-2 transition-colors ${
+                active === i ? 'border-water-500' : 'border-grey-200 hover:border-grey-300'
               }`}
             >
               <Image src={img.url} alt={img.alt ?? name} fill sizes="64px" className="object-cover" />
