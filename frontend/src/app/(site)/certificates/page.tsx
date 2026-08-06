@@ -6,7 +6,7 @@ import { PageHeroBanner } from '@/components/site/PageHeroBanner';
 import { CertificateCard } from '@/components/site/CertificateCard';
 import { listCertificates, getPageBySlug } from '@/lib/api/content';
 import { t } from '@/lib/i18n/site-strings';
-import { getCertificateDisplayMeta } from '@/lib/certificates/display-config';
+import { getCertificateDisplayMeta, dedupeByRule } from '@/lib/certificates/display-config';
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getPageBySlug('certificates');
@@ -24,11 +24,14 @@ export default async function CertificatesPage() {
   const [allCertificates, page] = await Promise.all([listCertificates(), getPageBySlug('certificates')]);
   const hasHero = Boolean(page?.heroImage || page?.heroImageMobile);
 
-  // 只展示能在证书原文里核实分类/适用范围的证书，见 lib/certificates/display-config.ts
-  const certificates = allCertificates.filter((c) => getCertificateDisplayMeta(c.id));
-  const approvals = certificates.filter((c) => getCertificateDisplayMeta(c.id)?.group === 'approvals');
-  const compliance = certificates.filter((c) => getCertificateDisplayMeta(c.id)?.group === 'compliance');
-  const historical = certificates.filter((c) => getCertificateDisplayMeta(c.id)?.group === 'historical');
+  // listCertificates() 只返回 published=true 的记录；这里再按证书业务字段（证书编号/
+  // 签发机构+名称组合，见 lib/certificates/display-config.ts）去重，防止同一份证书被
+  // 后台意外同时发布两条时重复展示
+  const certificates = dedupeByRule(allCertificates);
+  const approvals = certificates.filter((c) => getCertificateDisplayMeta(c).group === 'approvals');
+  const compliance = certificates.filter((c) => getCertificateDisplayMeta(c).group === 'compliance');
+  const historical = certificates.filter((c) => getCertificateDisplayMeta(c).group === 'historical');
+  const unclassified = certificates.filter((c) => getCertificateDisplayMeta(c).group === 'unclassified');
 
   return (
     <>
@@ -94,6 +97,17 @@ export default async function CertificatesPage() {
             <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {historical.map((cert) => (
                 <CertificateCard key={cert.id} certificate={cert} locale="en" muted />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {unclassified.length > 0 && (
+          <section className="mt-12">
+            <h2 className="text-xl font-semibold text-navy-950">{t('en', 'certGroupUnclassifiedTitle')}</h2>
+            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {unclassified.map((cert) => (
+                <CertificateCard key={cert.id} certificate={cert} locale="en" />
               ))}
             </div>
           </section>

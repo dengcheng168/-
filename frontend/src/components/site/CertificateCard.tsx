@@ -22,8 +22,7 @@ export function CertificateCard({
   locale?: Locale;
   muted?: boolean;
 }) {
-  const rawMeta = getCertificateDisplayMeta(certificate.id);
-  const meta = rawMeta ? localizeCertMeta(rawMeta, locale) : null;
+  const meta = localizeCertMeta(getCertificateDisplayMeta(certificate), locale);
   const issuedLabel = formatDate(certificate.issueDate, locale);
 
   return (
@@ -58,35 +57,35 @@ export function CertificateCard({
           </p>
         )}
 
-        {meta && (
-          <div className="mt-3 space-y-1.5 border-t border-grey-100 pt-3 text-xs text-grey-600">
+        <div className="mt-3 space-y-1.5 border-t border-grey-100 pt-3 text-xs text-grey-600">
+          {meta.productType && (
             <p>
               <span className="font-semibold text-navy-950">{t(locale, 'certApplicableProductType')}: </span>
               {meta.productType}
             </p>
+          )}
+          <p>
+            <span className="font-semibold text-navy-950">{t(locale, 'certApplicableModels')}: </span>
+            {meta.models ? meta.models.join(', ') : t(locale, 'certModelsReferScope')}
+          </p>
+          {meta.status && (
             <p>
-              <span className="font-semibold text-navy-950">{t(locale, 'certApplicableModels')}: </span>
-              {meta.models ? meta.models.join(', ') : t(locale, 'certModelsReferScope')}
+              <span
+                className={`inline-block rounded px-2 py-0.5 text-xs font-semibold ${
+                  meta.group === 'historical' ? 'bg-grey-200 text-grey-700' : 'bg-water-50 text-water-700'
+                }`}
+              >
+                {meta.status}
+              </span>
             </p>
-            {meta.status && (
-              <p>
-                <span
-                  className={`inline-block rounded px-2 py-0.5 text-xs font-semibold ${
-                    meta.group === 'historical' ? 'bg-grey-200 text-grey-700' : 'bg-water-50 text-water-700'
-                  }`}
-                >
-                  {meta.status}
-                </span>
-              </p>
-            )}
-            {meta.expiredOn && (
-              <p>
-                <span className="font-semibold text-navy-950">{t(locale, 'certExpiryLabel')}: </span>
-                {meta.expiredOn}
-              </p>
-            )}
-          </div>
-        )}
+          )}
+          {meta.expiredOn && (
+            <p>
+              <span className="font-semibold text-navy-950">{t(locale, 'certExpiryLabel')}: </span>
+              {meta.expiredOn}
+            </p>
+          )}
+        </div>
 
         {certificate.description && <p className="mt-3 line-clamp-3 text-sm text-grey-500">{certificate.description}</p>}
 

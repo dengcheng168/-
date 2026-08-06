@@ -6,11 +6,15 @@ import { t } from '@/lib/i18n/site-strings';
 import type { Locale } from '@/lib/i18n/locales';
 import { localeHref } from '@/lib/i18n/paths';
 import type { Certificate } from '@/types/content';
-import { getCertificateDisplayMeta, localizeCertMeta } from '@/lib/certificates/display-config';
+import { getCertificateDisplayMeta, localizeCertMeta, dedupeByRule } from '@/lib/certificates/display-config';
 
 export function CertificatesShowcase({ certificates, locale = 'en' }: { certificates: Certificate[]; locale?: Locale }) {
-  // 首页预览只展示已核实分类、且不是 Historical/Expired 的证书，避免暗示所有文件都适用于当前产品
-  const eligible = certificates.filter((c) => getCertificateDisplayMeta(c.id)?.group !== 'historical' && getCertificateDisplayMeta(c.id));
+  // 首页预览：先按业务字段去重（防止重复发布造成重复卡片），再排除 Historical/Expired
+  // 和 unclassified（未确认分类的文件不适合出现在首页），避免暗示所有文件都适用于当前产品
+  const eligible = dedupeByRule(certificates).filter((c) => {
+    const group = getCertificateDisplayMeta(c).group;
+    return group !== 'historical' && group !== 'unclassified';
+  });
   if (eligible.length === 0) return null;
   const displayedCertificates = eligible.slice(0, 4);
 
@@ -20,8 +24,7 @@ export function CertificatesShowcase({ certificates, locale = 'en' }: { certific
         <SectionHeading eyebrow={t(locale, 'sectionCertificatesEyebrow')} title={t(locale, 'sectionCertificatesTitle')} />
         <div className="mt-10 flex flex-wrap justify-center gap-6">
           {displayedCertificates.map((cert) => {
-            const rawMeta = getCertificateDisplayMeta(cert.id);
-            const meta = rawMeta ? localizeCertMeta(rawMeta, locale) : null;
+            const meta = localizeCertMeta(getCertificateDisplayMeta(cert), locale);
             return (
               <div
                 key={cert.id}
@@ -42,7 +45,7 @@ export function CertificatesShowcase({ certificates, locale = 'en' }: { certific
                     <span className="block w-full truncate text-xs font-medium uppercase tracking-wide text-water-600">{cert.issuingAuthority}</span>
                   )}
                   <h3 className="mt-1 line-clamp-2 min-h-[2.75rem] text-base font-semibold leading-snug text-navy-950">{cert.name}</h3>
-                  {meta && <p className="mt-1 text-xs font-medium text-grey-500">{meta.productType}</p>}
+                  {meta.productType && <p className="mt-1 text-xs font-medium text-grey-500">{meta.productType}</p>}
                 </div>
               </div>
             );

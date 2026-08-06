@@ -18,10 +18,16 @@
 --   4) FactoryGalleryItem（About 页 16 组素材）本身一条记录都不改，16 张原图、原始英西语
 --      标题/说明全部保留，只在前端按 id 重新分组展示（见
 --      frontend/src/lib/about/gallery-groups.ts），本脚本不涉及这张表。
---   5) Certificate 表本身也不改：生产库里 WRAS Product Approval 被重复发布了 3 次
---      （id 5/6/9，同一个 Approval Number 240902711），本轮选择在前端用展示白名单
---      （frontend/src/lib/certificates/display-config.ts）只渲染 id 9（内容最完整、
---      唯一有西语翻译的版本），不在数据库层面 unpublish id 5/6，避免不必要的写操作。
+--   5) 生产库里 WRAS Product Approval 被重复发布了 3 次（id 5/6/9，同一个 Approval Number
+--      240902711）。网站所有者已确认：只保留 id 9 公开发布（内容最完整、唯一有西语翻译、
+--      三者中最后编辑），id 5/6 通过后台 unpublish 下线——不删除记录、不删除翻译、
+--      不改证书原图/PDF/证书编号/持证方名称，仅有的写操作是把 published 置为 0。
+--      前端展示分类（frontend/src/lib/certificates/display-config.ts）也已经从"数据库
+--      主键 id 必须等于 9"改成按证书业务字段识别（WRAS 用 Approval Number 240902711，
+--      SGS/CSA/TÜV/UL 用各自 certNumber，Eurofins 用签发机构+标准化名称组合——它的证书
+--      原文没有编号字段），id 5/6 unpublish 后公开查询接口本身就会把它们过滤掉
+--      （backend/src/modules/certificates/certificates.service.ts 的
+--      `where: { published: true, deletedAt: null }`），不需要靠前端白名单硬编码 id。
 --
 -- 执行前必须先跑一次本文件顶部列出的"执行前断言"（见下），全部符合预期才继续；
 -- 任意一条不符，立即停止，不得执行 BEGIN 之后的任何语句。
@@ -37,6 +43,13 @@
 --     -- 期望：title='About Us'
 --   SELECT companyName FROM site_settings LIMIT 1;
 --     -- 期望：'Zhongshan Li-Men Technology Co., Ltd.'（用于核实 About 文案没有编造公司全称）
+--   SELECT id,certNumber,issuingAuthority,name,published FROM certificates WHERE id IN (5,6,9);
+--     -- 期望（2026-08-07 对生产库确认）：
+--     --   id=5 certNumber='240902711' issuingAuthority='Water Regulations Approval Scheme Ltd. (WRAS)'
+--     --        name='WRAS Product Approval Certificate – WDM001 & WD001 Water Conditioners' published=1
+--     --   id=6 certNumber=NULL/空       issuingAuthority='Water Regulations Approval Scheme Ltd. (WRAS)'
+--     --        name='WRAS Product Approval Certificate – WDM001 & WD001 Water Conditioners' published=1
+--     --   id=9 certNumber='240902711' published=1（这条保持不变）
 --
 -- 用法：
 --   sqlite3 <db文件> < 2026-08-07-b2b-trust-batch2-content-fixes.sql
@@ -96,6 +109,17 @@ SET title = 'Fabricación de Purificación de Agua y Soporte OEM/ODM',
     updatedAt = datetime('now')
 WHERE pageId = (SELECT id FROM pages WHERE slug = 'about') AND locale = 'es';
 
+-- 7) WRAS 重复发布记录下线：id 5、id 6 设为未发布（id 9 保持发布，不受影响）
+--    WHERE 条件同时使用 id 限定 + 业务字段（签发机构 + 标准化证书名称）核实，
+--    不是只凭 id；不删除记录、不删除翻译、不改证书原图/PDF/证书编号/持证方名称
+UPDATE certificates
+SET published = 0,
+    updatedAt = datetime('now')
+WHERE id IN (5, 6)
+  AND issuingAuthority = 'Water Regulations Approval Scheme Ltd. (WRAS)'
+  AND name = 'WRAS Product Approval Certificate – WDM001 & WD001 Water Conditioners'
+  AND published = 1;
+
 COMMIT;
 
 -- 执行后校验（应当自动打印以下结果，逐条核对）
@@ -116,6 +140,15 @@ SELECT title, bodyHtml, seoDescription FROM pages WHERE slug = 'about';
 
 SELECT '--- about page (es) ---' AS section;
 SELECT title, bodyHtml FROM page_translations WHERE pageId = (SELECT id FROM pages WHERE slug = 'about') AND locale = 'es';
+
+SELECT '--- WRAS id 5/6/9 final state (expect 5=0, 6=0, 9=1) ---' AS section;
+SELECT id, published, certNumber, name FROM certificates WHERE id IN (5, 6, 9) ORDER BY id;
+
+SELECT '--- WRAS translations untouched (expect 2 rows, id 5/6 have none, id 9 unchanged) ---' AS section;
+SELECT certificateId, locale, name FROM certificate_translations WHERE certificateId IN (5, 6, 9) ORDER BY certificateId;
+
+SELECT '--- published certificates with duplicate certNumber (expect 0 rows) ---' AS section;
+SELECT certNumber, COUNT(*) c FROM certificates WHERE published = 1 AND certNumber IS NOT NULL AND certNumber != '' GROUP BY certNumber HAVING c > 1;
 
 SELECT '--- foreign_key_check (expect 0 rows) ---' AS section;
 PRAGMA foreign_key_check;
