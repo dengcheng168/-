@@ -135,10 +135,10 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
                   aria-hidden="true"
                   className="pointer-events-none absolute hidden border-2 border-water-500 bg-water-500/10 lg:block"
                   style={{
-                    width: '40%',
-                    height: '40%',
-                    left: `calc(${zoomPos.x}% - 20%)`,
-                    top: `calc(${zoomPos.y}% - 20%)`,
+                    width: '35%',
+                    height: '35%',
+                    left: `calc(${zoomPos.x}% - 17.5%)`,
+                    top: `calc(${zoomPos.y}% - 17.5%)`,
                   }}
                 />
               )}
@@ -165,18 +165,19 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
             </div>
 
             {/*
-              放大面板尺寸=主图框本身（left:100%/top:0/h-full/w-full，紧贴主图右侧），
-              取景框（上面那个）约占主图 40% 宽高，对应放大倍数 250%——参考同类产品站的
-              成熟做法（面板和主图等大贴靠展示，而不是做成一个跟主图尺寸无关的小方块）
+              放大面板故意不跟主图框同尺寸：参考站点那种"面板=主图等大"的做法，是建立在
+              它主图框本身就很小（固定 ≤450px）的前提上；我们这边是两栏布局，主图框在宽屏下
+              会长到接近 560px 高，两个等大的框并排会直接把右侧购买信息区域整个挡住。改成固定
+              的、不随主图框联动的尺寸，控制在合理范围内，不抢占布局。
             */}
             {zoomPos && (
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute left-full top-0 z-30 hidden h-full w-full overflow-hidden rounded-lg border border-grey-200 bg-white shadow-xl lg:block"
+                className="pointer-events-none absolute left-full top-0 z-30 ml-3 hidden h-[320px] w-[320px] overflow-hidden rounded-lg border border-grey-200 bg-white shadow-xl lg:block"
                 style={{
                   backgroundImage: `url(${allImages[active]?.url ?? mainImage})`,
                   backgroundRepeat: 'no-repeat',
-                  backgroundSize: '250% 250%',
+                  backgroundSize: '285% 285%',
                   backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
                 }}
               />
