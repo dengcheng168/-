@@ -167,7 +167,7 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
             {zoomPos && (
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute left-full top-0 z-30 ml-4 hidden h-full w-[280px] overflow-hidden rounded-lg border border-grey-200 bg-white shadow-xl lg:block"
+                className="pointer-events-none absolute left-full top-0 z-30 ml-4 hidden h-[240px] w-[240px] overflow-hidden rounded-lg border border-grey-200 bg-white shadow-xl lg:block"
                 style={{
                   backgroundImage: `url(${allImages[active]?.url ?? mainImage})`,
                   backgroundRepeat: 'no-repeat',
