@@ -129,6 +129,44 @@ const SITE_STRINGS = {
     openMenuLabel: 'Open menu',
     closeMenuLabel: 'Close menu',
     productCategoriesLabel: 'Product categories',
+    certPageEyebrow: 'Quality & Compliance',
+    certScopeNotice:
+      'Certificates and test reports apply only to the product types and models stated in each document. They do not automatically cover every Li-Men product.',
+    certGroupApprovalsTitle: 'Product Approvals',
+    certGroupComplianceTitle: 'Compliance & Component Test Documents',
+    certGroupHistoricalTitle: 'Historical / Expired',
+    certApplicableProductType: 'Applicable Product Type',
+    certApplicableModels: 'Applicable Models',
+    certModelsReferScope: 'Refer to certificate scope',
+    certExpiryLabel: 'Expiry',
+    certCtaTitle: 'Need Certification Details for Your Market?',
+    certCtaDescription:
+      'Tell us your destination market and product requirements. Our team will help confirm the available documents and applicable product scope.',
+    certCtaButton: 'Contact Us',
+    aboutEyebrow: 'About Li-Men',
+    whatWeSupportTitle: 'What We Support',
+    whatWeSupportItem1Title: 'OEM & ODM Cooperation',
+    whatWeSupportItem1Desc: 'Logo, packaging and appearance customization according to confirmed project requirements.',
+    whatWeSupportItem2Title: 'Quality-Control Coordination',
+    whatWeSupportItem2Desc: 'Material inspection, assembly checks, functional testing and pre-shipment verification.',
+    whatWeSupportItem3Title: 'Export Project Support',
+    whatWeSupportItem3Desc: 'Product communication, packaging coordination and shipment preparation for international customers.',
+    aboutGalleryManufacturingTitle: 'Manufacturing Workflow',
+    aboutGalleryManufacturingDesc:
+      'Our workflow covers material checks, component preparation, electronic control-board processing, pre-assembly and final product assembly.',
+    aboutGalleryQualityTitle: 'Quality Control & Testing',
+    aboutGalleryQualityDesc:
+      'Products and key components are checked through filtration, pressure, leakage, functional and operating-stability testing according to the requirements of each product and project.',
+    aboutGalleryPackagingTitle: 'Packaging & Shipment',
+    aboutGalleryPackagingDesc:
+      'Packaging materials are prepared according to confirmed order requirements, and completed products are organized for labeling, storage and shipment.',
+    aboutGalleryVisitsTitle: 'Customer Visits & Cooperation',
+    aboutGalleryVisitsDesc:
+      'Customer visits and project discussions help our team understand market requirements, product expectations and long-term cooperation plans.',
+    aboutCtaTitle: 'Discuss Your Water Purification Project',
+    aboutCtaDescription: 'Share your product requirements, target market and customization needs with the Li-Men team.',
+    aboutCtaPrimaryButton: 'Request a Quote',
+    aboutCtaSecondaryButton: 'View Products',
   },
   es: {
     headerCta: 'Solicitar Cotización',
@@ -253,6 +291,45 @@ const SITE_STRINGS = {
     openMenuLabel: 'Abrir menú',
     closeMenuLabel: 'Cerrar menú',
     productCategoriesLabel: 'Categorías de productos',
+    certPageEyebrow: 'Calidad y Cumplimiento',
+    certScopeNotice:
+      'Los certificados y los informes de ensayo se aplican únicamente a los tipos de producto y modelos indicados en cada documento. No cubren automáticamente todos los productos Li-Men.',
+    certGroupApprovalsTitle: 'Aprobaciones de Productos',
+    certGroupComplianceTitle: 'Documentos de Conformidad y Ensayos de Componentes',
+    certGroupHistoricalTitle: 'Históricos / Caducados',
+    certApplicableProductType: 'Tipo de Producto Aplicable',
+    certApplicableModels: 'Modelos Aplicables',
+    certModelsReferScope: 'Consulte el alcance del certificado',
+    certExpiryLabel: 'Caducidad',
+    certCtaTitle: 'Necesita Detalles de Certificación para su Mercado?',
+    certCtaDescription:
+      'Indíquenos su mercado de destino y los requisitos del producto. Nuestro equipo le ayudará a confirmar los documentos disponibles y el alcance del producto aplicable.',
+    certCtaButton: 'Contáctenos',
+    aboutEyebrow: 'Sobre Li-Men',
+    whatWeSupportTitle: 'Lo Que Ofrecemos',
+    whatWeSupportItem1Title: 'Cooperación OEM y ODM',
+    whatWeSupportItem1Desc: 'Personalización de logotipo, embalaje y apariencia según los requisitos confirmados del proyecto.',
+    whatWeSupportItem2Title: 'Coordinación de Control de Calidad',
+    whatWeSupportItem2Desc: 'Inspección de materiales, verificación de ensamblaje, pruebas funcionales y verificación previa al envío.',
+    whatWeSupportItem3Title: 'Soporte para Proyectos de Exportación',
+    whatWeSupportItem3Desc:
+      'Comunicación del producto, coordinación de embalaje y preparación de envío para clientes internacionales.',
+    aboutGalleryManufacturingTitle: 'Proceso de Fabricación',
+    aboutGalleryManufacturingDesc:
+      'Nuestro proceso abarca la verificación de materiales, la preparación de componentes, el procesamiento de placas de control electrónico, el preensamblaje y el ensamblaje final del producto.',
+    aboutGalleryQualityTitle: 'Control de Calidad y Pruebas',
+    aboutGalleryQualityDesc:
+      'Los productos y los componentes clave se verifican mediante pruebas de filtración, presión, fugas, funcionamiento y estabilidad operativa, según los requisitos de cada producto y proyecto.',
+    aboutGalleryPackagingTitle: 'Embalaje y Envío',
+    aboutGalleryPackagingDesc:
+      'Los materiales de embalaje se preparan según los requisitos confirmados del pedido, y los productos terminados se organizan para su etiquetado, almacenamiento y envío.',
+    aboutGalleryVisitsTitle: 'Visitas de Clientes y Cooperación',
+    aboutGalleryVisitsDesc:
+      'Las visitas de clientes y las conversaciones sobre proyectos ayudan a nuestro equipo a comprender los requisitos del mercado, las expectativas del producto y los planes de cooperación a largo plazo.',
+    aboutCtaTitle: 'Hable de su Proyecto de Purificación de Agua',
+    aboutCtaDescription: 'Comparta con el equipo de Li-Men los requisitos de su producto, el mercado objetivo y las necesidades de personalización.',
+    aboutCtaPrimaryButton: 'Solicitar una Cotización',
+    aboutCtaSecondaryButton: 'Ver Productos',
   },
 } satisfies Record<Locale, Record<string, string>>;
 

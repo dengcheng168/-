@@ -12,11 +12,13 @@ import { Container } from '@/components/ui/Container';
 export function PageHeroBanner({
   image,
   imageMobile,
+  eyebrow,
   title,
   children,
 }: {
   image?: string | null;
   imageMobile?: string | null;
+  eyebrow?: string;
   title: string;
   children?: React.ReactNode;
 }) {
@@ -29,7 +31,8 @@ export function PageHeroBanner({
       {mobileSrc && <Image src={mobileSrc} alt="" fill priority sizes="100vw" className="block object-cover sm:hidden" />}
       <div className="absolute inset-0 bg-navy-950/70" />
       <Container className="relative z-10 py-16">
-        <h1 className="text-3xl font-semibold text-white">{title}</h1>
+        {eyebrow && <p className="text-sm font-semibold uppercase tracking-wide text-water-400">{eyebrow}</p>}
+        <h1 className="mt-2 text-3xl font-semibold text-white">{title}</h1>
         {children}
       </Container>
     </div>
