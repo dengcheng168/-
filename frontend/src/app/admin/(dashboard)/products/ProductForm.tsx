@@ -115,14 +115,14 @@ export function ProductForm({
         name="mainImage"
         label="主图"
         defaultValue={initialValues?.mainImage}
-        recommendedSize="建议 1200×1200px（正方形，不低于1000×1000px）。上传后会弹出裁剪框，请把核心内容（标题/产品/卖点）裁剪到取景框内，四周不要留白"
+        recommendedSize="建议 1200×1200px（正方形，不低于1000×1000px）。请使用产品实拍照（干净背景、不带文字），方便买家放大查看做工细节；带标题/参数/卖点的宣传海报图请放到下方「详细描述」里，不要用作主图。上传后会弹出裁剪框，请把产品主体居中裁剪，四周不要留白过多"
         aspectRatio={1}
       />
       <MultiImageUploader
         name="galleryImages"
         label="详情图片（多张）"
         defaultValue={initialValues?.galleryImages}
-        recommendedSize="建议 1200×1200px（正方形，不低于1000×1000px），可上传多张。上传后会弹出裁剪框裁剪为正方形"
+        recommendedSize="建议 1200×1200px（正方形，不低于1000×1000px），可上传多张。同样建议用产品多角度实拍照，宣传海报图请放到「详细描述」里。上传后会弹出裁剪框裁剪为正方形"
         aspectRatio={1}
       />
 
