@@ -106,69 +106,77 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
       )}
 
       <div className="min-w-0 lg:flex-1">
-        <div
-          className="relative mx-auto max-h-[500px] w-full max-w-full min-[1440px]:max-h-[560px]"
-          style={{ aspectRatio: ratio }}
-          onMouseMove={handleZoomMove}
-          onMouseLeave={() => setZoomPos(null)}
-        >
-          <div className="absolute inset-0 overflow-hidden rounded-lg border border-grey-200 bg-white lg:cursor-zoom-in">
-            <Image
-              ref={mainImgRef}
-              src={allImages[active]?.url ?? mainImage}
-              alt={allImages[active]?.alt ?? name}
-              fill
-              sizes="(min-width: 1024px) 35vw, 100vw"
-              className="object-contain"
-              priority
-              onLoad={(e) => applyNaturalRatio(e.currentTarget)}
-            />
+        {/*
+          外层 flex+justify-center 让 aspect-ratio 框以"高度固定、宽度按比例反推"的方式
+          自适应尺寸。框本身没有任何占位内容（图片和放大镜浮层都是 absolute 定位，不参与
+          正常布局撑开父元素），所以高度必须是明确值（h-*），不能只给 max-h-*——否则父元素
+          既没有宽度也没有内容撑开高度，aspect-ratio 无从换算，框会直接塌成 0。
+        */}
+        <div className="flex justify-center">
+          <div
+            className="relative h-[500px] max-w-full min-[1440px]:h-[560px]"
+            style={{ aspectRatio: ratio }}
+            onMouseMove={handleZoomMove}
+            onMouseLeave={() => setZoomPos(null)}
+          >
+            <div className="absolute inset-0 overflow-hidden rounded-lg border border-grey-200 bg-white lg:cursor-zoom-in">
+              <Image
+                ref={mainImgRef}
+                src={allImages[active]?.url ?? mainImage}
+                alt={allImages[active]?.alt ?? name}
+                fill
+                sizes="(min-width: 1024px) 35vw, 100vw"
+                className="object-contain"
+                priority
+                onLoad={(e) => applyNaturalRatio(e.currentTarget)}
+              />
+              {zoomPos && (
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute hidden border-2 border-water-500 bg-water-500/10 lg:block"
+                  style={{
+                    width: '32%',
+                    height: '32%',
+                    left: `calc(${zoomPos.x}% - 16%)`,
+                    top: `calc(${zoomPos.y}% - 16%)`,
+                  }}
+                />
+              )}
+              {hasMultiple && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => goTo(-1)}
+                    aria-label="Previous image"
+                    className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-navy-950 shadow transition-colors hover:bg-white lg:hidden"
+                  >
+                    &lsaquo;
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => goTo(1)}
+                    aria-label="Next image"
+                    className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-navy-950 shadow transition-colors hover:bg-white lg:hidden"
+                  >
+                    &rsaquo;
+                  </button>
+                </>
+              )}
+            </div>
+
             {zoomPos && (
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute hidden border-2 border-water-500 bg-water-500/10 lg:block"
+                className="pointer-events-none absolute left-full top-0 z-30 ml-4 hidden h-full w-[380px] overflow-hidden rounded-lg border border-grey-200 bg-white shadow-xl lg:block"
                 style={{
-                  width: '32%',
-                  height: '32%',
-                  left: `calc(${zoomPos.x}% - 16%)`,
-                  top: `calc(${zoomPos.y}% - 16%)`,
+                  backgroundImage: `url(${allImages[active]?.url ?? mainImage})`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '260% 260%',
+                  backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
                 }}
               />
             )}
-            {hasMultiple && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => goTo(-1)}
-                  aria-label="Previous image"
-                  className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-navy-950 shadow transition-colors hover:bg-white lg:hidden"
-                >
-                  &lsaquo;
-                </button>
-                <button
-                  type="button"
-                  onClick={() => goTo(1)}
-                  aria-label="Next image"
-                  className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-navy-950 shadow transition-colors hover:bg-white lg:hidden"
-                >
-                  &rsaquo;
-                </button>
-              </>
-            )}
           </div>
-
-          {zoomPos && (
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute left-full top-0 z-30 ml-4 hidden h-full w-[380px] overflow-hidden rounded-lg border border-grey-200 bg-white shadow-xl lg:block"
-              style={{
-                backgroundImage: `url(${allImages[active]?.url ?? mainImage})`,
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: '260% 260%',
-                backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
-              }}
-            />
-          )}
         </div>
         {hasMultiple && (
           <div className="mt-3 flex gap-2.5 overflow-x-auto pb-1 lg:hidden" aria-label="Product thumbnails">
