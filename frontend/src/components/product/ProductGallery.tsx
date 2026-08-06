@@ -135,10 +135,10 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
                   aria-hidden="true"
                   className="pointer-events-none absolute hidden border-2 border-water-500 bg-water-500/10 lg:block"
                   style={{
-                    width: '32%',
-                    height: '32%',
-                    left: `calc(${zoomPos.x}% - 16%)`,
-                    top: `calc(${zoomPos.y}% - 16%)`,
+                    width: '50%',
+                    height: '50%',
+                    left: `calc(${zoomPos.x}% - 25%)`,
+                    top: `calc(${zoomPos.y}% - 25%)`,
                   }}
                 />
               )}
@@ -167,11 +167,11 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
             {zoomPos && (
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute left-full top-0 z-30 ml-4 hidden h-full w-[380px] overflow-hidden rounded-lg border border-grey-200 bg-white shadow-xl lg:block"
+                className="pointer-events-none absolute left-full top-0 z-30 ml-4 hidden h-full w-[280px] overflow-hidden rounded-lg border border-grey-200 bg-white shadow-xl lg:block"
                 style={{
                   backgroundImage: `url(${allImages[active]?.url ?? mainImage})`,
                   backgroundRepeat: 'no-repeat',
-                  backgroundSize: '260% 260%',
+                  backgroundSize: '200% 200%',
                   backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
                 }}
               />
