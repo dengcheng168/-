@@ -1,9 +1,12 @@
 import type { Metadata } from 'next';
 import { Container } from '@/components/ui/Container';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import { Button } from '@/components/ui/Button';
 import { PageHeroBanner } from '@/components/site/PageHeroBanner';
 import { FactoryGallery } from '@/components/site/FactoryGallery';
+import { WhatWeSupport } from '@/components/site/WhatWeSupport';
 import { getPageBySlug, listFactoryGalleryItems } from '@/lib/api/content';
+import { t } from '@/lib/i18n/site-strings';
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getPageBySlug('about');
@@ -21,7 +24,12 @@ export default async function AboutPage() {
   return (
     <>
       {hasHero && (
-        <PageHeroBanner image={page?.heroImage} imageMobile={page?.heroImageMobile} title={page?.title ?? 'About Us'}>
+        <PageHeroBanner
+          image={page?.heroImage}
+          imageMobile={page?.heroImageMobile}
+          eyebrow={t('en', 'aboutEyebrow')}
+          title={page?.title ?? 'About Us'}
+        >
           {page?.bodyHtml && (
             <div
               className="prose prose-sm prose-invert mt-4 max-w-3xl text-grey-100/90"
@@ -50,7 +58,23 @@ export default async function AboutPage() {
         )}
       </Container>
 
+      <WhatWeSupport locale="en" />
       <FactoryGallery items={galleryItems} />
+
+      <section className="bg-navy-950 py-14">
+        <Container className="text-center">
+          <h2 className="text-2xl font-semibold text-white sm:text-3xl">{t('en', 'aboutCtaTitle')}</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-grey-100/90">{t('en', 'aboutCtaDescription')}</p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <Button href="/contact" variant="primary">
+              {t('en', 'aboutCtaPrimaryButton')}
+            </Button>
+            <Button href="/products" variant="outline" className="!border-white !text-white hover:!bg-white hover:!text-navy-950">
+              {t('en', 'aboutCtaSecondaryButton')}
+            </Button>
+          </div>
+        </Container>
+      </section>
     </>
   );
 }

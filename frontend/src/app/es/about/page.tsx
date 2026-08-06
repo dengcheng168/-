@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { Container } from '@/components/ui/Container';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import { Button } from '@/components/ui/Button';
 import { PageHeroBanner } from '@/components/site/PageHeroBanner';
 import { FactoryGallery } from '@/components/site/FactoryGallery';
+import { WhatWeSupport } from '@/components/site/WhatWeSupport';
 import { getPageBySlug, listFactoryGalleryItems } from '@/lib/api/content';
 import { t } from '@/lib/i18n/site-strings';
 
@@ -22,7 +24,12 @@ export default async function SpanishAboutPage() {
   return (
     <>
       {hasHero && (
-        <PageHeroBanner image={page?.heroImage} imageMobile={page?.heroImageMobile} title={page?.title ?? t('es', 'aboutPageTitle')}>
+        <PageHeroBanner
+          image={page?.heroImage}
+          imageMobile={page?.heroImageMobile}
+          eyebrow={t('es', 'aboutEyebrow')}
+          title={page?.title ?? t('es', 'aboutPageTitle')}
+        >
           {page?.bodyHtml && (
             <div
               className="prose prose-sm prose-invert mt-4 max-w-3xl text-grey-100/90"
@@ -51,7 +58,23 @@ export default async function SpanishAboutPage() {
         )}
       </Container>
 
+      <WhatWeSupport locale="es" />
       <FactoryGallery items={galleryItems} locale="es" />
+
+      <section className="bg-navy-950 py-14">
+        <Container className="text-center">
+          <h2 className="text-2xl font-semibold text-white sm:text-3xl">{t('es', 'aboutCtaTitle')}</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-grey-100/90">{t('es', 'aboutCtaDescription')}</p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <Button href="/es/contact" variant="primary">
+              {t('es', 'aboutCtaPrimaryButton')}
+            </Button>
+            <Button href="/es/products" variant="outline" className="!border-white !text-white hover:!bg-white hover:!text-navy-950">
+              {t('es', 'aboutCtaSecondaryButton')}
+            </Button>
+          </div>
+        </Container>
+      </section>
     </>
   );
 }
