@@ -63,9 +63,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     fetchAllPages((page, pageSize) => listBlogPosts({ page, pageSize })),
   ]);
 
+  // 没有任何已发布产品的分类不进 sitemap——避免搜索引擎收录一个客户点进去空手而归的页面
+  const categoryIdsWithProducts = new Set(products.map((p) => p.categoryId));
+  const visibleCategories = categories.filter((category) => categoryIdsWithProducts.has(category.id));
+
   const entryGroups = await Promise.all([
     ...staticPaths.map((path) => bilingualEntry(path, { changeFrequency: path === '' ? 'daily' : 'weekly', priority: path === '' ? 1 : 0.7 })),
-    ...categories.map((category) =>
+    ...visibleCategories.map((category) =>
       bilingualEntry(`/products/category/${category.slug}`, { changeFrequency: 'weekly', priority: 0.6 }, category.updatedAt),
     ),
     ...products.map((product) =>

@@ -137,6 +137,18 @@ export async function listProductCategories(locale: Locale = 'en'): Promise<Prod
   }
 }
 
+/**
+ * 只返回"当前语言下至少有一个已发布产品"的分类，用于导航/Footer/分类筛选栏/首页分类模块/
+ * sitemap 这些客户可见入口——公开 /products 接口本身已经只返回 PUBLISHED 产品（见后端
+ * products.service.ts），这里不重复做发布状态判断，只是按 categoryId 交叉过滤，不新增接口、
+ * 不改分页合同。分类总数不大，一次性拉全部已发布产品做交叉即可，避免逐个分类发请求的 N+1。
+ */
+export async function listVisibleProductCategories(locale: Locale = 'en'): Promise<ProductCategory[]> {
+  const [categories, products] = await Promise.all([listProductCategories(locale), listAllProducts(locale)]);
+  const categoryIdsWithProducts = new Set(products.map((p) => p.categoryId));
+  return categories.filter((c) => categoryIdsWithProducts.has(c.id));
+}
+
 export async function getProductCategoryBySlug(
   slug: string,
   params: { page?: number; pageSize?: number } = {},

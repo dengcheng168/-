@@ -5,7 +5,7 @@ import { CategoryFilterSidebar } from '@/components/product/CategoryFilterSideba
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { Pagination } from '@/components/ui/Pagination';
 import { PageHeroBanner } from '@/components/site/PageHeroBanner';
-import { listProducts, listProductCategories } from '@/lib/api/products';
+import { listProducts, listVisibleProductCategories } from '@/lib/api/products';
 import { getPageBySlug } from '@/lib/api/content';
 import { t } from '@/lib/i18n/site-strings';
 
@@ -28,7 +28,7 @@ export default async function SpanishProductsPage({
 
   const [{ items, meta }, categories, pageContent] = await Promise.all([
     listProducts({ page: currentPage, pageSize: 12 }, 'es'),
-    listProductCategories('es'),
+    listVisibleProductCategories('es'),
     getPageBySlug('products', 'es'),
   ]);
   const hasHero = Boolean(pageContent?.heroImage || pageContent?.heroImageMobile);

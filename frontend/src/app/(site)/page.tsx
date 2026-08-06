@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { getPublicSettings } from '@/lib/api/settings';
-import { listProductCategories, listProducts } from '@/lib/api/products';
+import { listVisibleProductCategories, listProducts } from '@/lib/api/products';
 import { listCertificates, listFaqs } from '@/lib/api/content';
 import { listBlogPosts } from '@/lib/api/blog';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -30,7 +30,7 @@ export default async function HomePage() {
   const [settings, categories, featuredProducts, certificates, latestPosts, faqs, siteUrl] =
     await Promise.all([
       getPublicSettings(),
-      listProductCategories(),
+      listVisibleProductCategories(),
       listProducts({ featured: true, pageSize: 8 }),
       listCertificates(),
       listBlogPosts({ pageSize: 3 }),

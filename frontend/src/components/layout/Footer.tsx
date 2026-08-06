@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getPublicSettings } from '@/lib/api/settings';
 import { getNavigation } from '@/lib/api/navigation';
-import { listProductCategories } from '@/lib/api/products';
+import { listVisibleProductCategories } from '@/lib/api/products';
 import { getTranslationMap } from '@/lib/api/translations';
 import { localizeNavigation } from '@/lib/i18n/content-overlay';
 import { t } from '@/lib/i18n/site-strings';
@@ -48,7 +48,7 @@ export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
   const [settings, rawNavItems, categories, translations] = await Promise.all([
     getPublicSettings(),
     getNavigation(),
-    listProductCategories(locale),
+    listVisibleProductCategories(locale),
     locale === 'en' ? Promise.resolve({}) : getTranslationMap(locale),
   ]);
   const localizedNavItems = locale === 'en' ? rawNavItems : localizeNavigation(rawNavItems, translations);

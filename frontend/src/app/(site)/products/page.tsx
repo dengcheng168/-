@@ -5,7 +5,7 @@ import { CategoryFilterSidebar } from '@/components/product/CategoryFilterSideba
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { Pagination } from '@/components/ui/Pagination';
 import { PageHeroBanner } from '@/components/site/PageHeroBanner';
-import { listProducts, listProductCategories } from '@/lib/api/products';
+import { listProducts, listVisibleProductCategories } from '@/lib/api/products';
 import { getPageBySlug } from '@/lib/api/content';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -27,7 +27,7 @@ export default async function ProductsPage({
 
   const [{ items, meta }, categories, pageContent] = await Promise.all([
     listProducts({ page: currentPage, pageSize: 12 }),
-    listProductCategories(),
+    listVisibleProductCategories(),
     getPageBySlug('products'),
   ]);
   const hasHero = Boolean(pageContent?.heroImage || pageContent?.heroImageMobile);

@@ -23,7 +23,9 @@ export function FaqAccordion({ faqs }: { faqs: Faq[] }) {
                 +
               </span>
             </button>
-            {isOpen && <p className="animate-fade-in px-5 pb-4 text-sm text-grey-500">{faq.answer}</p>}
+            {/* 答案始终留在服务端 HTML 里（只用 CSS 隐藏未展开的），这样 JS 没加载/执行失败时
+                手风琴退化成一份可读的静态问答列表，而不是只剩问题、答案整段从 DOM 里消失 */}
+            <p className={`px-5 pb-4 text-sm text-grey-500 ${isOpen ? 'animate-fade-in block' : 'hidden'}`}>{faq.answer}</p>
           </div>
         );
       })}

@@ -5,7 +5,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { CategoryFilterSidebar } from '@/components/product/CategoryFilterSidebar';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { Pagination } from '@/components/ui/Pagination';
-import { getProductCategoryBySlug, listProductCategories } from '@/lib/api/products';
+import { getProductCategoryBySlug, listVisibleProductCategories } from '@/lib/api/products';
 
 export async function generateMetadata({
   params,
@@ -27,6 +27,9 @@ export async function generateMetadata({
         'x-default': `/products/category/${categorySlug}`,
       },
     },
+    // 分类当前没有任何已发布产品时不参与索引，但仍允许爬虫顺着链接继续走——
+    // 页面本身不删除，只是不让空分类占搜索结果位
+    ...(result.products.length === 0 ? { robots: { index: false, follow: true } } : {}),
   };
 }
 
@@ -43,7 +46,7 @@ export default async function ProductCategoryPage({
 
   const [result, categories] = await Promise.all([
     getProductCategoryBySlug(categorySlug, { page, pageSize: 12 }),
-    listProductCategories(),
+    listVisibleProductCategories(),
   ]);
 
   if (!result) notFound();

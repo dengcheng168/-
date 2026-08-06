@@ -5,7 +5,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { CategoryFilterSidebar } from '@/components/product/CategoryFilterSidebar';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { Pagination } from '@/components/ui/Pagination';
-import { getProductCategoryBySlug, listProductCategories } from '@/lib/api/products';
+import { getProductCategoryBySlug, listVisibleProductCategories } from '@/lib/api/products';
 import { t } from '@/lib/i18n/site-strings';
 
 export async function generateMetadata({
@@ -28,6 +28,7 @@ export async function generateMetadata({
         'x-default': `/products/category/${categorySlug}`,
       },
     },
+    ...(result.products.length === 0 ? { robots: { index: false, follow: true } } : {}),
   };
 }
 
@@ -44,7 +45,7 @@ export default async function SpanishProductCategoryPage({
 
   const [result, categories] = await Promise.all([
     getProductCategoryBySlug(categorySlug, { page, pageSize: 12 }, 'es'),
-    listProductCategories('es'),
+    listVisibleProductCategories('es'),
   ]);
 
   if (!result) notFound();
