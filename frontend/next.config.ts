@@ -11,6 +11,17 @@ const nextConfig: NextConfig = {
     // 必须显式开这个 flag 配合 app/global-not-found.tsx 使用。
     globalNotFound: true,
   },
+  // K01 的正式型号/slug 从"600G"更正为"100G"（网站所有者已确认真实容量为 100G，
+  // 详见 scripts/maintenance/2026-08-07-first-batch-product-fixes.sql）。旧 URL 不能
+  // 直接 404 也不能继续 200，这里用 Next.js 原生的永久重定向；项目里另有一张 `redirects`
+  // 数据库表 + 后台 CRUD 页面，但从未接入任何运行时重定向逻辑（没有 middleware.ts，
+  // 后端也没有暴露对应的公开查询接口），本次不依赖那张表，直接用框架自带机制。
+  async redirects() {
+    return [
+      { source: '/products/qw-ro-600g-k01', destination: '/products/qw-ro-100g-k01', permanent: true },
+      { source: '/es/products/qw-ro-600g-k01', destination: '/es/products/qw-ro-100g-k01', permanent: true },
+    ];
+  },
   images: {
     // 关闭 Next.js 内置的图片优化代理（/_next/image）。
     //
