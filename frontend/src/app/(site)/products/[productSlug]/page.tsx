@@ -156,12 +156,12 @@ export default async function ProductDetailPage({
 
       {product.specs.length > 0 && (
         <section className="mt-10 border-t border-grey-200 pt-6 lg:mt-11 lg:pt-7">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-extrabold uppercase tracking-wide text-water-600">Product Information</p>
-              <h2 className="mt-1 text-2xl font-semibold text-navy-950 sm:text-[26px]">Specifications</h2>
-            </div>
-            {product.specSheetUrl && (
+          <div className="text-center">
+            <p className="text-[11px] font-extrabold uppercase tracking-wide text-water-600">Product Information</p>
+            <h2 className="mt-1 text-2xl font-semibold text-navy-950 sm:text-[26px]">Specifications</h2>
+          </div>
+          {product.specSheetUrl && (
+            <div className="mt-3 text-center">
               <a
                 href={product.specSheetUrl}
                 target="_blank"
@@ -170,8 +170,8 @@ export default async function ProductDetailPage({
               >
                 {t('en', 'downloadSpecSheet')} &darr;
               </a>
-            )}
-          </div>
+            </div>
+          )}
           <div className="mt-5">
             <ProductSpecTable specs={product.specs} />
           </div>
@@ -220,7 +220,7 @@ export default async function ProductDetailPage({
 
       {hasDescription && (
         <section id="description" className="mt-12 scroll-mt-24 border-t border-grey-200 pt-8 lg:mt-14 lg:pt-9">
-          <SectionHeading title="Product Description" align="left" />
+          <SectionHeading title="Product Description" />
           <div
             className="prose prose-sm mt-6 max-w-none text-grey-700"
             dangerouslySetInnerHTML={{ __html: product.description }}

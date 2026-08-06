@@ -25,8 +25,6 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
   const [active, setActive] = useState(0);
   // 主图展示框按当前图片的真实宽高比自适应，避免正方形固定框在遇到非正方形图片时产生留白
   const [ratio, setRatio] = useState(1);
-  // 鼠标在图片框内的位置（百分比），null 表示未悬停，仅桌面端（lg+）生效
-  const [zoomPos, setZoomPos] = useState<{ x: number; y: number } | null>(null);
   const hasMultiple = allImages.length > 1;
   const thumbListRef = useRef<HTMLDivElement>(null);
   const thumbRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -47,14 +45,6 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
     const el = mainImgRef.current;
     if (el?.complete) applyNaturalRatio(el);
   }, [active]);
-
-  function handleZoomMove(e: React.MouseEvent<HTMLDivElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setZoomPos({
-      x: Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100)),
-      y: Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100)),
-    });
-  }
 
   useEffect(() => {
     thumbRefs.current[active]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -108,18 +98,13 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
       <div className="min-w-0 lg:flex-1">
         {/*
           外层 flex+justify-center 让 aspect-ratio 框以"高度固定、宽度按比例反推"的方式
-          自适应尺寸。框本身没有任何占位内容（图片和放大镜浮层都是 absolute 定位，不参与
-          正常布局撑开父元素），所以高度必须是明确值（h-*），不能只给 max-h-*——否则父元素
-          既没有宽度也没有内容撑开高度，aspect-ratio 无从换算，框会直接塌成 0。
+          自适应尺寸。框本身没有任何占位内容（图片是 absolute 定位，不参与正常布局撑开父
+          元素），所以高度必须是明确值（h-*），不能只给 max-h-*——否则父元素既没有宽度也没有
+          内容撑开高度，aspect-ratio 无从换算，框会直接塌成 0。
         */}
         <div className="flex justify-center">
-          <div
-            className="relative h-[500px] max-w-full min-[1440px]:h-[560px]"
-            style={{ aspectRatio: ratio }}
-            onMouseMove={handleZoomMove}
-            onMouseLeave={() => setZoomPos(null)}
-          >
-            <div className="absolute inset-0 overflow-hidden rounded-lg border border-grey-200 bg-white lg:cursor-zoom-in">
+          <div className="relative h-[500px] max-w-full min-[1440px]:h-[560px]" style={{ aspectRatio: ratio }}>
+            <div className="absolute inset-0 overflow-hidden rounded-lg border border-grey-200 bg-white">
               <Image
                 ref={mainImgRef}
                 src={allImages[active]?.url ?? mainImage}
@@ -130,25 +115,13 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
                 priority
                 onLoad={(e) => applyNaturalRatio(e.currentTarget)}
               />
-              {zoomPos && (
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute hidden border-2 border-water-500 bg-water-500/10 lg:block"
-                  style={{
-                    width: '35%',
-                    height: '35%',
-                    left: `calc(${zoomPos.x}% - 17.5%)`,
-                    top: `calc(${zoomPos.y}% - 17.5%)`,
-                  }}
-                />
-              )}
               {hasMultiple && (
                 <>
                   <button
                     type="button"
                     onClick={() => goTo(-1)}
                     aria-label="Previous image"
-                    className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-navy-950 shadow transition-colors hover:bg-white lg:hidden"
+                    className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-navy-950 shadow transition-colors hover:bg-white"
                   >
                     &lsaquo;
                   </button>
@@ -156,32 +129,13 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
                     type="button"
                     onClick={() => goTo(1)}
                     aria-label="Next image"
-                    className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-navy-950 shadow transition-colors hover:bg-white lg:hidden"
+                    className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-navy-950 shadow transition-colors hover:bg-white"
                   >
                     &rsaquo;
                   </button>
                 </>
               )}
             </div>
-
-            {/*
-              放大面板故意不跟主图框同尺寸：参考站点那种"面板=主图等大"的做法，是建立在
-              它主图框本身就很小（固定 ≤450px）的前提上；我们这边是两栏布局，主图框在宽屏下
-              会长到接近 560px 高，两个等大的框并排会直接把右侧购买信息区域整个挡住。改成固定
-              的、不随主图框联动的尺寸，控制在合理范围内，不抢占布局。
-            */}
-            {zoomPos && (
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute left-full top-0 z-30 ml-3 hidden h-[320px] w-[320px] overflow-hidden rounded-lg border border-grey-200 bg-white shadow-xl lg:block"
-                style={{
-                  backgroundImage: `url(${allImages[active]?.url ?? mainImage})`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundSize: '285% 285%',
-                  backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
-                }}
-              />
-            )}
           </div>
         </div>
         {hasMultiple && (
