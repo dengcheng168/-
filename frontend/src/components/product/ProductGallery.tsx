@@ -30,10 +30,23 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
   const hasMultiple = allImages.length > 1;
   const thumbListRef = useRef<HTMLDivElement>(null);
   const thumbRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const mainImgRef = useRef<HTMLImageElement>(null);
 
   function goTo(delta: number) {
     setActive((prev) => (prev + delta + allImages.length) % allImages.length);
   }
+
+  function applyNaturalRatio(el: HTMLImageElement) {
+    if (el.naturalWidth && el.naturalHeight) setRatio(el.naturalWidth / el.naturalHeight);
+  }
+
+  // next/image 的 onLoad 只在浏览器实际发起并完成加载时触发；如果该 URL 已被浏览器缓存
+  // （例如切换缩略图后再切回来），img 会直接以 complete=true 挂载，onLoad 不会再派发一次，
+  // 这里在每次切换图片后做一次同步检查作为兜底，避免展示框停留在上一张图的宽高比上
+  useEffect(() => {
+    const el = mainImgRef.current;
+    if (el?.complete) applyNaturalRatio(el);
+  }, [active]);
 
   function handleZoomMove(e: React.MouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -101,16 +114,14 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
         >
           <div className="absolute inset-0 overflow-hidden rounded-lg border border-grey-200 bg-white lg:cursor-zoom-in">
             <Image
+              ref={mainImgRef}
               src={allImages[active]?.url ?? mainImage}
               alt={allImages[active]?.alt ?? name}
               fill
               sizes="(min-width: 1024px) 35vw, 100vw"
               className="object-contain"
               priority
-              onLoad={(e) => {
-                const img = e.currentTarget;
-                if (img.naturalWidth && img.naturalHeight) setRatio(img.naturalWidth / img.naturalHeight);
-              }}
+              onLoad={(e) => applyNaturalRatio(e.currentTarget)}
             />
             {zoomPos && (
               <div
