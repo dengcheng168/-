@@ -18,8 +18,15 @@ export interface CertificateDisplayMeta {
 interface CertificateRule extends CertificateDisplayMeta {
   /** 优先匹配键：证书正文自带的证书/批准编号，大小写和首尾空白不敏感 */
   certNumber?: string;
-  /** certNumber 为空时的兜底匹配键（目前只有 Eurofins 用到——它的证书原文没有编号字段） */
-  fallback?: { issuingAuthority: string; name: string };
+  /**
+   * certNumber 为空时的兜底匹配键（目前只有 Eurofins 用到——它的证书原文没有编号字段）。
+   * 只用 issuingAuthority，不掺 name：Certificate.name 在 /es 页面会被 CertificateTranslation
+   * 覆盖成西语译文，如果兜底键里也要求 name 匹配英文原文，西语页面会永远匹配不上、
+   * 错误地降级到 Unclassified（这里踩过一次坑，issuingAuthority 字段本身没有对应的翻译表列，
+   * 任何 locale 下都是同一个值，作为唯一匹配键更稳）。生产库里这个签发机构目前只对应
+   * 一份证书，唯一性足够。
+   */
+  fallback?: { issuingAuthority: string };
 }
 
 function normalize(value: string): string {
@@ -91,10 +98,7 @@ const RULES: CertificateRule[] = [
   {
     // Eurofins ACS Sanitary Conformity Certificate — 证书原文没有编号字段，
     // 用签发机构 + 标准化证书名称组合识别
-    fallback: {
-      issuingAuthority: 'Eurofins Expertises Environnementales',
-      name: 'Eurofins ACS Sanitary Conformity Certificate – Household UV Reactors',
-    },
+    fallback: { issuingAuthority: 'Eurofins Expertises Environnementales' },
     group: 'historical',
     productType: { en: 'Household UV Reactors', es: 'Reactores UV domésticos' },
     models: ['SSE-011', 'SDE-016', 'SDE-025', 'SDE-040'],
@@ -119,12 +123,9 @@ function findRule(cert: CertificateLike): CertificateRule | null {
     const byCertNumber = RULES.find((r) => r.certNumber && normalize(r.certNumber) === certNumber);
     if (byCertNumber) return byCertNumber;
   }
-  if (cert.issuingAuthority && cert.name) {
+  if (cert.issuingAuthority) {
     const issuer = normalize(cert.issuingAuthority);
-    const name = normalize(cert.name);
-    const byFallback = RULES.find(
-      (r) => r.fallback && normalize(r.fallback.issuingAuthority) === issuer && normalize(r.fallback.name) === name,
-    );
+    const byFallback = RULES.find((r) => r.fallback && normalize(r.fallback.issuingAuthority) === issuer);
     if (byFallback) return byFallback;
   }
   return null;
