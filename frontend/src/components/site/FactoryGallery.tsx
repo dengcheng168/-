@@ -5,17 +5,15 @@ import type { Locale } from '@/lib/i18n/locales';
 import type { FactoryGalleryItem } from '@/types/content';
 import { GALLERY_GROUP_ORDER, GALLERY_GROUP_SEQUENCE, type GalleryGroup } from '@/lib/about/gallery-groups';
 
-const GROUP_TITLE_KEY: Record<GalleryGroup, 'aboutGalleryManufacturingTitle' | 'aboutGalleryQualityTitle' | 'aboutGalleryPackagingTitle' | 'aboutGalleryVisitsTitle'> = {
+const GROUP_TITLE_KEY: Record<GalleryGroup, 'aboutGalleryManufacturingTitle' | 'aboutGalleryQualityTitle' | 'aboutGalleryVisitsTitle'> = {
   manufacturing: 'aboutGalleryManufacturingTitle',
   quality: 'aboutGalleryQualityTitle',
-  packaging: 'aboutGalleryPackagingTitle',
   visits: 'aboutGalleryVisitsTitle',
 };
 
-const GROUP_DESC_KEY: Record<GalleryGroup, 'aboutGalleryManufacturingDesc' | 'aboutGalleryQualityDesc' | 'aboutGalleryPackagingDesc' | 'aboutGalleryVisitsDesc'> = {
+const GROUP_DESC_KEY: Record<GalleryGroup, 'aboutGalleryManufacturingDesc' | 'aboutGalleryQualityDesc' | 'aboutGalleryVisitsDesc'> = {
   manufacturing: 'aboutGalleryManufacturingDesc',
   quality: 'aboutGalleryQualityDesc',
-  packaging: 'aboutGalleryPackagingDesc',
   visits: 'aboutGalleryVisitsDesc',
 };
 
