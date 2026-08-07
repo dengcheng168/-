@@ -25,10 +25,17 @@ export default async function SpanishCertificatesPage() {
   const hasHero = Boolean(page?.heroImage || page?.heroImageMobile);
 
   const certificates = dedupeByRule(allCertificates);
-  const approvals = certificates.filter((c) => getCertificateDisplayMeta(c).group === 'approvals');
-  const compliance = certificates.filter((c) => getCertificateDisplayMeta(c).group === 'compliance');
-  const historical = certificates.filter((c) => getCertificateDisplayMeta(c).group === 'historical');
-  const unclassified = certificates.filter((c) => getCertificateDisplayMeta(c).group === 'unclassified');
+  // displaySection（若填写）只决定证书出现在哪个标题下面；muted/徽章配色继续看 group
+  // 本身，保证被网站所有者手动挪去 Approvals 标题下展示的过期证书仍然带着"已过期"的
+  // 灰化样式和过期日期，不会被误当成当前有效认证
+  const sectionOf = (c: (typeof certificates)[number]) => {
+    const meta = getCertificateDisplayMeta(c);
+    return meta.displaySection ?? meta.group;
+  };
+  const approvals = certificates.filter((c) => sectionOf(c) === 'approvals');
+  const compliance = certificates.filter((c) => sectionOf(c) === 'compliance');
+  const historical = certificates.filter((c) => sectionOf(c) === 'historical');
+  const unclassified = certificates.filter((c) => sectionOf(c) === 'unclassified');
 
   return (
     <>
@@ -75,7 +82,12 @@ export default async function SpanishCertificatesPage() {
             <h2 className="text-xl font-semibold text-navy-950">{t('es', 'certGroupApprovalsTitle')}</h2>
             <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {approvals.map((cert) => (
-                <CertificateCard key={cert.id} certificate={cert} locale="es" />
+                <CertificateCard
+                  key={cert.id}
+                  certificate={cert}
+                  locale="es"
+                  muted={getCertificateDisplayMeta(cert).group === 'historical'}
+                />
               ))}
             </div>
           </section>

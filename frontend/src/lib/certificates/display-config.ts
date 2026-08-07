@@ -5,6 +5,16 @@ export type CertificateGroup = 'approvals' | 'compliance' | 'historical' | 'uncl
 
 export interface CertificateDisplayMeta {
   group: CertificateGroup;
+  /**
+   * 仅供 /certificates 页面决定"展示在哪个标题下"使用，不影响其它任何判断——首页
+   * CertificatesShowcase 的入选过滤、卡片的 muted 灰化样式、status 徽章颜色全部继续
+   * 只认 group，不认 displaySection。目的：网站所有者可以把一份已过期证书摆到
+   * Product Approvals 标题下面展示（不想让它单独占一个"过期"分组），但不能因此让它
+   * 悄悄混进首页预览轮播（首页卡片不展示 Expired 状态，混进去等于把过期证书伪装成
+   * 当前有效认证），也不能让它在 Approvals 分组下面还用"有效"的配色徽章。
+   * 不填时按 group 本身的分组展示（绝大多数证书都是这种情况）。
+   */
+  displaySection?: CertificateGroup;
   /** 适用产品类型，来自证书正文/证书原图，不是猜测；unclassified 时为 null */
   productType: { en: string; es: string } | null;
   /** 适用型号；null 表示证书正文没有列出具体型号，展示时改用"Refer to certificate scope" */
@@ -99,7 +109,12 @@ const RULES: CertificateRule[] = [
     // Eurofins ACS Sanitary Conformity Certificate — 证书原文没有编号字段，
     // 用签发机构 + 标准化证书名称组合识别
     fallback: { issuingAuthority: 'Eurofins Expertises Environnementales' },
+    // 网站所有者要求把它摆到 Product Approvals 标题下面展示（仅调整 /certificates
+    // 页面的展示位置），但 group 本身必须保持 'historical'：首页 CertificatesShowcase
+    // 只按 group 过滤，且不展示 Expired 状态，group 一旦改成 'approvals' 这份已过期
+    // 证书就会未经任何过期提示地混进首页预览轮播。见 displaySection 字段注释。
     group: 'historical',
+    displaySection: 'approvals',
     productType: { en: 'Household UV Reactors', es: 'Reactores UV domésticos' },
     models: ['SSE-011', 'SDE-016', 'SDE-025', 'SDE-040'],
     status: { en: 'Expired', es: 'Caducado' },
