@@ -20,22 +20,35 @@ function ChevronDownIcon() {
   );
 }
 
-export function ProductGallery({ mainImage, images, name }: { mainImage: string; images: ProductImage[]; name: string }) {
-  const allImages: ProductImage[] = [{ url: mainImage, alt: name }, ...images];
+export function ProductGallery({
+  mainImage,
+  mainImageMobile,
+  images,
+  name,
+}: {
+  mainImage: string;
+  mainImageMobile?: string | null;
+  images: ProductImage[];
+  name: string;
+}) {
+  const allImages: ProductImage[] = [{ url: mainImage, alt: name, mobileUrl: mainImageMobile ?? undefined }, ...images];
   const [active, setActive] = useState(0);
-  // 主图展示框按当前图片的真实宽高比自适应，避免正方形固定框在遇到非正方形图片时产生留白
+  // 主图展示框按当前图片的真实宽高比自适应，避免正方形固定框在遇到非正方形图片时产生留白。
+  // 桌面版/手机版图片各自维护一份比例——两者素材可能不是同一张图（见 mobileUrl），宽高比也可能不同。
   const [ratio, setRatio] = useState(1);
+  const [mobileRatio, setMobileRatio] = useState(1);
   const hasMultiple = allImages.length > 1;
   const thumbListRef = useRef<HTMLDivElement>(null);
   const thumbRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const mainImgRef = useRef<HTMLImageElement>(null);
+  const mobileImgRef = useRef<HTMLImageElement>(null);
 
   function goTo(delta: number) {
     setActive((prev) => (prev + delta + allImages.length) % allImages.length);
   }
 
-  function applyNaturalRatio(el: HTMLImageElement) {
-    if (el.naturalWidth && el.naturalHeight) setRatio(el.naturalWidth / el.naturalHeight);
+  function applyNaturalRatio(el: HTMLImageElement, setter: (r: number) => void) {
+    if (el.naturalWidth && el.naturalHeight) setter(el.naturalWidth / el.naturalHeight);
   }
 
   // next/image 的 onLoad 只在浏览器实际发起并完成加载时触发；如果该 URL 已被浏览器缓存
@@ -43,7 +56,9 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
   // 这里在每次切换图片后做一次同步检查作为兜底，避免展示框停留在上一张图的宽高比上
   useEffect(() => {
     const el = mainImgRef.current;
-    if (el?.complete) applyNaturalRatio(el);
+    if (el?.complete) applyNaturalRatio(el, setRatio);
+    const mobileEl = mobileImgRef.current;
+    if (mobileEl?.complete) applyNaturalRatio(mobileEl, setMobileRatio);
   }, [active]);
 
   useEffect(() => {
@@ -54,6 +69,28 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
     `relative aspect-square w-full shrink-0 overflow-hidden rounded-md border-2 transition-colors ${
       active === i ? 'border-water-500' : 'border-grey-200 hover:border-grey-300'
     }`;
+
+  const current = allImages[active] ?? allImages[0]!;
+  const navButtons = hasMultiple ? (
+    <>
+      <button
+        type="button"
+        onClick={() => goTo(-1)}
+        aria-label="Previous image"
+        className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-navy-950 shadow transition-colors hover:bg-white"
+      >
+        &lsaquo;
+      </button>
+      <button
+        type="button"
+        onClick={() => goTo(1)}
+        aria-label="Next image"
+        className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-navy-950 shadow transition-colors hover:bg-white"
+      >
+        &rsaquo;
+      </button>
+    </>
+  ) : null;
 
   return (
     <div className="lg:flex lg:items-start lg:gap-4">
@@ -103,40 +140,64 @@ export function ProductGallery({ mainImage, images, name }: { mainImage: string;
           内容撑开高度，aspect-ratio 无从换算，框会直接塌成 0。
         */}
         <div className="flex justify-center">
-          <div className="relative h-[500px] max-w-full min-[1440px]:h-[560px]" style={{ aspectRatio: ratio }}>
-            <div className="absolute inset-0 overflow-hidden rounded-lg border border-grey-200 bg-white">
-              <Image
-                ref={mainImgRef}
-                src={allImages[active]?.url ?? mainImage}
-                alt={allImages[active]?.alt ?? name}
-                fill
-                sizes="(min-width: 1024px) 35vw, 100vw"
-                className="object-contain"
-                priority
-                onLoad={(e) => applyNaturalRatio(e.currentTarget)}
-              />
-              {hasMultiple && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => goTo(-1)}
-                    aria-label="Previous image"
-                    className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-navy-950 shadow transition-colors hover:bg-white"
-                  >
-                    &lsaquo;
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => goTo(1)}
-                    aria-label="Next image"
-                    className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-navy-950 shadow transition-colors hover:bg-white"
-                  >
-                    &rsaquo;
-                  </button>
-                </>
-              )}
+          {current?.mobileUrl ? (
+            <>
+              {/*
+                该图配置了手机端专用版本（mobileUrl）：两套 <Image> 都会被渲染，用 sm 断点
+                切换显示/隐藏（而不是用 JS 判断视口宽度），避免 hydration 时序问题；未配置
+                mobileUrl 的图片（占绝大多数）走下面的单一分支，不受影响、不多渲染一张图。
+              */}
+              <div className="relative h-[420px] max-w-full sm:hidden" style={{ aspectRatio: mobileRatio }}>
+                <div className="absolute inset-0 overflow-hidden rounded-lg border border-grey-200 bg-white">
+                  <Image
+                    ref={mobileImgRef}
+                    src={current.mobileUrl}
+                    alt={current.alt ?? name}
+                    fill
+                    sizes="100vw"
+                    className="object-contain"
+                    priority
+                    onLoad={(e) => applyNaturalRatio(e.currentTarget, setMobileRatio)}
+                  />
+                  {navButtons}
+                </div>
+              </div>
+              <div
+                className="relative hidden h-[500px] max-w-full sm:block min-[1440px]:h-[560px]"
+                style={{ aspectRatio: ratio }}
+              >
+                <div className="absolute inset-0 overflow-hidden rounded-lg border border-grey-200 bg-white">
+                  <Image
+                    ref={mainImgRef}
+                    src={current.url}
+                    alt={current.alt ?? name}
+                    fill
+                    sizes="(min-width: 1024px) 35vw, 100vw"
+                    className="object-contain"
+                    priority
+                    onLoad={(e) => applyNaturalRatio(e.currentTarget, setRatio)}
+                  />
+                  {navButtons}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="relative h-[500px] max-w-full min-[1440px]:h-[560px]" style={{ aspectRatio: ratio }}>
+              <div className="absolute inset-0 overflow-hidden rounded-lg border border-grey-200 bg-white">
+                <Image
+                  ref={mainImgRef}
+                  src={current?.url ?? mainImage}
+                  alt={current?.alt ?? name}
+                  fill
+                  sizes="(min-width: 1024px) 35vw, 100vw"
+                  className="object-contain"
+                  priority
+                  onLoad={(e) => applyNaturalRatio(e.currentTarget, setRatio)}
+                />
+                {navButtons}
+              </div>
             </div>
-          </div>
+          )}
         </div>
         {hasMultiple && (
           <div className="mt-3 flex gap-2.5 overflow-x-auto pb-1 lg:hidden" aria-label="Product thumbnails">

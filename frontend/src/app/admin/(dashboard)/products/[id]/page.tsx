@@ -13,7 +13,8 @@ interface ProductDetail {
   shortDescription: string | null;
   description: string;
   mainImage: string;
-  galleryImages: { url: string; alt?: string }[];
+  mainImageMobile: string | null;
+  galleryImages: { url: string; alt?: string; mobileUrl?: string }[];
   specs: { label: string; value: string }[];
   features: (string | { title: string; description?: string })[];
   applications: { title: string; description?: string }[];

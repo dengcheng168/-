@@ -44,9 +44,14 @@ export function resolveProductMedia(product: Product): Product {
   return {
     ...product,
     mainImage: resolveMediaUrl(product.mainImage),
+    mainImageMobile: product.mainImageMobile ? resolveMediaUrl(product.mainImageMobile) : product.mainImageMobile,
     ogImage: product.ogImage ? resolveMediaUrl(product.ogImage) : product.ogImage,
     specSheetUrl: product.specSheetUrl ? resolveMediaUrl(product.specSheetUrl) : product.specSheetUrl,
-    galleryImages: product.galleryImages.map((img) => ({ ...img, url: resolveMediaUrl(img.url) })),
+    galleryImages: product.galleryImages.map((img) => ({
+      ...img,
+      url: resolveMediaUrl(img.url),
+      mobileUrl: img.mobileUrl ? resolveMediaUrl(img.mobileUrl) : img.mobileUrl,
+    })),
   };
 }
 

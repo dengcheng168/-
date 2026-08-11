@@ -19,6 +19,8 @@ export interface ProductSpec {
 export interface ProductImage {
   url: string;
   alt?: string;
+  /** 该图的手机端专用版本（可选）；留空时手机端回退显示 url */
+  mobileUrl?: string;
 }
 
 export interface ProductApplication {
@@ -37,6 +39,7 @@ export interface Product {
   shortDescription: string | null;
   description: string;
   mainImage: string;
+  mainImageMobile: string | null;
   galleryImages: ProductImage[];
   specs: ProductSpec[];
   features: (string | { title: string; description?: string })[];

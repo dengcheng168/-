@@ -15,6 +15,7 @@ const product: Product = {
   shortDescription: 'A compact RO system.',
   description: 'Full description.',
   mainImage: '/uploads/ro-500.webp',
+  mainImageMobile: null,
   galleryImages: [],
   specs: [],
   features: [],

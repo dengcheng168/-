@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { SUPPORTED_LOCALES } from '../translations/translations.schema.js';
 
 const specItemSchema = z.object({ label: z.string(), value: z.string() });
-const imageItemSchema = z.object({ url: z.string(), alt: z.string().optional() });
+const imageItemSchema = z.object({ url: z.string(), alt: z.string().optional(), mobileUrl: z.string().optional() });
 const applicationItemSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
@@ -17,6 +17,7 @@ export const createProductSchema = z.object({
   shortDescription: z.string().optional(),
   description: z.string().optional(),
   mainImage: z.string().min(1, '请上传主图'),
+  mainImageMobile: z.string().optional(),
   galleryImages: z.array(imageItemSchema).default([]),
   specs: z.array(specItemSchema).default([]),
   features: z.array(z.union([z.string(), z.object({ title: z.string(), description: z.string().optional() })])).default([]),

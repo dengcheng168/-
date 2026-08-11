@@ -111,7 +111,12 @@ export default async function ProductDetailPage({
       />
 
       <div className="mt-4 grid gap-8 lg:grid-cols-[1.02fr_minmax(430px,0.98fr)] lg:gap-10">
-        <ProductGallery mainImage={product.mainImage} images={product.galleryImages} name={product.name} />
+        <ProductGallery
+          mainImage={product.mainImage}
+          mainImageMobile={product.mainImageMobile}
+          images={product.galleryImages}
+          name={product.name}
+        />
 
         <div className="min-w-0">
           <h1 className="text-[clamp(28px,2.4vw,38px)] font-semibold leading-[1.15] text-navy-950">{product.name}</h1>

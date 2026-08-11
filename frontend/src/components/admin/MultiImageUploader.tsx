@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Image from 'next/image';
 import { resolveMediaUrl } from '@/lib/utils/media';
 import { ImageCropper } from './ImageCropper';
@@ -11,6 +11,8 @@ const RASTER_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/av
 interface GalleryImage {
   url: string;
   alt?: string;
+  /** 该图的手机端专用版本（可选）；留空时手机端回退显示 url */
+  mobileUrl?: string;
 }
 
 export function MultiImageUploader({
@@ -19,12 +21,15 @@ export function MultiImageUploader({
   defaultValue,
   recommendedSize,
   aspectRatio,
+  mobileVariantHint,
 }: {
   name: string;
   label?: string;
   defaultValue?: GalleryImage[];
   recommendedSize?: string;
   aspectRatio?: number;
+  /** 每张图下方"+ 手机版"按钮的说明文案；不传则不展示该按钮所在的整块提示（按钮本身始终可用） */
+  mobileVariantHint?: string;
 }) {
   const [images, setImages] = useState<GalleryImage[]>(defaultValue ?? []);
   const [uploading, setUploading] = useState(false);
@@ -34,6 +39,10 @@ export function MultiImageUploader({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   /** 每张图实际加载出来的原始像素尺寸，key 是图片 URL，用来在缩略图下方标出真实尺寸 */
   const [dimensionsByUrl, setDimensionsByUrl] = useState<Record<string, { width: number; height: number }>>({});
+  /** 当前正在为哪一张图上传手机端版本；null 表示没有进行中的手机版上传 */
+  const [mobileUploadIndex, setMobileUploadIndex] = useState<number | null>(null);
+  const [mobileUploading, setMobileUploading] = useState(false);
+  const mobileFileInputRef = useRef<HTMLInputElement>(null);
 
   function moveImage(from: number, to: number) {
     if (from === to) return;
@@ -78,6 +87,41 @@ export function MultiImageUploader({
     }
 
     void uploadFile(file, file.name);
+  }
+
+  async function uploadMobileVariant(index: number, file: File) {
+    setMobileUploading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file, file.name);
+      const res = await fetch('/api/admin/media/upload', { method: 'POST', body: formData });
+      const body = await res.json();
+
+      if (!res.ok || !body.success) {
+        setError(body?.error?.message ?? '上传失败');
+        return;
+      }
+      const url = body.data.webpUrl || body.data.url;
+      setImages((prev) => prev.map((img, i) => (i === index ? { ...img, mobileUrl: url } : img)));
+    } catch {
+      setError('上传失败，请检查网络连接');
+    } finally {
+      setMobileUploading(false);
+    }
+  }
+
+  function handleMobileFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || mobileUploadIndex === null) return;
+    void uploadMobileVariant(mobileUploadIndex, file);
+    setMobileUploadIndex(null);
+  }
+
+  function removeMobileVariant(index: number) {
+    setImages((prev) => prev.map((img, i) => (i === index ? { ...img, mobileUrl: undefined } : img)));
   }
 
   return (
@@ -137,9 +181,45 @@ export function MultiImageUploader({
                 {dimensionsByUrl[img.url].width}×{dimensionsByUrl[img.url].height}px
               </p>
             )}
+            <div className="mt-1 text-center text-[11px]">
+              {img.mobileUrl ? (
+                <span className="inline-flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewUrl(img.mobileUrl ?? null)}
+                    className="text-water-600 hover:underline"
+                  >
+                    手机版
+                  </button>
+                  <button type="button" onClick={() => removeMobileVariant(i)} className="text-red-600 hover:underline">
+                    移除
+                  </button>
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileUploadIndex(i);
+                    mobileFileInputRef.current?.click();
+                  }}
+                  disabled={mobileUploading}
+                  className="text-grey-400 hover:text-water-600 hover:underline disabled:opacity-60"
+                >
+                  {mobileUploading && mobileUploadIndex === i ? '上传中...' : '+ 手机版'}
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
+      {mobileVariantHint && images.length > 0 && <p className="mt-1.5 text-xs text-grey-500">{mobileVariantHint}</p>}
+      <input
+        ref={mobileFileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/avif"
+        onChange={handleMobileFileChange}
+        className="hidden"
+      />
 
       <Dialog open={previewUrl !== null} onOpenChange={(open) => !open && setPreviewUrl(null)}>
         <DialogContent className="max-w-3xl">
