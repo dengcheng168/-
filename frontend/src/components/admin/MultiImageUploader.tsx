@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import Image from 'next/image';
 import { resolveMediaUrl } from '@/lib/utils/media';
+import { describeImageDimensions } from '@/lib/utils/image-dimensions';
 import { ImageCropper } from './ImageCropper';
 import { Dialog, DialogContent, DialogTitle } from './ui/dialog';
 
@@ -22,14 +23,18 @@ export function MultiImageUploader({
   recommendedSize,
   aspectRatio,
   mobileVariantHint,
+  minRecommendedSize,
 }: {
   name: string;
   label?: string;
   defaultValue?: GalleryImage[];
   recommendedSize?: string;
+  /** 同时也是每张图尺寸徽章判断"是否符合目标比例"的依据 */
   aspectRatio?: number;
   /** 每张图下方"+ 手机版"按钮的说明文案；不传则不展示该按钮所在的整块提示（按钮本身始终可用） */
   mobileVariantHint?: string;
+  /** 建议的最低边长（px），传了才会在低于该值时显示分辨率偏低的 Warning（不阻断上传） */
+  minRecommendedSize?: number;
 }) {
   const [images, setImages] = useState<GalleryImage[]>(defaultValue ?? []);
   const [uploading, setUploading] = useState(false);
@@ -177,9 +182,26 @@ export function MultiImageUploader({
               </button>
             </div>
             {dimensionsByUrl[img.url] && (
-              <p className="mt-1 text-center text-[11px] text-grey-500">
-                {dimensionsByUrl[img.url].width}×{dimensionsByUrl[img.url].height}px
-              </p>
+              <div className="mt-1 text-center text-[11px] leading-relaxed">
+                <p className="text-grey-500">
+                  {dimensionsByUrl[img.url].width}×{dimensionsByUrl[img.url].height}px
+                </p>
+                {(() => {
+                  const { matchesExpectedRatio, isLowResolution } = describeImageDimensions(
+                    dimensionsByUrl[img.url].width,
+                    dimensionsByUrl[img.url].height,
+                    aspectRatio,
+                    minRecommendedSize,
+                  );
+                  return (
+                    <>
+                      {matchesExpectedRatio === true && <p className="text-green-600">✓</p>}
+                      {matchesExpectedRatio === false && <p className="text-amber-600">⚠ 非建议比例</p>}
+                      {isLowResolution && <p className="text-amber-600">⚠ 分辨率偏低</p>}
+                    </>
+                  );
+                })()}
+              </div>
             )}
             <div className="mt-1 text-center text-[11px]">
               {img.mobileUrl ? (

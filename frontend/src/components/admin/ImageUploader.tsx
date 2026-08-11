@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { resolveMediaUrl } from '@/lib/utils/media';
+import { describeImageDimensions } from '@/lib/utils/image-dimensions';
 import { ImageCropper } from './ImageCropper';
 import { MediaLibraryPicker } from './MediaLibraryPicker';
 import { Dialog, DialogContent, DialogTitle } from './ui/dialog';
@@ -15,14 +16,18 @@ export function ImageUploader({
   defaultValue,
   recommendedSize,
   aspectRatio,
+  minRecommendedSize,
 }: {
   name: string;
   label?: string;
   defaultValue?: string | null;
   /** 展示给管理员的尺寸建议文案，例如 "建议 1200×630px" */
   recommendedSize?: string;
-  /** 宽/高，传了才会在选择图片后弹出裁剪框；未传（例如 Logo）则跟以前一样直接上传原图 */
+  /** 宽/高，传了才会在选择图片后弹出裁剪框；未传（例如 Logo）则跟以前一样直接上传原图。
+   * 同时也是尺寸徽章判断"是否符合目标比例"的依据（例如产品图传 1，判断是否为 1:1）。 */
   aspectRatio?: number;
+  /** 建议的最低边长（px），传了才会在低于该值时显示分辨率偏低的 Warning（不阻断上传） */
+  minRecommendedSize?: number;
 }) {
   const [url, setUrl] = useState(defaultValue ?? '');
   const [uploading, setUploading] = useState(false);
@@ -100,9 +105,30 @@ export function ImageUploader({
               />
             </button>
             {dimensions && (
-              <p className="mt-1 text-center text-[11px] text-grey-500">
-                {dimensions.width}×{dimensions.height}px
-              </p>
+              <div className="mt-1 text-center text-[11px] leading-relaxed">
+                <p className="text-grey-500">
+                  {dimensions.width}×{dimensions.height}px
+                </p>
+                {(() => {
+                  const { matchesExpectedRatio, isLowResolution } = describeImageDimensions(
+                    dimensions.width,
+                    dimensions.height,
+                    aspectRatio,
+                    minRecommendedSize,
+                  );
+                  return (
+                    <>
+                      {matchesExpectedRatio === true && <p className="text-green-600">✓ 符合建议比例</p>}
+                      {matchesExpectedRatio === false && (
+                        <p className="text-amber-600">⚠ 非建议比例，系统会完整保留内容，不裁切</p>
+                      )}
+                      {isLowResolution && (
+                        <p className="text-amber-600">⚠ 分辨率较低，建议至少 {minRecommendedSize}×{minRecommendedSize}px</p>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
             )}
           </div>
         ) : (

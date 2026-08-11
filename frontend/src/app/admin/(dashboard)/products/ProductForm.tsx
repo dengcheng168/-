@@ -116,22 +116,24 @@ export function ProductForm({
         name="mainImage"
         label="主图"
         defaultValue={initialValues?.mainImage}
-        recommendedSize="建议 1200×1200px（正方形，不低于1000×1000px）。请使用产品实拍照（干净背景、不带文字），方便买家放大查看做工细节；带标题/参数/卖点的宣传海报图请放到下方「详细描述」里，不要用作主图。上传后会弹出裁剪框，请把产品主体居中裁剪，四周不要留白过多"
+        recommendedSize="标准比例：1:1　推荐尺寸：1200×1200px　最低建议：1000×1000px。请使用清晰的产品图片，上传后系统会自动裁剪为标准画布，前台会根据电脑、平板和手机屏幕自动缩放，不会把页面撑宽。若是产品实拍照：建议干净背景、主体居中，四周留出适当空间，不要把产品贴到图片边缘。带文字的宣传/参数信息图也可以上传（前台完整缩放显示、不裁切，支持点击查看大图）"
         aspectRatio={1}
+        minRecommendedSize={1000}
       />
       <ImageUploader
         name="mainImageMobile"
         label="主图 - 手机端专用版本（可选）"
         defaultValue={initialValues?.mainImageMobile ?? ''}
-        recommendedSize="仅当上方主图是带文字的宣传/信息图、缩小到手机宽度后文字会看不清时才需要上传这张。建议：文字不少于图片宽度的 3.5%（例如宽 800px 的图，关键文字笔画粗细/字号对应至少 28px 左右），能竖版就竖版，避免把桌面端的横向信息图直接等比缩小。留空则手机端自动显示与桌面端相同的主图，不影响任何现有产品"
+        recommendedSize="一般不需要单独上传——手机端前台已经会把上方主图完整缩放显示，并支持点击放大查看清晰原图。只有极少数情况（希望手机端展示跟桌面完全不同的一张图）才需要用到这里。留空则手机端自动显示与桌面端相同的主图"
       />
       <MultiImageUploader
         name="galleryImages"
         label="详情图片（多张）"
         defaultValue={initialValues?.galleryImages}
-        recommendedSize="建议 1200×1200px（正方形，不低于1000×1000px），可上传多张。同样建议用产品多角度实拍照，宣传海报图请放到「详细描述」里。上传后会弹出裁剪框裁剪为正方形"
+        recommendedSize="标准比例：1:1　推荐尺寸：1200×1200px　最低建议：1000×1000px，可上传多张。适合上传产品不同角度、应用场景、安装方式、配件、卖点、参数信息图等。含文字的信息图也建议尽量按 1:1 设计；前台手机端会完整缩放显示，不会裁掉左右内容，也支持点击查看大图"
         aspectRatio={1}
-        mobileVariantHint="仅当某张图是带文字的宣传/信息图、缩小到手机宽度会看不清时才需要点「手机版」上传。留空则手机端沿用同一张图，不影响其余图片"
+        minRecommendedSize={1000}
+        mobileVariantHint="一般不需要——手机端前台已支持点击放大查看清晰原图。只有极少数图片需要跟桌面端完全不同的手机版内容时，才需要点「手机版」单独上传"
       />
 
       <FormField label="参数表" htmlFor="specsText" hint="每行一条，格式：标签: 值，例如 Daily Output: 50 GPD">
