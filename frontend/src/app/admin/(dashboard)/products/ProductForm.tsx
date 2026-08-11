@@ -21,7 +21,6 @@ interface FormValues {
   shortDescription?: string | null;
   description?: string;
   mainImage?: string;
-  mainImageMobile?: string | null;
   galleryImages?: { url: string; alt?: string; mobileUrl?: string }[];
   specs?: { label: string; value: string }[];
   features?: (string | { title: string; description?: string })[];
@@ -119,12 +118,6 @@ export function ProductForm({
         recommendedSize="标准比例：1:1　推荐尺寸：1200×1200px　最低建议：1000×1000px。请使用清晰的产品图片，上传后系统会自动裁剪为标准画布，前台会根据电脑、平板和手机屏幕自动缩放，不会把页面撑宽。若是产品实拍照：建议干净背景、主体居中，四周留出适当空间，不要把产品贴到图片边缘。带文字的宣传/参数信息图也可以上传（前台完整缩放显示、不裁切，支持点击查看大图）"
         aspectRatio={1}
         minRecommendedSize={1000}
-      />
-      <ImageUploader
-        name="mainImageMobile"
-        label="主图 - 手机端专用版本（可选）"
-        defaultValue={initialValues?.mainImageMobile ?? ''}
-        recommendedSize="一般不需要单独上传——手机端前台已经会把上方主图完整缩放显示，并支持点击放大查看清晰原图。只有极少数情况（希望手机端展示跟桌面完全不同的一张图）才需要用到这里。留空则手机端自动显示与桌面端相同的主图"
       />
       <MultiImageUploader
         name="galleryImages"

@@ -32,16 +32,14 @@ function ZoomIcon() {
 
 export function ProductGallery({
   mainImage,
-  mainImageMobile,
   images,
   name,
 }: {
   mainImage: string;
-  mainImageMobile?: string | null;
   images: ProductImage[];
   name: string;
 }) {
-  const allImages: ProductImage[] = [{ url: mainImage, alt: name, mobileUrl: mainImageMobile ?? undefined }, ...images];
+  const allImages: ProductImage[] = [{ url: mainImage, alt: name }, ...images];
   const [active, setActive] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const hasMultiple = allImages.length > 1;

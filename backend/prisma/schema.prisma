@@ -147,7 +147,6 @@ model Product {
   shortDescription String?
   description      String // 富文本 HTML，保存前会做 sanitize
   mainImage        String
-  mainImageMobile  String? // 主图的手机端专用版本（可选）；留空时手机端回退显示 mainImage
   galleryImages    String               @default("[]") // JSON 字符串：[{url, alt, mobileUrl}]，mobileUrl 可选（SQLite 无原生 Json 类型，应用层负责序列化）
   specs            String               @default("[]") // JSON 字符串：[{label, value}]
   features         String               @default("[]") // JSON 字符串：string[] 或 [{title, description}]

@@ -39,7 +39,6 @@ export interface Product {
   shortDescription: string | null;
   description: string;
   mainImage: string;
-  mainImageMobile: string | null;
   galleryImages: ProductImage[];
   specs: ProductSpec[];
   features: (string | { title: string; description?: string })[];

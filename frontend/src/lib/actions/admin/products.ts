@@ -56,7 +56,6 @@ function buildPayload(formData: FormData) {
     shortDescription: textOrUndefined(formData, 'shortDescription'),
     description: formData.get('description'),
     mainImage: formData.get('mainImage'),
-    mainImageMobile: formData.get('mainImageMobile') ?? undefined,
     galleryImages: parseGalleryImages(String(formData.get('galleryImages') ?? '[]')),
     specs: parseSpecs(String(formData.get('specsText') ?? '')),
     features: parseFeatures(String(formData.get('featuresText') ?? '')),
