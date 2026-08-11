@@ -59,7 +59,7 @@ export default async function ProductsPage({
           </>
         )}
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-[240px_1fr]">
+        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]">
           <aside>
             <CategoryFilterSidebar categories={categories} />
           </aside>

@@ -110,7 +110,7 @@ export default async function ProductDetailPage({
         ]}
       />
 
-      <div className="mt-4 grid gap-8 lg:grid-cols-[1.02fr_minmax(430px,0.98fr)] lg:gap-10">
+      <div className="mt-4 grid grid-cols-1 gap-8 lg:grid-cols-[1.02fr_minmax(430px,0.98fr)] lg:gap-10">
         <ProductGallery
           mainImage={product.mainImage}
           mainImageMobile={product.mainImageMobile}

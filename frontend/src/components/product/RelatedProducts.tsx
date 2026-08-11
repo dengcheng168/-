@@ -12,7 +12,7 @@ function RelatedCard({ product, locale }: { product: Product; locale: Locale }) 
       href={localeHref(`/products/${product.slug}`, locale)}
       className="group flex flex-col overflow-hidden rounded-lg border border-grey-200 bg-white transition-all hover:-translate-y-1 hover:border-water-300 hover:shadow-lg"
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden border-b border-grey-200 bg-grey-50">
+      <div className="relative aspect-square w-full min-w-0 overflow-hidden border-b border-grey-200 bg-grey-50">
         <Image
           src={product.mainImage}
           alt={product.galleryImages[0]?.alt?.trim() || product.name}

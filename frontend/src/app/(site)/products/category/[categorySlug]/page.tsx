@@ -59,7 +59,7 @@ export default async function ProductCategoryPage({
       <h1 className="mt-4 text-3xl font-semibold text-navy-950">{result.category.name}</h1>
       {result.category.description && <p className="mt-3 max-w-2xl text-grey-500">{result.category.description}</p>}
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[240px_1fr]">
+      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]">
         <aside>
           <CategoryFilterSidebar categories={categories} activeSlug={categorySlug} />
         </aside>
