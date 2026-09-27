@@ -40,6 +40,15 @@ const envSchema = z.object({
   SMTP_PASSWORD: z.string().optional(),
   SMTP_FROM_EMAIL: z.string().optional(),
 
+  // GA4 Measurement Protocol secret. Kept server-side and optional so missing
+  // analytics configuration can never prevent the application from starting.
+  GA4_API_SECRET: z.string().optional(),
+
+  // Meta Conversions API credentials. Both remain server-side and are optional;
+  // analytics failures must never block a legitimate inquiry.
+  META_CAPI_ACCESS_TOKEN: z.string().optional(),
+  META_GRAPH_API_VERSION: z.string().regex(/^v\d+\.\d+$/).default('v23.0'),
+
   /**
    * 保存正式站点域名（SiteSetting.siteBaseUrl）后，后端服务器到服务器调用前端
    * POST /api/internal/revalidate-site-config 的目标地址。本机开发时前后端分属不同端口

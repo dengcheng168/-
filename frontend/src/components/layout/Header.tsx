@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Container } from '@/components/ui/Container';
 import { MobileNav } from './MobileNav';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { toThumbnailUrl } from '@/lib/media/thumbnail';
 
 export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
   const [items, settings, translations] = await Promise.all([
@@ -31,7 +32,7 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
           {settings.companyLogoUrl ? (
             <span className="relative block h-9 w-40">
               <Image
-                src={settings.companyLogoUrl}
+                src={toThumbnailUrl(settings.companyLogoUrl)}
                 alt={settings.brandName || settings.companyName || 'Li-Men'}
                 fill
                 sizes="160px"

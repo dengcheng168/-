@@ -9,6 +9,7 @@ interface Settings {
   faviconUrl: string | null;
   companyAddress: string | null;
   companyMapImage: string | null;
+  companyMapMobileImage: string | null;
   companyEmail: string | null;
   companyPhone: string | null;
 }

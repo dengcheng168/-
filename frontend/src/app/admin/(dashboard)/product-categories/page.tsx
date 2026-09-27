@@ -13,6 +13,8 @@ interface CategoryRow {
   slug: string;
   sortOrder: number;
   published: boolean;
+  image: string | null;
+  _count?: { products: number };
 }
 
 export default async function AdminProductCategoriesPage() {
@@ -22,7 +24,7 @@ export default async function AdminProductCategoriesPage() {
     <div>
       <PageHeader
         title="产品分类"
-        description="管理产品分类，用于产品列表的归类与前台导航展示。"
+        description="前台导航仅显示已发布且有已发布产品的分类。缺少分类图片不会隐藏分类，但会影响展示。"
         action={
           <Link
             href="/admin/product-categories/new"
@@ -36,9 +38,9 @@ export default async function AdminProductCategoriesPage() {
 
       <div>
         <AdminTable>
-          <AdminTableHead columns={['名称', 'Slug', '排序', '状态', '操作']} />
+          <AdminTableHead columns={['名称', 'Slug', '排序', '状态', '前台展示', '操作']} />
           <tbody>
-            {data.length === 0 && <AdminEmptyRow colSpan={5} />}
+            {data.length === 0 && <AdminEmptyRow colSpan={6} />}
             {data.map((cat) => (
               <tr key={cat.id} className="border-b border-grey-100 last:border-none">
                 <td className="px-4 py-3 font-medium text-navy-950">{cat.name}</td>
@@ -50,6 +52,10 @@ export default async function AdminProductCategoriesPage() {
                   <span className={`rounded-full px-2 py-0.5 text-xs ${cat.published ? 'bg-green-100 text-green-700' : 'bg-grey-100 text-grey-700'}`}>
                     {cat.published ? '已发布' : '未发布'}
                   </span>
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  <p>{!cat.published ? '未展示：未发布' : cat._count === undefined ? '产品数量待确认' : cat._count.products > 0 ? `展示中（${cat._count.products} 个产品）` : '未展示：没有已发布产品'}</p>
+                  {!cat.image && <p className="text-amber-700">缺少分类图片</p>}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-3">

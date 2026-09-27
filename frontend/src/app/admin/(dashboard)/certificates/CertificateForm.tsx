@@ -18,6 +18,8 @@ interface FormValues {
   imageUrl?: string | null;
   pdfUrl?: string | null;
   description?: string | null;
+  applicableProductType?: string | null;
+  applicableModels?: string[];
   published?: boolean;
 }
 
@@ -90,6 +92,14 @@ export function CertificateForm({
 
       <FormField label="描述" htmlFor="description">
         <textarea id="description" name="description" rows={3} defaultValue={initialValues?.description ?? ''} className={fieldInputClasses} />
+      </FormField>
+
+      <FormField label="适用产品类型" htmlFor="applicableProductType" hint="仅填写证书文件明确覆盖的产品类型；不确定请留空">
+        <input id="applicableProductType" name="applicableProductType" defaultValue={initialValues?.applicableProductType ?? ''} className={fieldInputClasses} />
+      </FormField>
+
+      <FormField label="适用型号 / SKU" htmlFor="applicableModels" hint="每行一个型号；只有证书明确覆盖时才填写">
+        <textarea id="applicableModels" name="applicableModels" rows={3} defaultValue={(initialValues?.applicableModels ?? []).join('\n')} className={fieldInputClasses} />
       </FormField>
 
       <div className="flex items-center gap-2">

@@ -3,6 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import type { ProductImage } from '@/types/product';
+import { toThumbnailUrl } from '@/lib/media/thumbnail';
+
+function imageAlt(alt: string | undefined, productName: string) {
+  return alt?.trim() || productName;
+}
 
 function ChevronUpIcon() {
   return (
@@ -128,7 +133,7 @@ export function ProductGallery({
                 aria-current={active === i ? 'true' : undefined}
                 className={thumbButtonClasses(i)}
               >
-                <Image src={img.url} alt={img.alt ?? name} fill sizes="84px" className="object-cover" />
+                <Image src={toThumbnailUrl(img.url)} alt={imageAlt(img.alt, name)} fill sizes="84px" className="object-cover" />
               </button>
             ))}
           </div>
@@ -158,7 +163,7 @@ export function ProductGallery({
               aria-label={`${name} — tap to view full image`}
               className={`${stageClasses} block cursor-zoom-in sm:hidden`}
             >
-              <Image src={current.mobileUrl} alt={current.alt ?? name} fill sizes="100vw" className="object-contain" priority />
+              <Image src={current.mobileUrl} alt={imageAlt(current.alt, name)} fill sizes="100vw" className="object-contain" priority />
               <span className="pointer-events-none absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/85 text-navy-950 shadow">
                 <ZoomIcon />
               </span>
@@ -173,7 +178,7 @@ export function ProductGallery({
               >
                 <Image
                   src={current.url}
-                  alt={current.alt ?? name}
+                  alt={imageAlt(current.alt, name)}
                   fill
                   sizes="(min-width: 1024px) 35vw, 100vw"
                   className="object-contain"
@@ -196,7 +201,7 @@ export function ProductGallery({
             >
               <Image
                 src={current?.url ?? mainImage}
-                alt={current?.alt ?? name}
+                alt={imageAlt(current?.alt, name)}
                 fill
                 sizes="(min-width: 1024px) 35vw, 100vw"
                 className="object-contain"
@@ -223,7 +228,7 @@ export function ProductGallery({
                   active === i ? 'border-water-500' : 'border-grey-200 hover:border-grey-300'
                 }`}
               >
-                <Image src={img.url} alt={img.alt ?? name} fill sizes="64px" className="object-cover" />
+                <Image src={toThumbnailUrl(img.url)} alt={imageAlt(img.alt, name)} fill sizes="64px" className="object-cover" />
               </button>
             ))}
           </div>
@@ -254,7 +259,7 @@ export function ProductGallery({
           >
             <Image
               src={current.url}
-              alt={current.alt ?? name}
+              alt={imageAlt(current.alt, name)}
               fill
               sizes="90vw"
               className="object-contain"

@@ -20,7 +20,10 @@ export async function createCategoryAction(_prevState: AdminFormState, formData:
       method: 'POST',
       body: JSON.stringify({
         name: formData.get('name'),
+        slug: textOrUndefined(formData, 'slug'),
         description: textOrUndefined(formData, 'description'),
+        seoTitle: textOrUndefined(formData, 'seoTitle'),
+        seoDescription: textOrUndefined(formData, 'seoDescription'),
         image: textOrUndefined(formData, 'image'),
         published: formData.get('published') === 'on',
       }),
@@ -47,7 +50,10 @@ export async function updateCategoryAction(
       method: 'PATCH',
       body: JSON.stringify({
         name: formData.get('name'),
+        slug: textOrUndefined(formData, 'slug'),
         description: textOrUndefined(formData, 'description'),
+        seoTitle: textOrUndefined(formData, 'seoTitle'),
+        seoDescription: textOrUndefined(formData, 'seoDescription'),
         image: textOrUndefined(formData, 'image'),
         published: formData.get('published') === 'on',
       }),

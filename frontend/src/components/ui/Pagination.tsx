@@ -17,6 +17,7 @@ export function Pagination({
 
   const pageHref = (p: number) => {
     const url = new URL(basePath, 'https://placeholder.local');
+    if (p === 1) return url.pathname;
     url.searchParams.set('page', String(p));
     return `${url.pathname}?${url.searchParams.toString()}`;
   };

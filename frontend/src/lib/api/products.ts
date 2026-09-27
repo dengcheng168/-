@@ -1,8 +1,10 @@
-import { apiFetch, type ApiMeta } from './client';
+import { apiFetch, ApiError, type ApiMeta } from './client';
 import { resolveMediaUrl } from '@/lib/utils/media';
 import type { Product, ProductCategory } from '@/types/product';
 import type { Locale } from '@/lib/i18n/locales';
 import { resolveLocalizedEntity, localeQueryParam, localizedTag } from '@/lib/i18n/localize';
+import { localeHref } from '@/lib/i18n/paths';
+import { publicRedirectSourcePaths } from '@/lib/seo/sitemap-redirects';
 
 export interface ProductListParams {
   category?: string;
@@ -30,7 +32,7 @@ const PRODUCT_TRANSLATABLE_FIELDS: (keyof Product)[] = [
 
 const CATEGORY_TRANSLATABLE_FIELDS: (keyof ProductCategory)[] = ['name', 'description', 'seoTitle', 'seoDescription'];
 
-function localizeProduct(product: WithTranslation<Product>): Product {
+export function localizeProduct(product: WithTranslation<Product>): Product {
   const { translation, ...base } = product;
   return resolveLocalizedEntity(base as Product, translation, PRODUCT_TRANSLATABLE_FIELDS);
 }
@@ -75,7 +77,7 @@ export async function listProducts(
   try {
     const { data, meta } = await apiFetch<WithTranslation<Product>[]>(`/products${qs ? `?${qs}` : ''}`, {
       revalidate: 60,
-      tags: ['products', ...localizedTag('products', locale)],
+      tags: ['products', 'product-categories', ...localizedTag('products', locale), ...localizedTag('product-categories', locale)],
     });
     return { items: data.map((p) => resolveProductMedia(localizeProduct(p))), meta };
   } catch {
@@ -116,15 +118,18 @@ export async function getProductBySlug(
       `/products/${slug}${localeParam ? `?locale=${localeParam}` : ''}`,
       {
         revalidate: 60,
-        tags: ['products', `product:${slug}`, ...localizedTag(`product:${slug}`, locale)],
+        tags: ['products', 'product-categories', `product:${slug}`, ...localizedTag('products', locale), ...localizedTag('product-categories', locale), ...localizedTag(`product:${slug}`, locale)],
       },
     );
     return {
       product: resolveProductMedia(localizeProduct(data.product)),
       related: data.related.map((r) => resolveProductMedia(localizeProduct(r))),
     };
-  } catch {
-    return null;
+  } catch (error) {
+    // Only a confirmed missing resource may trigger the page's notFound().
+    // Rate limits and upstream outages must remain errors, not false SEO 404s.
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
   }
 }
 
@@ -150,7 +155,15 @@ export async function listProductCategories(locale: Locale = 'en'): Promise<Prod
 export async function listVisibleProductCategories(locale: Locale = 'en'): Promise<ProductCategory[]> {
   const [categories, products] = await Promise.all([listProductCategories(locale), listAllProducts(locale)]);
   const categoryIdsWithProducts = new Set(products.map((p) => p.categoryId));
-  return categories.filter((c) => categoryIdsWithProducts.has(c.id));
+  const visible = categories.filter((c) => categoryIdsWithProducts.has(c.id));
+  try {
+    const paths = visible.map((c) => localeHref(`/products/category/${c.slug}`, locale));
+    const redirectSources = await publicRedirectSourcePaths(paths);
+    return visible.filter((c) => !redirectSources.has(localeHref(`/products/category/${c.slug}`, locale)));
+  } catch {
+    // A redirect lookup outage must not make the public category navigation disappear.
+    return visible;
+  }
 }
 
 export async function getProductCategoryBySlug(
@@ -168,14 +181,16 @@ export async function getProductCategoryBySlug(
   try {
     const { data, meta } = await apiFetch<{ category: WithTranslation<ProductCategory>; products: WithTranslation<Product>[] }>(
       `/product-categories/${slug}${qs ? `?${qs}` : ''}`,
-      { revalidate: 300, tags: ['product-categories', ...localizedTag('product-categories', locale)] },
+      // 分类详情包含产品列表：发布、下架、排序和译文更新都必须使这份缓存失效。
+      { revalidate: 300, tags: ['product-categories', 'products', ...localizedTag('product-categories', locale), ...localizedTag('products', locale)] },
     );
     return {
       category: resolveCategoryMedia(localizeCategory(data.category)),
       products: data.products.map((p) => resolveProductMedia(localizeProduct(p))),
       meta,
     };
-  } catch {
-    return null;
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
   }
 }

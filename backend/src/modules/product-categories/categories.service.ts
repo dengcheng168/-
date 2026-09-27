@@ -50,6 +50,7 @@ export async function listAdminCategories(
       where,
       orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
       ...toSkipTake(query),
+      include: { _count: { select: { products: { where: { status: 'PUBLISHED', deletedAt: null } } } } },
     }),
     prisma.productCategory.count({ where }),
   ]);

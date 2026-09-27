@@ -6,6 +6,7 @@ interface Settings {
   metaPixelId: string | null;
   tiktokPixelId: string | null;
   googlePixelId: string | null;
+  googleAdsId: string | null;
 }
 
 export default async function AdminPixelSettingsPage() {
@@ -13,7 +14,7 @@ export default async function AdminPixelSettingsPage() {
 
   return (
     <div>
-      <PageHeader title="像素设置" description="保存 Meta / TikTok / Google 的追踪像素 ID。" />
+      <PageHeader title="像素设置" description="分别配置 GA4、Google Ads、Meta 和 TikTok 的追踪 ID。" />
       <PixelSettingsForm initialValues={data} />
     </div>
   );

@@ -17,7 +17,7 @@ export type UpsertCategoryTranslationInput = z.infer<typeof upsertCategoryTransl
 
 export const createCategorySchema = z.object({
   name: z.string().min(1, '名称不能为空'),
-  slug: z.string().min(1).optional(),
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug 只能包含小写字母、数字和连字符').optional(),
   description: z.string().optional(),
   image: z.string().optional(),
   sortOrder: z.number().int().optional(),

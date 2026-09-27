@@ -1,8 +1,11 @@
 import { z } from 'zod';
+import { isRedirectPath } from './redirect-path.js';
+
+const pathSchema = z.string().refine(isRedirectPath, '请输入站内路径，例如 /products/ro，不支持外部网址、查询参数或管理路径');
 
 export const createRedirectSchema = z.object({
-  fromPath: z.string().min(1, '来源路径不能为空'),
-  toPath: z.string().min(1, '目标路径不能为空'),
+  fromPath: pathSchema,
+  toPath: pathSchema,
   statusCode: z.union([z.literal(301), z.literal(302)]).optional(),
 });
 

@@ -223,6 +223,7 @@ export async function findMediaUsage(prisma: PrismaClient, media: MediaUrls) {
         { faviconUrl: { in: urls } },
         { defaultOgImage: { in: urls } },
         { companyMapImage: { in: urls } },
+        { companyMapMobileImage: { in: urls } },
       ],
     },
   });

@@ -14,9 +14,10 @@ function formatDate(dateStr: string | null, locale: Locale) {
 }
 
 export function BlogCard({ post, locale = 'en' }: { post: BlogPost; locale?: Locale }) {
+  const hrefLocale = locale === 'es' && post.hasLocaleTranslation === false ? 'en' : locale;
   return (
     <Link
-      href={localeHref(`/blog/${post.slug}`, locale)}
+      href={localeHref(`/blog/${post.slug}`, hrefLocale)}
       className="group flex flex-col overflow-hidden rounded-lg border border-grey-200 bg-white transition-shadow hover:shadow-lg"
     >
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-grey-50">

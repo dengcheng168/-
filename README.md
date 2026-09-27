@@ -167,7 +167,7 @@ vim .env   # 修改 JWT_SECRET / ADMIN_INIT_EMAIL / ADMIN_INIT_PASSWORD / DOMAIN
 bash scripts/deploy.sh
 ```
 
-`deploy.sh` 会自动完成：检查 `.env` → 构建镜像 → 启动容器 → 等待后端健康检查通过 → 创建管理员账号。
+`deploy.sh` 会自动完成：检查 `.env` → 构建镜像 → 启动容器 → 等待健康检查 → 创建管理员账号 → 校验 Nginx → 记录 commit、运行镜像 ID、容器状态和迁移结果。
 
 也可以手动执行等价的步骤：
 
@@ -179,7 +179,7 @@ docker compose exec backend npm run create-admin
 
 **三个容器**：`nginx`（唯一对外暴露 80/443 端口）、`frontend`、`backend`（均只在内部 Docker 网络里，互相通过服务名访问，不直接暴露给公网）。生产环境内存限制：frontend 512MB / backend 512MB / nginx 128MB。
 
-> **关于构建期数据**：`next build` 阶段部分页面会尝试预取后端数据做静态生成；Docker 构建默认处于隔离网络，届时后端可能还没启动。前端所有数据请求函数都做了兜底（连不上时用占位内容完成构建），不会导致构建失败；容器真正跑起来之后，ISR 会在首次真实访问时自动刷新为最新内容，通常几分钟内前台就会显示真实数据。
+> **构建与运行要求**：`SITE_URL` 是生产构建必填项，缺失时构建会主动失败，以免生成 localhost 的 SEO 地址。公开站点页面由服务端动态渲染并读取当前数据；不能再依赖“构建期占位内容 + ISR 稍后刷新”。发布后必须检查动态页面，并以 `release-records/latest.txt` 中的 commit 与运行镜像 ID 作为实际上线版本依据。
 
 ## 9. Nginx 配置
 
@@ -191,6 +191,8 @@ docker compose exec backend npm run create-admin
   - `/uploads/` → 直接从挂载卷读取静态文件，不经过后端进程，带长缓存
   - `/` → 前端容器
 - `snippets/security-headers.conf`：通用安全响应头
+
+凡是 `location` 自己使用 `add_header`（例如 HTML 与上传资源缓存）时，都必须在该 `location` 内重新 include 安全头；Nginx 的继承规则会让 location 级 `add_header` 覆盖 server 级安全头。配置同时隐藏上游的 `X-Powered-By`。
 
 **上线前**，把 `conf.d/default.conf` 里的 `your-domain.com` 替换成实际域名，然后重新加载：
 
@@ -253,7 +255,15 @@ bash scripts/restore.sh backups/backup-20260101-030000.tar.gz
 bash scripts/update.sh
 ```
 
-会依次执行：`git pull`（如果是 git 仓库）→ 自动备份 → 重新构建镜像 → 重启容器（数据库迁移会在容器启动时自动应用）→ 清理旧镜像。
+会依次执行：`git pull`（如果是 git 仓库）→ 自动备份 → 重新构建镜像 → 重启容器（数据库迁移会在容器启动时自动应用）→ 健康检查与 Nginx 校验 → 写入发布证据 → 清理旧镜像。每次记录位于 `release-records/`，`latest.txt` 指向最近一次发布。
+
+首次在生产服务器部署或发现源码目录为 777 时，以 root 执行：
+
+```bash
+bash scripts/harden-permissions.sh
+```
+
+该脚本把源码/配置目录收紧为 755、文件设为 644、脚本设为 755、`.env` 设为 600，并在仍发现非运行时目录全员可写时失败。它不修改所有者；如容器使用非 root UID/GID，应按实际运行身份调整 `data/uploads/backend/logs` 的所有者。
 
 ## 13. 上传文件目录
 
@@ -272,17 +282,17 @@ bash scripts/update.sh
 检查 Nginx 的 `/uploads/` 反代是否正常，以及 `uploads/` 目录权限；本地开发时确认 `frontend/.env.local` 里 `NEXT_PUBLIC_UPLOADS_BASE_URL` 指向了正在运行的后端地址。
 
 **Q: 后台保存后前台没有立即更新？**
-大部分前台页面用了 60 秒～5 分钟不等的 ISR 缓存（减轻服务器压力），保存后台内容后需要等缓存过期，或直接刷新几次。若需要立即生效，可以在对应的 Server Action 里补充 `revalidateTag`。
+先确认后台保存成功和后端健康，再检查 Nginx 的 60 秒 HTML 缓存；不要把问题归因于构建期占位内容或等待 ISR。超过缓存窗口仍未更新时，核对 `release-records/latest.txt` 的运行镜像与预期源码，并检查前后端日志。
 
-**Q: `docker compose build` 报错找不到后端数据？**
-这是正常现象，见上文「Docker 部署」里的说明，不影响最终部署结果。
+**Q: `docker compose build` 因 `SITE_URL` 缺失而失败？**
+这是生产安全门禁。请在 `.env` 中设置正式的 `SITE_URL=https://你的域名` 后重新构建，不要用 localhost 绕过。
 
 ## 15. 2 核 2GB 服务器优化建议
 
 - 生产环境已经通过 `mem_limit` 限制了三个容器的内存上限（前端/后端各 512MB，Nginx 128MB），避免任何单个服务把内存耗尽拖垮整机
 - 数据库用 SQLite，无需额外的数据库进程；后端只有一个主进程，没有引入 Redis / Elasticsearch 等重型依赖
 - 图片上传后自动生成 WebP + 缩略图，前台列表页优先加载缩略图并做懒加载
-- 前台大部分页面启用了 ISR（增量静态再生），减少对后端 API 的重复请求
+- Nginx 对公开 HTML 使用短缓存与 stale-while-revalidate；页面本身保持动态服务端渲染
 - 日志已配置轮转（`max-size: 10m, max-file: 3`），避免磁盘被日志占满
 - 如果内存依然紧张，可以考虑：给 VPS 增加 1-2GB Swap；把 `docker-compose.prod.yml` 里的内存上限适当调低但需自行观察是否 OOM
 

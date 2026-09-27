@@ -6,6 +6,11 @@ import { AnalyticsPixels } from '@/components/analytics/AnalyticsPixels';
 import { PageViewTracker } from '@/components/analytics/PageViewTracker';
 import { getPublicBaseMetadata } from '@/lib/seo/base-metadata';
 
+// Public pages read their navigation, settings and CMS content from the backend.
+// The backend is intentionally unavailable in the isolated Docker build stage,
+// so rendering these routes statically can persist empty fallback content.
+export const dynamic = 'force-dynamic';
+
 // (site) 现在是一个根 layout（app/ 顶层不再有共享的 layout.tsx，见该文件被删除时的提交说明），
 // 负责声明英文站自己的 <html lang="en">。这是为了让西语页面能在服务端首次响应里就输出
 // <html lang="es">（es/layout.tsx 是另一个独立的根 layout），而不是像之前那样用客户端脚本

@@ -11,6 +11,8 @@ import { ProductHighlights } from '@/components/product/ProductHighlights';
 import { ProductInfoCard } from '@/components/product/ProductInfoCard';
 import { RelatedProducts } from '@/components/product/RelatedProducts';
 import { ProductPrevNextNav } from '@/components/product/ProductPrevNextNav';
+import { ProductEvidenceLinks } from '@/components/product/ProductEvidenceLinks';
+import { ProductBuyerChecklist } from '@/components/product/ProductBuyerChecklist';
 import { InquiryForm } from '@/components/forms/InquiryForm';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { SOCIAL_ICONS } from '@/components/layout/SocialIcons';
@@ -88,12 +90,15 @@ export default async function SpanishProductDetailPage({
 
   return (
     <Container className="max-w-[1400px] py-8 lg:py-10">
-      <JsonLd data={productJsonLd(product, siteUrl, 'es', settings.brandName || settings.companyName)} />
+      <JsonLd data={productJsonLd(product, siteUrl, 'es')} />
       <JsonLd
         data={breadcrumbListJsonLd(
           [
             { label: t('es', 'breadcrumbHome'), href: '/es' },
             { label: t('es', 'breadcrumbProducts'), href: '/es/products' },
+            ...(product.category
+              ? [{ label: product.category.name, href: `/es/products/category/${product.category.slug}` }]
+              : []),
             { label: product.name, href: `/es/products/${product.slug}` },
           ],
           siteUrl,
@@ -121,7 +126,9 @@ export default async function SpanishProductDetailPage({
         />
 
         <div className="min-w-0">
-          <h1 className="text-[clamp(28px,2.4vw,38px)] font-semibold leading-[1.15] text-navy-950">{product.name}</h1>
+          <h1 className="text-[clamp(28px,2.4vw,38px)] font-semibold leading-[1.15] text-navy-950">
+            {product.name}{product.sku && !product.name.toLowerCase().includes(product.sku.toLowerCase()) ? ` | ${product.sku}` : ''}
+          </h1>
           {product.category && (
             <p className="mt-1.5 text-[20px] font-bold leading-snug text-navy-800 sm:text-[22px]">
               {product.category.name}
@@ -239,6 +246,9 @@ export default async function SpanishProductDetailPage({
         </section>
       )}
 
+      <ProductBuyerChecklist product={product} locale="es" />
+      <ProductEvidenceLinks locale="es" />
+
       <RelatedProducts products={related} locale="es" />
 
       <ProductPrevNextNav
@@ -258,7 +268,7 @@ export default async function SpanishProductDetailPage({
       <section id="inquiry" className="mt-14 scroll-mt-24 pt-2 lg:mt-16">
         <SectionHeading title={t('es', 'sectionInquiryTitle')} />
         <div className="mx-auto mt-8 max-w-[1000px]">
-          <InquiryForm sourcePage={`/es/products/${product.slug}`} defaultProductName={product.name} locale="es" />
+          <InquiryForm sourcePage={`/es/products/${product.slug}`} defaultProductName={product.name} locale="es" turnstileEnabled={settings.turnstileEnabled} turnstileSiteKey={settings.turnstileSiteKey} />
         </div>
       </section>
     </Container>

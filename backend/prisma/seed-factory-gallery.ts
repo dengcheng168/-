@@ -9,22 +9,22 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const items = [
-  { title: 'Temperature Testing Chamber', description: 'Environmental reliability testing under controlled temperature conditions.' },
-  { title: 'Salt Spray Test', description: 'Corrosion-resistance verification for metal parts and product surfaces.' },
-  { title: 'Pressure Testing', description: 'Performance and safety inspection under controlled testing conditions.' },
-  { title: 'Automated Testing Line', description: 'Automated inspection and grading for stable product quality.' },
-  { title: 'Automated Production', description: 'Consistent manufacturing supported by standardized automated equipment.' },
-  { title: 'Assembly Workshop', description: 'Organized assembly areas designed for efficient production workflows.' },
-  { title: 'Production Assembly Line', description: 'Efficient and repeatable assembly from components to finished products.' },
-  { title: 'Packaging Area', description: 'Final inspection, protective packaging and shipment preparation.' },
-  { title: 'Product Discussion', description: 'Direct communication about product specifications and market requirements.' },
-  { title: 'Product Demonstration', description: 'Hands-on presentation of product functions, installation and operation.' },
-  { title: 'International Customer Visit', description: 'On-site review of factory facilities, capacity and quality processes.' },
-  { title: 'Project Consultation', description: 'OEM, ODM and commercial project planning with our technical team.' },
-  { title: 'Business Partner Meeting', description: 'Cooperation discussions for distribution and long-term market development.' },
-  { title: 'Customer Group Visit', description: 'Transparent review of production workflow and quality-control standards.' },
-  { title: 'Cooperation Photo', description: 'Building reliable and lasting partnerships with global customers.' },
-  { title: 'Production Line Inspection', description: 'On-site verification of manufacturing processes and production capability.' },
+  { galleryGroup: 'quality', title: 'Temperature Testing Chamber', description: 'Environmental reliability testing under controlled temperature conditions.' },
+  { galleryGroup: 'quality', title: 'Salt Spray Test', description: 'Corrosion-resistance verification for metal parts and product surfaces.' },
+  { galleryGroup: 'quality', title: 'Pressure Testing', description: 'Performance and safety inspection under controlled testing conditions.' },
+  { galleryGroup: 'quality', title: 'Automated Testing Line', description: 'Automated inspection and grading for stable product quality.' },
+  { galleryGroup: 'manufacturing', title: 'Automated Production', description: 'Consistent manufacturing supported by standardized automated equipment.' },
+  { galleryGroup: 'manufacturing', title: 'Assembly Workshop', description: 'Organized assembly areas designed for efficient production workflows.' },
+  { galleryGroup: 'manufacturing', title: 'Production Assembly Line', description: 'Efficient and repeatable assembly from components to finished products.' },
+  { galleryGroup: 'manufacturing', title: 'Packaging Area', description: 'Final inspection, protective packaging and shipment preparation.' },
+  { galleryGroup: 'visits', title: 'Product Discussion', description: 'Direct communication about product specifications and market requirements.' },
+  { galleryGroup: 'visits', title: 'Product Demonstration', description: 'Hands-on presentation of product functions, installation and operation.' },
+  { galleryGroup: 'visits', title: 'International Customer Visit', description: 'On-site review of factory facilities, capacity and quality processes.' },
+  { galleryGroup: 'visits', title: 'Project Consultation', description: 'OEM, ODM and commercial project planning with our technical team.' },
+  { galleryGroup: 'visits', title: 'Business Partner Meeting', description: 'Cooperation discussions for distribution and long-term market development.' },
+  { galleryGroup: 'visits', title: 'Customer Group Visit', description: 'Transparent review of production workflow and quality-control standards.' },
+  { galleryGroup: 'visits', title: 'Cooperation Photo', description: 'Building reliable and lasting partnerships with global customers.' },
+  { galleryGroup: 'manufacturing', title: 'Production Line Inspection', description: 'On-site verification of manufacturing processes and production capability.' },
 ];
 
 async function main() {
@@ -35,7 +35,7 @@ async function main() {
   }
   for (let i = 0; i < items.length; i++) {
     await prisma.factoryGalleryItem.create({
-      data: { title: items[i].title, description: items[i].description, sortOrder: i + 1, published: true },
+      data: { ...items[i], sortOrder: i + 1, published: true },
     });
   }
   console.log(`已导入 ${items.length} 条工厂展示图记录（暂无图片，需要在后台上传）。`);

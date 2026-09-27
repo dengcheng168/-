@@ -22,7 +22,22 @@ async function attachCategoryTranslations<T extends { id: number }>(
 
 export async function listPublishedBlogCategories(prisma: PrismaClient, locale?: string) {
   const categories = await prisma.blogCategory.findMany({
-    where: { published: true, deletedAt: null },
+    where: {
+      published: true,
+      deletedAt: null,
+      // Empty taxonomy pages are not useful navigation targets and can be
+      // classified as soft 404s. Only expose categories backed by a live post
+      // in the requested language.
+      posts: {
+        some: {
+          status: 'PUBLISHED',
+          deletedAt: null,
+          ...(locale
+            ? { translations: { some: { locale, translationStatus: 'PUBLISHED' } } }
+            : {}),
+        },
+      },
+    },
     orderBy: { sortOrder: 'asc' },
   });
   return attachCategoryTranslations(prisma, categories, locale);

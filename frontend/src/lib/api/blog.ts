@@ -1,4 +1,4 @@
-import { apiFetch, type ApiMeta } from './client';
+import { apiFetch, ApiError, type ApiMeta } from './client';
 import { resolveMediaUrl } from '@/lib/utils/media';
 import type { BlogPost, BlogCategory, BlogTag } from '@/types/blog';
 import type { Locale } from '@/lib/i18n/locales';
@@ -17,7 +17,7 @@ type WithTranslation<T> = T & { translation?: Partial<T> | null };
 const POST_TRANSLATABLE_FIELDS: (keyof BlogPost)[] = ['title', 'excerpt', 'body', 'seoTitle', 'seoDescription'];
 const CATEGORY_TRANSLATABLE_FIELDS: (keyof BlogCategory)[] = ['name', 'description'];
 
-function localizePost(post: WithTranslation<BlogPost>): BlogPost {
+export function localizePost(post: WithTranslation<BlogPost>): BlogPost {
   const { translation, ...base } = post;
   return resolveLocalizedEntity(base as BlogPost, translation, POST_TRANSLATABLE_FIELDS);
 }
@@ -50,7 +50,13 @@ export async function listBlogPosts(
       revalidate: 60,
       tags: ['blog', ...localizedTag('blog', locale)],
     });
-    return { items: data.map((p) => resolveBlogMedia(localizePost(p))), meta };
+    return {
+      items: data.map((p) => resolveBlogMedia({
+        ...localizePost(p),
+        hasLocaleTranslation: locale === 'en' || Boolean(p.translation),
+      })),
+      meta,
+    };
   } catch {
     // 构建期后端不可达时的兜底：见 lib/api/settings.ts 顶部注释
     return { items: [] };
@@ -74,8 +80,11 @@ export async function getBlogPostBySlug(
       post: resolveBlogMedia(localizePost(data.post)),
       related: data.related.map((r) => resolveBlogMedia(localizePost(r))),
     };
-  } catch {
-    return null;
+  } catch (error) {
+    // Only a confirmed missing post is a 404. Rate limiting or an upstream
+    // outage must propagate so Next.js never emits a false noindex page.
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
   }
 }
 

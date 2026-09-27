@@ -7,13 +7,19 @@ import { Pagination } from '@/components/ui/Pagination';
 import { PageHeroBanner } from '@/components/site/PageHeroBanner';
 import { listBlogPosts, listBlogCategories, listBlogTags } from '@/lib/api/blog';
 import { getPageBySlug } from '@/lib/api/content';
+import { paginatedDescription, paginatedPath, paginatedTitle } from '@/lib/seo/pagination';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }): Promise<Metadata> {
+  const { page: pageParam } = await searchParams;
   const page = await getPageBySlug('blog');
+  const baseTitle = page?.seoTitle ?? page?.title ?? 'Blog';
+  const baseDescription = page?.seoDescription ?? 'News and insights from our water purifier factory.';
+  const enPath = paginatedPath('/blog', pageParam);
+  const esPath = paginatedPath('/es/blog', pageParam);
   return {
-    title: page?.seoTitle ?? page?.title ?? 'Blog',
-    description: page?.seoDescription ?? 'News and insights from our water purifier factory.',
-    alternates: { canonical: '/blog', languages: { en: '/blog', es: '/es/blog', 'x-default': '/blog' } },
+    title: paginatedTitle(baseTitle, pageParam),
+    description: paginatedDescription(baseDescription, pageParam),
+    alternates: { canonical: enPath, languages: { en: enPath, es: esPath, 'x-default': enPath } },
   };
 }
 

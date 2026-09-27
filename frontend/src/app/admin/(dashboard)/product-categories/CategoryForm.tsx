@@ -10,6 +10,7 @@ import type { TranslationFormState } from '@/lib/actions/admin/translations-shar
 
 interface CategoryFormValues {
   name?: string;
+  slug?: string;
   description?: string | null;
   image?: string | null;
   published?: boolean;
@@ -47,8 +48,27 @@ export function CategoryForm({
         <input id="name" name="name" defaultValue={initialValues?.name} required className={fieldInputClasses} />
       </FormField>
 
+      <FormField label="Slug" htmlFor="slug" hint="用于分类 URL；修改后请为不再使用的旧 URL 建立 301 重定向。">
+        <input
+          id="slug"
+          name="slug"
+          defaultValue={initialValues?.slug ?? ''}
+          pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+          placeholder="under-sink-ro-water-purifiers"
+          className={fieldInputClasses}
+        />
+      </FormField>
+
       <FormField label="分类描述" htmlFor="description">
         <textarea id="description" name="description" rows={3} defaultValue={initialValues?.description ?? ''} className={fieldInputClasses} />
+      </FormField>
+
+      <FormField label="SEO 标题（英文）" htmlFor="seoTitle" hint="建议准确描述采购意图，避免堆砌关键词。">
+        <input id="seoTitle" name="seoTitle" defaultValue={initialValues?.seoTitle ?? ''} className={fieldInputClasses} />
+      </FormField>
+
+      <FormField label="SEO 描述（英文）" htmlFor="seoDescription">
+        <textarea id="seoDescription" name="seoDescription" rows={2} defaultValue={initialValues?.seoDescription ?? ''} className={fieldInputClasses} />
       </FormField>
 
       <ImageUploader

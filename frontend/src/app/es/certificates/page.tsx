@@ -7,6 +7,10 @@ import { CertificateCard } from '@/components/site/CertificateCard';
 import { listCertificates, getPageBySlug } from '@/lib/api/content';
 import { t } from '@/lib/i18n/site-strings';
 import { getCertificateDisplayMeta, dedupeByRule } from '@/lib/certificates/display-config';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { certificateItemListJsonLd } from '@/lib/seo/jsonld';
+import { getPublicSettings } from '@/lib/api/settings';
+import { getSiteUrl } from '@/lib/seo/site';
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getPageBySlug('certificates', 'es');
@@ -21,7 +25,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SpanishCertificatesPage() {
-  const [allCertificates, page] = await Promise.all([listCertificates('es'), getPageBySlug('certificates', 'es')]);
+  const [allCertificates, page, settings, siteUrl] = await Promise.all([
+    listCertificates('es'), getPageBySlug('certificates', 'es'), getPublicSettings(), getSiteUrl(),
+  ]);
   const hasHero = Boolean(page?.heroImage || page?.heroImageMobile);
 
   const certificates = dedupeByRule(allCertificates);
@@ -39,6 +45,7 @@ export default async function SpanishCertificatesPage() {
 
   return (
     <>
+      <JsonLd data={certificateItemListJsonLd(certificates, siteUrl, settings.companyName, 'es')} />
       {hasHero && (
         <PageHeroBanner
           image={page?.heroImage}

@@ -1,6 +1,7 @@
 import { getPublicSettings } from '@/lib/api/settings';
 import type { Locale } from '@/lib/i18n/locales';
 import { MetaPixel } from './MetaPixel';
+import { MetaPixelRouteEvents } from './MetaPixelRouteEvents';
 import { GooglePixel } from './GooglePixel';
 import { TikTokPixel } from './TikTokPixel';
 
@@ -19,8 +20,11 @@ export async function AnalyticsPixels({ locale = 'en' }: { locale?: Locale } = {
 
   return (
     <>
-      {settings.metaPixelId && <MetaPixel pixelId={settings.metaPixelId} locale={locale} />}
-      {settings.googlePixelId && <GooglePixel pixelId={settings.googlePixelId} locale={locale} />}
+      {settings.metaPixelId && <>
+        <MetaPixel pixelId={settings.metaPixelId} />
+        <MetaPixelRouteEvents locale={locale} />
+      </>}
+      <GooglePixel ga4Id={settings.googlePixelId} adsId={settings.googleAdsId} locale={locale} />
       {settings.tiktokPixelId && <TikTokPixel pixelId={settings.tiktokPixelId} />}
     </>
   );

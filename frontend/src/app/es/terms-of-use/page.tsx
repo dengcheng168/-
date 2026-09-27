@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const page = await getPageBySlug('terms-of-use', 'es');
   return {
     title: page?.seoTitle ?? page?.title ?? t('es', 'termsOfUsePageTitle'),
-    description: page?.seoDescription ?? undefined,
+    description: page?.seoDescription || 'Consulta las condiciones de uso del sitio web de Koigatech.',
     alternates: {
       canonical: '/es/terms-of-use',
       languages: { en: '/terms-of-use', es: '/es/terms-of-use', 'x-default': '/terms-of-use' },

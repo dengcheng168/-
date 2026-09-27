@@ -17,6 +17,9 @@ export const createInquirySchema = z.object({
   turnstileToken: z.string().optional(),
   // 蜜罐字段：正常用户看不到该输入框，机器人脚本通常会自动填写，一旦有值即视为垃圾提交（在 service 层判断，不在此处强制校验）
   website: z.string().optional(),
+  metaEventId: z.string().min(8).max(128).optional(),
+  metaFbp: z.string().max(255).optional(),
+  metaFbc: z.string().max(255).optional(),
 });
 
 export const updateInquirySchema = z.object({

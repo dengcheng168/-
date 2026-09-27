@@ -12,6 +12,7 @@ interface Values {
   faviconUrl: string | null;
   companyAddress: string | null;
   companyMapImage: string | null;
+  companyMapMobileImage: string | null;
   companyEmail: string | null;
   companyPhone: string | null;
 }
@@ -45,10 +46,17 @@ export function ContactSettingsForm({ initialValues }: { initialValues: Values }
       </FormField>
       <ImageUploader
         name="companyMapImage"
-        label="地址地图截图（联系页展示）"
+        label="地址地图截图（桌面端）"
         defaultValue={initialValues.companyMapImage}
-        recommendedSize="建议宽高比约 16:9（如 1280×720px）。留空则联系页只显示「在地图中打开」链接，不显示图片；设置后不再实时加载 Google 地图，加载更快"
+        recommendedSize="建议宽高比约 16:9（如 1280×720px）。用于平板和桌面端联系页"
         aspectRatio={16 / 9}
+      />
+      <ImageUploader
+        name="companyMapMobileImage"
+        label="地址地图截图（手机端）"
+        defaultValue={initialValues.companyMapMobileImage}
+        recommendedSize="建议使用适合竖屏浏览的图片（如 750×900px）。留空时手机端自动使用上方桌面端地图截图"
+        aspectRatio={5 / 6}
       />
       <FormField label="邮箱" htmlFor="companyEmail">
         <input id="companyEmail" name="companyEmail" type="email" defaultValue={initialValues.companyEmail ?? ''} className={fieldInputClasses} />

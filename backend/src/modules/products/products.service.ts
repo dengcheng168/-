@@ -32,6 +32,44 @@ export function serializeProductTranslation(translation: ProductTranslation) {
   };
 }
 
+type ProductWithGalleryImages = ReturnType<typeof serializeProduct>;
+
+/**
+ * 产品图库历史数据只保存了媒体 URL，Alt 文本则维护在媒体库中。公开接口在这里按 URL
+ * 批量补齐缺失的 Alt，避免每张图片单独查询，也保留产品上手工填写的专用 Alt。
+ */
+async function attachGalleryMediaAltText<T extends ProductWithGalleryImages>(prisma: PrismaClient, items: T[]): Promise<T[]> {
+  const urls = [...new Set(items.flatMap((item) => item.galleryImages.map((image: { url?: string }) => image.url?.trim()).filter((url): url is string => !!url)))];
+  if (urls.length === 0) return items;
+
+  const media = await prisma.media.findMany({
+    where: {
+      OR: [
+        { url: { in: urls } },
+        { webpUrl: { in: urls } },
+        { thumbnailUrl: { in: urls } },
+      ],
+    },
+    select: { url: true, webpUrl: true, thumbnailUrl: true, altText: true },
+  });
+  const altByUrl = new Map<string, string>();
+  for (const item of media) {
+    const alt = item.altText?.trim();
+    if (!alt) continue;
+    for (const url of [item.url, item.webpUrl, item.thumbnailUrl]) {
+      if (url) altByUrl.set(url, alt);
+    }
+  }
+
+  return items.map((item) => ({
+    ...item,
+    galleryImages: item.galleryImages.map((image: { url: string; alt?: string }) => ({
+      ...image,
+      alt: image.alt?.trim() || altByUrl.get(image.url),
+    })),
+  }));
+}
+
 /**
  * 批量把一批产品各自的西语翻译贴到序列化结果的 translation 字段上——只在真的传了 locale 才查，
  * 不传 locale（英文默认路径）完全不碰 ProductTranslation 表，一次额外查询都不会有。
@@ -86,7 +124,8 @@ export async function listPublicProducts(
     prisma.product.count({ where }),
   ]);
 
-  const withOwnTranslation = await attachProductTranslations(prisma, items.map(serializeProduct), filters.locale);
+  const serializedItems = await attachGalleryMediaAltText(prisma, items.map(serializeProduct));
+  const withOwnTranslation = await attachProductTranslations(prisma, serializedItems, filters.locale);
   return {
     items: await attachNestedProductCategoryTranslations(prisma, withOwnTranslation, filters.locale),
     meta: buildPaginationMeta(query, total),
@@ -112,8 +151,12 @@ export async function getPublicProductBySlug(prisma: PrismaClient, slug: string,
     take: 4,
   });
 
-  const localizedProducts = await attachProductTranslations(prisma, [serializeProduct(product)], locale);
-  const localizedRelated = await attachProductTranslations(prisma, related.map(serializeProduct), locale);
+  const [serializedProducts, serializedRelated] = await Promise.all([
+    attachGalleryMediaAltText(prisma, [serializeProduct(product)]),
+    attachGalleryMediaAltText(prisma, related.map(serializeProduct)),
+  ]);
+  const localizedProducts = await attachProductTranslations(prisma, serializedProducts, locale);
+  const localizedRelated = await attachProductTranslations(prisma, serializedRelated, locale);
 
   const [productsWithCategory, relatedWithCategory] = await Promise.all([
     attachNestedProductCategoryTranslations(prisma, localizedProducts, locale),

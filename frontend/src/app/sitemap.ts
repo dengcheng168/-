@@ -4,6 +4,7 @@ import { listProducts, listProductCategories } from '@/lib/api/products';
 import { listBlogPosts } from '@/lib/api/blog';
 import { absoluteUrl } from '@/lib/seo/site';
 import { localeHref } from '@/lib/i18n/paths';
+import { excludeSitemapRedirects } from '@/lib/seo/sitemap-redirects';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,5 +79,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...posts.map((post) => bilingualEntry(`/blog/${post.slug}`, { changeFrequency: 'monthly', priority: 0.5 }, post.updatedAt)),
   ]);
 
-  return entryGroups.flat();
+  return excludeSitemapRedirects(entryGroups.flat());
 }

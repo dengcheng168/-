@@ -11,6 +11,8 @@ import { ProductHighlights } from '@/components/product/ProductHighlights';
 import { ProductInfoCard } from '@/components/product/ProductInfoCard';
 import { RelatedProducts } from '@/components/product/RelatedProducts';
 import { ProductPrevNextNav } from '@/components/product/ProductPrevNextNav';
+import { ProductEvidenceLinks } from '@/components/product/ProductEvidenceLinks';
+import { ProductBuyerChecklist } from '@/components/product/ProductBuyerChecklist';
 import { InquiryForm } from '@/components/forms/InquiryForm';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { SOCIAL_ICONS } from '@/components/layout/SocialIcons';
@@ -88,12 +90,15 @@ export default async function ProductDetailPage({
 
   return (
     <Container className="max-w-[1400px] py-8 lg:py-10">
-      <JsonLd data={productJsonLd(product, siteUrl, 'en', settings.brandName || settings.companyName)} />
+      <JsonLd data={productJsonLd(product, siteUrl, 'en')} />
       <JsonLd
         data={breadcrumbListJsonLd(
           [
             { label: 'Home', href: '/' },
             { label: 'Products', href: '/products' },
+            ...(product.category
+              ? [{ label: product.category.name, href: `/products/category/${product.category.slug}` }]
+              : []),
             { label: product.name, href: `/products/${product.slug}` },
           ],
           siteUrl,
@@ -118,7 +123,9 @@ export default async function ProductDetailPage({
         />
 
         <div className="min-w-0">
-          <h1 className="text-[clamp(28px,2.4vw,38px)] font-semibold leading-[1.15] text-navy-950">{product.name}</h1>
+          <h1 className="text-[clamp(28px,2.4vw,38px)] font-semibold leading-[1.15] text-navy-950">
+            {product.name}{product.sku && !product.name.toLowerCase().includes(product.sku.toLowerCase()) ? ` | ${product.sku}` : ''}
+          </h1>
           {product.category && (
             <p className="mt-1.5 text-[20px] font-bold leading-snug text-navy-800 sm:text-[22px]">
               {product.category.name}
@@ -232,6 +239,9 @@ export default async function ProductDetailPage({
         </section>
       )}
 
+      <ProductBuyerChecklist product={product} />
+      <ProductEvidenceLinks />
+
       <RelatedProducts products={related} />
 
       <ProductPrevNextNav
@@ -250,7 +260,7 @@ export default async function ProductDetailPage({
       <section id="inquiry" className="mt-14 scroll-mt-24 pt-2 lg:mt-16">
         <SectionHeading title="Request a Quote" />
         <div className="mx-auto mt-8 max-w-[1000px]">
-          <InquiryForm sourcePage={`/products/${product.slug}`} defaultProductName={product.name} />
+          <InquiryForm sourcePage={`/products/${product.slug}`} defaultProductName={product.name} turnstileEnabled={settings.turnstileEnabled} turnstileSiteKey={settings.turnstileSiteKey} />
         </div>
       </section>
     </Container>

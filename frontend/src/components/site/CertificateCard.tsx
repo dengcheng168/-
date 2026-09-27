@@ -31,14 +31,13 @@ export function CertificateCard({
         muted ? 'border-grey-200 opacity-80' : 'border-grey-200 hover:shadow-lg'
       }`}
     >
-      <div className="overflow-hidden bg-grey-50">
+      <div className="relative aspect-[3/4] overflow-hidden bg-grey-50">
         <Image
           src={certificate.imageUrl}
           alt={certificate.name}
-          width={0}
-          height={0}
+          fill
           sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-          className="h-auto w-full"
+          className="object-contain"
         />
       </div>
       <div className="flex flex-1 flex-col p-5">

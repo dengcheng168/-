@@ -21,6 +21,11 @@ function buildPayload(formData: FormData) {
     imageUrl: formData.get('imageUrl'),
     pdfUrl: textOrUndefined(formData, 'pdfUrl'),
     description: textOrUndefined(formData, 'description'),
+    applicableProductType: textOrUndefined(formData, 'applicableProductType'),
+    applicableModels: String(formData.get('applicableModels') ?? '')
+      .split(/[\n,]/)
+      .map((value) => value.trim())
+      .filter(Boolean),
     published: formData.get('published') === 'on',
   };
 }

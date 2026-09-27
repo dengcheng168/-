@@ -1,24 +1,35 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { Container } from '@/components/ui/Container';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { BlogSidebar } from '@/components/blog/BlogSidebar';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { Pagination } from '@/components/ui/Pagination';
 import { listBlogPosts, listBlogCategories, listBlogTags } from '@/lib/api/blog';
+import { paginatedPath } from '@/lib/seo/pagination';
 
 export async function generateMetadata({
-  params,
+  params, searchParams,
 }: {
   params: Promise<{ categorySlug: string }>;
+  searchParams: Promise<{ page?: string }>;
 }): Promise<Metadata> {
   const { categorySlug } = await params;
+  const { page } = await searchParams;
+  const categories = await listBlogCategories();
+  const name = categories.find((category) => category.slug === categorySlug)?.name ?? categorySlug;
+  const enPath = paginatedPath(`/blog/category/${categorySlug}`, page);
+  const esPath = paginatedPath(`/es/blog/category/${categorySlug}`, page);
   return {
+    title: `${name} | Li-Men Blog`,
+    description: `Li-Men blog articles in the ${name} category.`,
+    robots: { index: false, follow: true },
     alternates: {
-      canonical: `/blog/category/${categorySlug}`,
+      canonical: enPath,
       languages: {
-        en: `/blog/category/${categorySlug}`,
-        es: `/es/blog/category/${categorySlug}`,
-        'x-default': `/blog/category/${categorySlug}`,
+        en: enPath,
+        es: esPath,
+        'x-default': enPath,
       },
     },
   };
@@ -42,6 +53,7 @@ export default async function BlogCategoryPage({
   ]);
 
   const category = categories.find((c) => c.slug === categorySlug);
+  if (!category || items.length === 0) notFound();
 
   return (
     <Container className="py-12">

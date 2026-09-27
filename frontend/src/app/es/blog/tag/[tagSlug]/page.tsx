@@ -6,20 +6,30 @@ import { BlogCard } from '@/components/blog/BlogCard';
 import { Pagination } from '@/components/ui/Pagination';
 import { listBlogPosts, listBlogCategories, listBlogTags } from '@/lib/api/blog';
 import { t } from '@/lib/i18n/site-strings';
+import { paginatedPath } from '@/lib/seo/pagination';
 
 export async function generateMetadata({
-  params,
+  params, searchParams,
 }: {
   params: Promise<{ tagSlug: string }>;
+  searchParams: Promise<{ page?: string }>;
 }): Promise<Metadata> {
   const { tagSlug } = await params;
+  const { page } = await searchParams;
+  const tags = await listBlogTags();
+  const name = tags.find((tag) => tag.slug === tagSlug)?.name ?? tagSlug;
+  const enPath = paginatedPath(`/blog/tag/${tagSlug}`, page);
+  const esPath = paginatedPath(`/es/blog/tag/${tagSlug}`, page);
   return {
+    title: `Artículos: ${name} | Li-Men`,
+    description: `Artículos de Li-Men etiquetados como ${name}.`,
+    robots: { index: false, follow: true },
     alternates: {
-      canonical: `/es/blog/tag/${tagSlug}`,
+      canonical: esPath,
       languages: {
-        en: `/blog/tag/${tagSlug}`,
-        es: `/es/blog/tag/${tagSlug}`,
-        'x-default': `/blog/tag/${tagSlug}`,
+        en: enPath,
+        es: esPath,
+        'x-default': enPath,
       },
     },
   };

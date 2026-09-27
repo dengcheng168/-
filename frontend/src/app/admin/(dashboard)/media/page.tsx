@@ -8,6 +8,7 @@ import { MediaUploadButton } from './MediaUploadButton';
 import { MediaDeleteButton } from './MediaDeleteButton';
 import { MediaAltForm } from './MediaAltForm';
 import { CopyUrlButton } from './CopyUrlButton';
+import { Pagination } from '@/components/ui/Pagination';
 
 interface MediaItem {
   id: number;
@@ -21,14 +22,20 @@ interface MediaItem {
   usageCount: number;
 }
 
-export default async function AdminMediaPage() {
-  const { data } = await adminFetch<MediaItem[]>('/media?pageSize=100');
+const MEDIA_PAGE_SIZE = 24;
+
+export default async function AdminMediaPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const requestedPage = Number((await searchParams).page ?? '1');
+  const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const { data, meta } = await adminFetch<MediaItem[]>(`/media?page=${page}&pageSize=${MEDIA_PAGE_SIZE}`);
+  const total = typeof meta?.total === 'number' ? meta.total : data.length;
+  const totalPages = typeof meta?.totalPages === 'number' ? meta.totalPages : 1;
 
   return (
     <div>
       <PageHeader
         title="媒体库"
-        description="管理网站上传使用的图片与文件。绿色「使用中」表示该文件仍被产品/文章/证书/页面/首页设置等内容引用；灰色「未使用」的文件可以放心删除。"
+        description={`共 ${total} 个文件，每页显示 ${MEDIA_PAGE_SIZE} 个。绿色「使用中」表示该文件仍被网站内容引用；灰色「未使用」的文件可以删除。`}
         action={
           <div className="flex items-center gap-3">
             <Link href="/admin/media/unused" className="text-sm text-water-600 hover:underline">
@@ -74,6 +81,7 @@ export default async function AdminMediaPage() {
           );
         })}
       </div>
+      <Pagination page={page} totalPages={totalPages} basePath="/admin/media" />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import type { Locale } from '@/lib/i18n/locales';
 import { localeHref } from '@/lib/i18n/paths';
 import type { Certificate } from '@/types/content';
 import { getCertificateDisplayMeta, localizeCertMeta, dedupeByRule } from '@/lib/certificates/display-config';
+import { toThumbnailUrl } from '@/lib/media/thumbnail';
 
 export function CertificatesShowcase({ certificates, locale = 'en' }: { certificates: Certificate[]; locale?: Locale }) {
   // 首页预览：先按业务字段去重（防止重复发布造成重复卡片），再排除 Historical/Expired
@@ -30,14 +31,13 @@ export function CertificatesShowcase({ certificates, locale = 'en' }: { certific
                 key={cert.id}
                 className="group flex w-[calc(50%-0.75rem)] flex-col overflow-hidden rounded-lg border border-grey-200 bg-white text-center transition-shadow hover:shadow-lg sm:w-[calc(33.333%-1rem)] lg:w-[calc(25%-1.125rem)]"
               >
-                <div className="overflow-hidden bg-grey-50">
+                <div className="relative aspect-[3/4] overflow-hidden bg-grey-50">
                   <Image
-                    src={cert.imageUrl}
+                    src={toThumbnailUrl(cert.imageUrl)}
                     alt={cert.name}
-                    width={0}
-                    height={0}
+                    fill
                     sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                    className="h-auto w-full transition-transform duration-300 group-hover:scale-105"
+                    className="object-contain transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
                 <div className="flex flex-1 flex-col items-center p-4">

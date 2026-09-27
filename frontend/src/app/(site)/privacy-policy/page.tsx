@@ -7,7 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const page = await getPageBySlug('privacy-policy');
   return {
     title: page?.seoTitle ?? page?.title ?? 'Privacy Policy',
-    description: page?.seoDescription ?? undefined,
+    description: page?.seoDescription || 'Read the privacy policy for the Koigatech website and contact inquiries.',
     alternates: {
       canonical: '/privacy-policy',
       languages: { en: '/privacy-policy', es: '/es/privacy-policy', 'x-default': '/privacy-policy' },

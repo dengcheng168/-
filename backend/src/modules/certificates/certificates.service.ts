@@ -6,6 +6,17 @@ import type {
   UpsertCertificateTranslationInput,
 } from './certificates.schema.js';
 
+function serializeCertificate<T extends { applicableModels: string }>(certificate: T) {
+  let applicableModels: string[] = [];
+  try {
+    const parsed: unknown = JSON.parse(certificate.applicableModels);
+    if (Array.isArray(parsed)) applicableModels = parsed.filter((item): item is string => typeof item === 'string');
+  } catch {
+    // Invalid legacy/manual values are exposed as an empty, unverified scope.
+  }
+  return { ...certificate, applicableModels };
+}
+
 async function attachCertificateTranslations<T extends { id: number }>(
   prisma: PrismaClient,
   items: T[],
@@ -24,7 +35,7 @@ export async function listPublishedCertificates(prisma: PrismaClient, locale?: s
     where: { published: true, deletedAt: null },
     orderBy: { sortOrder: 'asc' },
   });
-  return attachCertificateTranslations(prisma, certificates, locale);
+  return attachCertificateTranslations(prisma, certificates.map(serializeCertificate), locale);
 }
 
 export async function listAdminCertificates(prisma: PrismaClient, query: PaginationQuery, search?: string) {
@@ -33,15 +44,16 @@ export async function listAdminCertificates(prisma: PrismaClient, query: Paginat
     prisma.certificate.findMany({ where, orderBy: { sortOrder: 'asc' }, ...toSkipTake(query) }),
     prisma.certificate.count({ where }),
   ]);
-  return { items, meta: buildPaginationMeta(query, total) };
+  return { items: items.map(serializeCertificate), meta: buildPaginationMeta(query, total) };
 }
 
-export function getCertificateById(prisma: PrismaClient, id: number) {
-  return prisma.certificate.findFirst({ where: { id, deletedAt: null } });
+export async function getCertificateById(prisma: PrismaClient, id: number) {
+  const certificate = await prisma.certificate.findFirst({ where: { id, deletedAt: null } });
+  return certificate ? serializeCertificate(certificate) : null;
 }
 
 export function createCertificate(prisma: PrismaClient, input: CreateCertificateInput) {
-  return prisma.certificate.create({ data: input });
+  return prisma.certificate.create({ data: { ...input, applicableModels: JSON.stringify(input.applicableModels) } });
 }
 
 /**
@@ -51,7 +63,11 @@ export function createCertificate(prisma: PrismaClient, input: CreateCertificate
 export async function updateCertificate(prisma: PrismaClient, id: number, input: UpdateCertificateInput) {
   const existing = await prisma.certificate.findFirst({ where: { id, deletedAt: null } });
   if (!existing) return null;
-  return prisma.certificate.update({ where: { id }, data: input });
+  const { applicableModels, ...data } = input;
+  return prisma.certificate.update({
+    where: { id },
+    data: { ...data, ...(applicableModels ? { applicableModels: JSON.stringify(applicableModels) } : {}) },
+  });
 }
 
 export function softDeleteCertificate(prisma: PrismaClient, id: number) {

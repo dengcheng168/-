@@ -1,13 +1,17 @@
 'use server';
 
 import { apiFetch, ApiError } from '@/lib/api/client';
+import { requestContextHeaders } from '@/lib/api/request-context';
 import { t } from '@/lib/i18n/site-strings';
 import { isSupportedLocale } from '@/lib/i18n/locales';
 import type { Locale } from '@/lib/i18n/locales';
+import { cookies } from 'next/headers';
+import { randomUUID } from 'node:crypto';
 
 export interface InquiryFormState {
   success?: boolean;
   message?: string;
+  metaEventId?: string;
 }
 
 export async function submitInquiryAction(
@@ -22,6 +26,8 @@ export async function submitInquiryAction(
   const rawLocale = value('locale');
   const locale: Locale = rawLocale && isSupportedLocale(rawLocale) ? rawLocale : 'en';
 
+  const metaEventId = randomUUID();
+  const cookieStore = await cookies();
   const payload = {
     name: value('name'),
     company: value('company'),
@@ -38,6 +44,10 @@ export async function submitInquiryAction(
     pageLanguage: locale,
     // 蜜罐字段：正常用户看不到，机器人脚本常会自动填写
     website: value('website'),
+    turnstileToken: value('cf-turnstile-response'),
+    metaEventId,
+    metaFbp: cookieStore.get('_fbp')?.value,
+    metaFbc: cookieStore.get('_fbc')?.value,
   };
 
   if (!payload.name || !payload.email) {
@@ -47,9 +57,10 @@ export async function submitInquiryAction(
   try {
     await apiFetch('/inquiries', {
       method: 'POST',
+      headers: await requestContextHeaders(),
       body: JSON.stringify(payload),
     });
-    return { success: true, message: t(locale, 'formSuccessMessage') };
+    return { success: true, message: t(locale, 'formSuccessMessage'), metaEventId };
   } catch (err) {
     if (err instanceof ApiError) {
       return { success: false, message: err.message };

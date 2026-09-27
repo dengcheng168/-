@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import { ResponsiveHeroImage } from './ResponsiveHeroImage';
 import { Container } from '@/components/ui/Container';
 
 /**
@@ -6,8 +6,7 @@ import { Container } from '@/components/ui/Container';
  * 视觉上跟首页 HeroBanner 保持一致。面包屑不放在这里面——放在下面正常的白色区域，
  * 这样不管有没有设置背景图，面包屑的颜色对比度都是对的，不用另外做深色变体。
  *
- * 桌面图/手机图跟首页 HeroBanner 同一套逻辑：按 Tailwind 响应式 display 切换两张图而不是换
- * src，其中一个没配就用另一个兜底，不会出现某个设备上突然空白。
+ * 用 picture 按屏幕宽度选择图片，避免同时下载桌面图和手机图；缺图时互相兜底。
  */
 export function PageHeroBanner({
   image,
@@ -15,20 +14,25 @@ export function PageHeroBanner({
   eyebrow,
   title,
   children,
+  compactOnMobile = false,
 }: {
   image?: string | null;
   imageMobile?: string | null;
   eyebrow?: string;
   title: string;
   children?: React.ReactNode;
+  compactOnMobile?: boolean;
 }) {
   const desktopSrc = image ?? imageMobile;
   const mobileSrc = imageMobile ?? image;
 
   return (
-    <div className="relative isolate flex min-h-[400px] items-center overflow-hidden bg-navy-950">
-      {desktopSrc && <Image src={desktopSrc} alt="" fill priority sizes="100vw" className="hidden object-cover sm:block" />}
-      {mobileSrc && <Image src={mobileSrc} alt="" fill priority sizes="100vw" className="block object-cover sm:hidden" />}
+    <div
+      className={`relative isolate flex items-center overflow-hidden bg-navy-950 ${
+        compactOnMobile ? 'min-h-[320px] sm:min-h-[400px]' : 'min-h-[400px]'
+      }`}
+    >
+      <ResponsiveHeroImage desktop={desktopSrc} mobile={mobileSrc} />
       <div className="absolute inset-0 bg-navy-950/70" />
       <Container className="relative z-10 py-16">
         {eyebrow && <p className="text-sm font-semibold uppercase tracking-wide text-water-400">{eyebrow}</p>}

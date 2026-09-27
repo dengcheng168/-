@@ -18,6 +18,11 @@ import { LatestBlogPosts } from '@/components/home/LatestBlogPosts';
 import { FaqPreview } from '@/components/home/FaqPreview';
 import { InquirySection } from '@/components/home/InquirySection';
 
+// The homepage depends on CMS data that is unavailable inside the isolated
+// Docker build network. Render it at request time so a build-time fallback is
+// never persisted as the production homepage.
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   const [settings, translations] = await Promise.all([getPublicSettings(), getTranslationMap('es')]);
   const seo = resolveHomeSeoMetadata({

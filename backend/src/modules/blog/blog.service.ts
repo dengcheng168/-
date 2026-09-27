@@ -16,7 +16,7 @@ function serializePost<T extends { tags: { tag: unknown }[] }>(post: T) {
 }
 
 /** 同 products 模块的 attachTranslations——只在传了 locale 才查一次批量翻译 */
-async function attachPostTranslations<T extends { id: number }>(
+export async function attachPostTranslations<T extends { id: number }>(
   prisma: PrismaClient,
   items: T[],
   locale: string | undefined,

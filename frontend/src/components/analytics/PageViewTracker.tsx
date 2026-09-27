@@ -17,12 +17,26 @@ export function PageViewTracker() {
 
   useEffect(() => {
     const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? '/api';
-    fetch(`${base}/page-views`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: pathname }),
-      keepalive: true,
-    }).catch(() => {});
+    const record = () => {
+      fetch(`${base}/page-views`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: pathname }),
+        keepalive: true,
+      }).catch(() => {});
+    };
+
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (idleWindow.requestIdleCallback) {
+      const idleId = idleWindow.requestIdleCallback(record, { timeout: 2500 });
+      return () => idleWindow.cancelIdleCallback?.(idleId);
+    }
+
+    const timeoutId = globalThis.setTimeout(record, 1200);
+    return () => globalThis.clearTimeout(timeoutId);
   }, [pathname]);
 
   return null;

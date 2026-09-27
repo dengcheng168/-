@@ -9,6 +9,7 @@ interface Detail {
   title: string;
   imageUrl: string | null;
   description: string | null;
+  galleryGroup: 'manufacturing' | 'quality' | 'visits';
   published: boolean;
 }
 

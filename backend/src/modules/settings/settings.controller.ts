@@ -14,6 +14,8 @@ import {
   footerSettingsSchema,
   turnstileSettingsSchema,
   pixelSettingsSchema,
+  ga4SettingsSchema,
+  googleAdsSettingsSchema,
   siteDomainSettingsSchema,
 } from './settings.schema.js';
 
@@ -76,6 +78,28 @@ export const adminPatchTurnstileHandler = makePatchHandler(
   omitTurnstileSecretKey,
 );
 export const adminPatchPixelsHandler = makePatchHandler(pixelSettingsSchema, 'settings.pixels_update', '更新营销像素 ID 设置');
+const patchGa4 = makePatchHandler(ga4SettingsSchema, 'settings.ga4_update', '更新 GA4 设置');
+const patchGoogleAds = makePatchHandler(googleAdsSettingsSchema, 'settings.google_ads_update', '更新 Google Ads 设置');
+
+export async function adminPatchGa4Handler(request: FastifyRequest) {
+  await patchGa4(request);
+  return adminGetGa4Handler(request);
+}
+
+export async function adminPatchGoogleAdsHandler(request: FastifyRequest) {
+  await patchGoogleAds(request);
+  return adminGetGoogleAdsHandler(request);
+}
+
+export async function adminGetGa4Handler(request: FastifyRequest) {
+  const settings = await getFullSettings(request.server.prisma);
+  return ok({ googlePixelId: settings.googlePixelId });
+}
+
+export async function adminGetGoogleAdsHandler(request: FastifyRequest) {
+  const settings = await getFullSettings(request.server.prisma);
+  return ok({ googleAdsId: settings.googleAdsId });
+}
 
 /**
  * 独立于 makePatchHandler：这里的校验规则（协议/路径/query/hash/localhost）依赖运行环境，

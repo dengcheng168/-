@@ -51,6 +51,17 @@ export default async function AdminDashboardPage() {
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
 
+  const shanghaiMonth = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+  }).formatToParts(new Date());
+  const year = Number(shanghaiMonth.find((part) => part.type === 'year')?.value);
+  const month = Number(shanghaiMonth.find((part) => part.type === 'month')?.value);
+  const pageViewFrom = new Date(Date.UTC(year, month - 1, 1) - 8 * 60 * 60 * 1000);
+  const pageViewTo = new Date(Date.UTC(year, month, 1) - 8 * 60 * 60 * 1000);
+  const monthlyPageViewPath = `/page-views?from=${encodeURIComponent(pageViewFrom.toISOString())}&to=${encodeURIComponent(pageViewTo.toISOString())}`;
+
   const [products, posts, inquiriesNew, allInquiries, allPosts, apiHealthy, pageViews] = await Promise.all([
     countOf('/products'),
     countOf('/blog'),
@@ -58,7 +69,7 @@ export default async function AdminDashboardPage() {
     adminFetch<InquiryRow[]>('/inquiries?pageSize=100').then((r) => r.data).catch(() => [] as InquiryRow[]),
     adminFetch<BlogRow[]>('/blog?pageSize=100').then((r) => r.data).catch(() => [] as BlogRow[]),
     checkSiteHealth(),
-    countOf('/page-views'),
+    countOf(monthlyPageViewPath),
   ]);
 
   const monthlyInquiries = allInquiries.filter((i) => new Date(i.createdAt) >= monthStart).length;
@@ -70,7 +81,7 @@ export default async function AdminDashboardPage() {
     { label: '博客文章数量', value: posts, href: '/admin/blog' },
     { label: '未处理询盘', value: inquiriesNew, href: '/admin/inquiries?status=NEW' },
     { label: '本月询盘', value: monthlyInquiries, href: '/admin/inquiries' },
-    { label: '网站访问量', value: pageViews },
+    { label: '本月访问量', value: pageViews },
   ];
 
   const quickActions = [

@@ -14,6 +14,7 @@ export const contactSettingsSchema = z.object({
   faviconUrl: z.string().optional(),
   companyAddress: z.string().optional(),
   companyMapImage: z.string().optional(),
+  companyMapMobileImage: z.string().optional(),
   companyEmail: z.string().optional(),
   companyPhone: z.string().optional(),
 });
@@ -72,8 +73,19 @@ export const turnstileSettingsSchema = z.object({
 export const pixelSettingsSchema = z.object({
   metaPixelId: z.string().optional(),
   tiktokPixelId: z.string().optional(),
-  googlePixelId: z.string().optional(),
+  googlePixelId: z.string().trim().max(64).refine(
+    (value) => value === '' || /^G-[A-Z0-9]+$/.test(value),
+    'GA4 只能填写 G- 开头的衡量 ID，不能粘贴脚本代码',
+  ).optional(),
+  googleAdsId: z.string().trim().max(64).refine(
+    (value) => value === '' || /^AW-\d+$/.test(value),
+    'Google Ads 只能填写 AW- 开头的数字 ID，不能粘贴脚本或转化标签',
+  ).optional(),
 });
+
+// Strict isolated endpoints cannot modify another platform's settings.
+export const ga4SettingsSchema = pixelSettingsSchema.pick({ googlePixelId: true }).required().strict();
+export const googleAdsSettingsSchema = pixelSettingsSchema.pick({ googleAdsId: true }).required().strict();
 
 /**
  * 这里只做"形状"校验（必须是字符串或 null），真正的域名格式规则（协议/路径/query/hash/

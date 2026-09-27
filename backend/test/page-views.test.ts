@@ -80,6 +80,36 @@ test('GET /api/admin/page-views returns a total count in meta that reflects reco
   }
 });
 
+test('GET /api/admin/page-views filters totals by a half-open monthly date range', async () => {
+  const app = await buildApp();
+  const email = uniqueEmail('monthly');
+  const path = `/monthly-range-${Date.now()}`;
+  try {
+    await createTestAdmin(app, { email, role: 'SUPER_ADMIN' });
+    const cookie = await loginCookie(app, email);
+    await app.prisma.pageView.createMany({ data: [
+      { path, createdAt: new Date('2026-08-31T15:59:59.999Z') },
+      { path, createdAt: new Date('2026-08-31T16:00:00.000Z') },
+      { path, createdAt: new Date('2026-09-30T15:59:59.999Z') },
+      { path, createdAt: new Date('2026-09-30T16:00:00.000Z') },
+    ] });
+
+    const from = encodeURIComponent('2026-08-31T16:00:00.000Z');
+    const to = encodeURIComponent('2026-09-30T16:00:00.000Z');
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/admin/page-views?pageSize=1&from=${from}&to=${to}`,
+      headers: { cookie: cookie! },
+    });
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.json().meta.total, 2);
+  } finally {
+    await app.prisma.pageView.deleteMany({ where: { path } });
+    await cleanupTestAdmin(app, email);
+    await app.close();
+  }
+});
+
 test('GET /api/admin/page-views is rejected for SALES (below CONTENT_ROLES)', async () => {
   const app = await buildApp();
   const email = uniqueEmail('sales-blocked');

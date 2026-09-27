@@ -4,6 +4,9 @@ import { verifyTurnstileToken } from '../../lib/turnstile.js';
 import { sendMail } from '../../lib/mailer.js';
 import { toCsv } from '../../lib/csv.js';
 import { logger } from '../../lib/logger.js';
+import { sendGa4LeadEvent } from '../../lib/ga4-measurement.js';
+import { MetaConversionError, sendMetaInquiryEvents, sendMetaQualityEvent } from '../../lib/meta-conversions.js';
+import { env } from '../../config/env.js';
 import type { CreateInquiryInput, UpdateInquiryInput } from './inquiries.schema.js';
 
 export class TurnstileVerificationError extends Error {}
@@ -20,7 +23,7 @@ export async function createInquiry(
   input: CreateInquiryInput,
   meta: CreateInquiryMeta,
 ) {
-  const { website, turnstileToken, ...rest } = input;
+  const { website, turnstileToken, metaEventId, metaFbp, metaFbc, ...rest } = input;
   const isHoneypotTriggered = !!website;
 
   // 防重复提交：相同邮箱 + 相同留言内容，在时间窗口内已存在则直接返回该记录，不重复入库
@@ -36,7 +39,10 @@ export async function createInquiry(
 
   if (!isHoneypotTriggered) {
     const settings = await prisma.siteSetting.findUnique({ where: { id: 1 } });
-    if (settings?.turnstileEnabled && settings.turnstileSecretKey) {
+    if (settings?.turnstileEnabled) {
+      if (!settings.turnstileSecretKey) {
+        throw new TurnstileVerificationError('人机验证配置不完整，请联系网站管理员');
+      }
       if (!turnstileToken) {
         throw new TurnstileVerificationError('缺少人机验证信息');
       }
@@ -60,9 +66,111 @@ export async function createInquiry(
     notifyNewInquiry(prisma, inquiry.id).catch((err) => {
       logger.warn({ err }, '询盘邮件提醒发送失败');
     });
+    notifyGa4Lead(prisma, inquiry.id).catch((err) => {
+      logger.warn({ err }, 'GA4 generate_lead 事件发送失败');
+    });
+    notifyMetaLead(prisma, inquiry.id, {
+      eventId: metaEventId,
+      fbp: metaFbp,
+      fbc: metaFbc,
+      ipAddress: meta.ipAddress,
+      userAgent: meta.userAgent,
+    }).catch((err) => {
+      const safe = err instanceof MetaConversionError
+        ? { eventName: 'Lead', eventId: metaEventId ?? 'missing', status: err.status, code: err.code }
+        : { eventName: 'Lead', eventId: metaEventId ?? 'missing', code: 'unexpected_error' };
+      logger.warn(safe, 'Meta Lead 事件发送失败');
+    });
   }
 
   return inquiry;
+}
+
+export async function reportInquiryQuality(prisma: PrismaClient, inquiryId: number, status: string): Promise<void> {
+  const names: Record<string, 'QualifiedLead' | 'QuoteProvided' | 'SaleWon'> = {
+    QUALIFIED: 'QualifiedLead',
+    QUOTED: 'QuoteProvided',
+    WON: 'SaleWon',
+  };
+  const eventName = names[status];
+  if (!eventName) return;
+  const inquiry = await prisma.inquiry.findUnique({ where: { id: inquiryId } });
+  if (!inquiry) return;
+  await sendMetaQualityEvent({
+    prisma,
+    eventName,
+    eventId: `crm-${eventName}-${inquiry.id}`,
+    eventTime: new Date(),
+    sourceUrl: inquiry.sourcePage,
+    email: inquiry.email,
+    phone: inquiry.phone || inquiry.whatsapp,
+    firstName: inquiry.name,
+    country: inquiry.country,
+    customData: {
+      inquiry_id: inquiry.id,
+      product: inquiry.productName,
+      country: inquiry.country,
+      quantity: inquiry.quantity,
+      source_page: inquiry.sourcePage,
+      page_language: inquiry.pageLanguage,
+    },
+  });
+}
+
+async function notifyMetaLead(
+  prisma: PrismaClient,
+  inquiryId: number,
+  tracking: { eventId?: string; fbp?: string; fbc?: string; ipAddress?: string; userAgent?: string },
+) {
+  if (!env.META_CAPI_ACCESS_TOKEN || !tracking.eventId) return;
+  const [settings, inquiry] = await Promise.all([
+    prisma.siteSetting.findUnique({ where: { id: 1 }, select: { metaPixelId: true, siteBaseUrl: true } }),
+    prisma.inquiry.findUnique({ where: { id: inquiryId } }),
+  ]);
+  if (!inquiry || !settings?.siteBaseUrl) return;
+  // Do not let an arbitrary submitted sourcePage turn event_source_url into a
+  // different origin. The frontend only submits relative site routes.
+  const sourcePath = inquiry.sourcePage?.startsWith('/') && !inquiry.sourcePage.startsWith('//')
+    ? inquiry.sourcePage
+    : '/contact';
+  await sendMetaInquiryEvents({
+    pixelId: settings.metaPixelId,
+    accessToken: env.META_CAPI_ACCESS_TOKEN,
+    apiVersion: env.META_GRAPH_API_VERSION,
+    eventId: tracking.eventId,
+    eventTime: inquiry.createdAt,
+    eventSourceUrl: new URL(sourcePath, settings.siteBaseUrl).toString(),
+    email: inquiry.email,
+    phone: inquiry.phone || inquiry.whatsapp,
+    firstName: inquiry.name,
+    country: inquiry.country,
+    fbp: tracking.fbp,
+    fbc: tracking.fbc,
+    clientIpAddress: tracking.ipAddress,
+    clientUserAgent: tracking.userAgent,
+    productName: inquiry.productName,
+  });
+}
+
+async function notifyGa4Lead(prisma: PrismaClient, inquiryId: number) {
+  if (!env.GA4_API_SECRET) return;
+  const [settings, inquiry] = await Promise.all([
+    prisma.siteSetting.findUnique({ where: { id: 1 }, select: { googlePixelId: true } }),
+    prisma.inquiry.findUnique({
+      where: { id: inquiryId },
+      select: { id: true, createdAt: true, sourcePage: true, pageLanguage: true },
+    }),
+  ]);
+  if (!inquiry) return;
+
+  await sendGa4LeadEvent({
+    measurementId: settings?.googlePixelId,
+    apiSecret: env.GA4_API_SECRET,
+    inquiryId: inquiry.id,
+    createdAt: inquiry.createdAt,
+    sourcePage: inquiry.sourcePage,
+    pageLanguage: inquiry.pageLanguage,
+  });
 }
 
 async function notifyNewInquiry(prisma: PrismaClient, inquiryId: number) {

@@ -6,6 +6,7 @@ import { t } from '@/lib/i18n/site-strings';
 import type { Locale } from '@/lib/i18n/locales';
 import { localeHref } from '@/lib/i18n/paths';
 import type { ProductCategory } from '@/types/product';
+import { toThumbnailUrl } from '@/lib/media/thumbnail';
 
 export function ProductCategories({ categories, locale = 'en' }: { categories: ProductCategory[]; locale?: Locale }) {
   if (categories.length === 0) return null;
@@ -24,8 +25,8 @@ export function ProductCategories({ categories, locale = 'en' }: { categories: P
             >
               {category.image && (
                 <Image
-                  src={category.image}
-                  alt={category.name}
+                  src={toThumbnailUrl(category.image)}
+                  alt=""
                   fill
                   sizes="(min-width: 1024px) 33vw, 50vw"
                   className="object-cover opacity-70 transition-transform duration-300 group-hover:scale-105"

@@ -8,12 +8,21 @@ import { PageHeroBanner } from '@/components/site/PageHeroBanner';
 import { listBlogPosts, listBlogCategories, listBlogTags } from '@/lib/api/blog';
 import { getPageBySlug } from '@/lib/api/content';
 import { t } from '@/lib/i18n/site-strings';
+import { paginatedDescription, paginatedPath, paginatedTitle } from '@/lib/seo/pagination';
 
-export const metadata: Metadata = {
-  title: t('es', 'blogPageTitle'),
-  description: t('es', 'blogPageDescription'),
-  alternates: { canonical: '/es/blog', languages: { en: '/blog', es: '/es/blog', 'x-default': '/blog' } },
-};
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }): Promise<Metadata> {
+  const { page: pageParam } = await searchParams;
+  const page = await getPageBySlug('blog', 'es');
+  const baseTitle = page?.seoTitle ?? page?.title ?? t('es', 'blogPageTitle');
+  const baseDescription = page?.seoDescription ?? t('es', 'blogPageDescription');
+  const enPath = paginatedPath('/blog', pageParam);
+  const esPath = paginatedPath('/es/blog', pageParam);
+  return {
+    title: paginatedTitle(baseTitle, pageParam, 'es'),
+    description: paginatedDescription(baseDescription, pageParam, 'es'),
+    alternates: { canonical: esPath, languages: { en: enPath, es: esPath, 'x-default': enPath } },
+  };
+}
 
 export default async function SpanishBlogListPage({
   searchParams,

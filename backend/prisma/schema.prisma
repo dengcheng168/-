@@ -345,6 +345,8 @@ model Certificate {
   imageUrl         String
   pdfUrl           String?
   description      String?
+  applicableProductType String?
+  applicableModels String                   @default("[]") // JSON 字符串数组；为空表示尚未由所有者核实适用型号
   sortOrder        Int                      @default(0)
   published        Boolean                  @default(true)
   deletedAt        DateTime?
@@ -381,6 +383,8 @@ model FactoryGalleryItem {
   imageUrl     String?
   title        String
   description  String?
+  // About 页面展示的区块。后台可选，新增照片不再依赖固定的数据库 id。
+  galleryGroup String                       @default("manufacturing")
   sortOrder    Int                          @default(0)
   published    Boolean                      @default(true)
   deletedAt    DateTime?
@@ -540,6 +544,8 @@ model SiteSetting {
   // 联系页地址下方展示的静态地图截图，替代直接嵌入 Google 地图 iframe（后者加载慢）；
   // 留空则联系页只显示"在地图中打开"链接，不显示图片
   companyMapImage       String?
+  // 联系页手机端专用地图截图；留空时手机端回退使用 companyMapImage
+  companyMapMobileImage String?
   companyEmail          String?
   companyPhone          String?
   whatsappNumber        String?
@@ -583,6 +589,7 @@ model SiteSetting {
   metaPixelId           String?
   tiktokPixelId         String?
   googlePixelId         String?
+  googleAdsId           String?
   // 正式站点根地址（Runtime Site Domain Configuration）：全站 canonical/hreflang/sitemap/
   // robots/Open Graph/JSON-LD 生成绝对 URL 的主要事实源，替代构建时写死的
   // NEXT_PUBLIC_SITE_URL。只存协议+域名，不存路径/query/hash，见 backend/src/lib/site-url.ts

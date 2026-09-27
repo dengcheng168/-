@@ -2,6 +2,7 @@ import 'server-only';
 import { cookies } from 'next/headers';
 import { ADMIN_COOKIE_NAME } from '@/config/constants';
 import { ApiError, type ApiMeta } from './client';
+import { requestContextHeaders } from './request-context';
 
 export interface AdminApiResult<T> {
   data: T;
@@ -34,6 +35,7 @@ export async function adminFetch<T>(
       ...(init.body ? { 'Content-Type': 'application/json' } : {}),
       ...(token ? { Cookie: `${ADMIN_COOKIE_NAME}=${token}` } : {}),
       ...init.headers,
+      ...await requestContextHeaders(),
     },
   });
 

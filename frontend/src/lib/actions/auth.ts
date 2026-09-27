@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { requestContextHeaders } from '@/lib/api/request-context';
 import { ADMIN_COOKIE_NAME, ADMIN_LOGIN_PATH } from '@/config/constants';
 
 const COOKIE_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
@@ -27,7 +28,7 @@ export async function loginAction(_prevState: LoginFormState, formData: FormData
   try {
     const res = await fetch(`${resolveBackendBase()}/auth/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...await requestContextHeaders() },
       body: JSON.stringify({ email, password }),
       cache: 'no-store',
     });

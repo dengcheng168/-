@@ -36,9 +36,17 @@ done
 echo "== 初始化管理员账号（若已存在则跳过）=="
 "${COMPOSE[@]}" exec -T backend npm run create-admin
 
+echo "== 验证 Nginx 配置与公开入口 =="
+"${COMPOSE[@]}" exec -T nginx nginx -t
+"${COMPOSE[@]}" exec -T nginx wget -qO- http://127.0.0.1/api/health > /dev/null
+
+echo "== 记录本次发布证据 =="
+bash scripts/record-release.sh
+
 echo ""
 echo "部署完成。"
 echo "  - 前台网站：http://<服务器IP或域名>/"
 echo "  - 后台管理：http://<服务器IP或域名>/admin/login"
 echo "  - 请尽快登录后台修改默认管理员密码"
 echo "  - 如需 HTTPS，请参考 README.md「HTTPS 配置」章节"
+echo "  - 发布记录：release-records/latest.txt"

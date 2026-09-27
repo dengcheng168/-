@@ -1,4 +1,4 @@
-import Fastify from 'fastify';
+import Fastify, { LogController } from 'fastify';
 import { logger } from './lib/logger.js';
 import { API_PREFIX, ADMIN_API_PREFIX } from './config/constants.js';
 import sensiblePlugin from './plugins/sensible.js';
@@ -24,7 +24,7 @@ import { adminMediaRoutes } from './modules/media/media.routes.js';
 import { publicPageRoutes, adminPageRoutes } from './modules/pages/pages.routes.js';
 import { publicNavigationRoutes, adminNavigationRoutes } from './modules/navigation/navigation.routes.js';
 import { publicSettingsRoutes, adminSettingsRoutes } from './modules/settings/settings.routes.js';
-import { adminRedirectRoutes } from './modules/redirects/redirects.routes.js';
+import { adminRedirectRoutes, publicRedirectRoutes } from './modules/redirects/redirects.routes.js';
 import { publicInquiryRoutes, adminInquiryRoutes } from './modules/inquiries/inquiries.routes.js';
 import { publicSearchRoutes } from './modules/search/search.routes.js';
 import { publicTranslationRoutes, adminTranslationRoutes } from './modules/translations/translations.routes.js';
@@ -43,8 +43,7 @@ export async function buildApp() {
     trustProxy: env.TRUST_PROXY,
     // 关闭 Fastify 内置的每请求默认日志（incoming request / request completed 两行），
     // 改用 middleware/request-logger.ts 输出的单行结构化日志。
-    // Fastify 5 中该选项仍可用（会打印 deprecation 提示），Fastify 6 移除后需改用 logController。
-    disableRequestLogging: true,
+    logController: new LogController({ disableRequestLogging: true }),
     // Fastify 默认单个路由参数（如 /blog/:slug）最长 100 字符，实际博客 slug 是标题自动生成的，
     // 超过 100 字符时请求会被直接拒绝（FST_ERR_MAX_PARAM_LENGTH，414），导致该文章对访客和搜索引擎
     // 都变成404——即使它明明存在于数据库、也出现在 sitemap.xml 里。放宽到 200，覆盖长标题场景。
@@ -80,6 +79,7 @@ export async function buildApp() {
   await app.register(publicSettingsRoutes, { prefix: API_PREFIX });
   await app.register(publicInquiryRoutes, { prefix: API_PREFIX });
   await app.register(publicSearchRoutes, { prefix: API_PREFIX });
+  await app.register(publicRedirectRoutes, { prefix: API_PREFIX });
   await app.register(publicTranslationRoutes, { prefix: API_PREFIX });
   await app.register(publicPageViewRoutes, { prefix: API_PREFIX });
 

@@ -12,6 +12,7 @@ interface FormValues {
   title?: string;
   imageUrl?: string | null;
   description?: string | null;
+  galleryGroup?: 'manufacturing' | 'quality' | 'visits';
   published?: boolean;
 }
 
@@ -50,6 +51,19 @@ export function FactoryGalleryItemForm({
         recommendedSize="建议 900×600px（3:2 横版），不设置则显示占位图"
         aspectRatio={3 / 2}
       />
+
+      <FormField label="展示区块" htmlFor="galleryGroup" hint="前台会按区块显示；同一区块内使用列表里的排序值排列">
+        <select
+          id="galleryGroup"
+          name="galleryGroup"
+          defaultValue={initialValues?.galleryGroup ?? 'manufacturing'}
+          className={fieldInputClasses}
+        >
+          <option value="manufacturing">生产流程（Manufacturing Workflow）</option>
+          <option value="quality">质量检测（Quality Control & Testing）</option>
+          <option value="visits">客户到访（Customer Visits & Cooperation）</option>
+        </select>
+      </FormField>
 
       <FormField label="描述" htmlFor="description">
         <textarea id="description" name="description" rows={3} defaultValue={initialValues?.description ?? ''} className={fieldInputClasses} />

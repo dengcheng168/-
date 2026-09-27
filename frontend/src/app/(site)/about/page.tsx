@@ -7,6 +7,10 @@ import { FactoryGallery } from '@/components/site/FactoryGallery';
 import { WhatWeSupport } from '@/components/site/WhatWeSupport';
 import { getPageBySlug, listFactoryGalleryItems } from '@/lib/api/content';
 import { t } from '@/lib/i18n/site-strings';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { aboutPageJsonLd, breadcrumbListJsonLd, organizationJsonLd } from '@/lib/seo/jsonld';
+import { getPublicSettings } from '@/lib/api/settings';
+import { getSiteUrl } from '@/lib/seo/site';
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getPageBySlug('about');
@@ -18,11 +22,19 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  const [page, galleryItems] = await Promise.all([getPageBySlug('about'), listFactoryGalleryItems()]);
+  const [page, galleryItems, settings, siteUrl] = await Promise.all([
+    getPageBySlug('about'),
+    listFactoryGalleryItems(),
+    getPublicSettings(),
+    getSiteUrl(),
+  ]);
   const hasHero = Boolean(page?.heroImage || page?.heroImageMobile);
 
   return (
     <>
+      <JsonLd data={organizationJsonLd(settings, siteUrl)} />
+      <JsonLd data={aboutPageJsonLd(settings, siteUrl)} />
+      <JsonLd data={breadcrumbListJsonLd([{ label: 'Home', href: '/' }, { label: 'About Us', href: '/about' }], siteUrl)} />
       {hasHero && (
         <PageHeroBanner
           image={page?.heroImage}

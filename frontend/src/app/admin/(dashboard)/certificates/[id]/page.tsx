@@ -15,6 +15,8 @@ interface Detail {
   imageUrl: string;
   pdfUrl: string | null;
   description: string | null;
+  applicableProductType: string | null;
+  applicableModels: string[];
   published: boolean;
 }
 

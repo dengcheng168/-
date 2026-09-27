@@ -12,13 +12,8 @@ export function textOrUndefined(formData: FormData, key: string): string | undef
   return typeof v === 'string' ? v.trim() : undefined;
 }
 
-/**
- * 专门给"可选日期"字段用：后端对应字段是 z.coerce.date().optional()，传空字符串会被
- * new Date('') 解析成 Invalid Date 触发校验报错，不能直接复用上面的 textOrUndefined。
- * 这里维持"清空即不改动"的旧行为——要支持真正清空一个已设置的日期，需要后端 schema
- * 同时改成 nullable 并在 service 里显式处理 null，这个改动更大，暂不在这次修复范围内。
- */
-export function dateOrUndefined(formData: FormData, key: string): string | undefined {
+/** Missing field preserves the value; a submitted empty field clears it. */
+export function dateOrUndefined(formData: FormData, key: string): string | null | undefined {
   const v = formData.get(key);
-  return typeof v === 'string' && v.trim() !== '' ? v.trim() : undefined;
+  return typeof v === 'string' ? v.trim() || null : undefined;
 }

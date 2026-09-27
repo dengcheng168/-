@@ -30,6 +30,26 @@ export default fp(async function errorHandlerPlugin(app: FastifyInstance) {
     const fastifyError = error as FastifyError;
     const statusCode = fastifyError.statusCode ?? 500;
 
+    // @fastify/rate-limit throws the object returned by errorResponseBuilder.
+    // Preserve our existing API envelope instead of wrapping it a second time
+    // and losing the RATE_LIMITED code. The plugin has already attached the
+    // standard rate-limit and Retry-After response headers at this point.
+    const rateLimitEnvelope = error as FastifyError & {
+      success?: boolean;
+      error?: { message?: string; code?: string; details?: unknown };
+    };
+    if (statusCode === 429 && rateLimitEnvelope.success === false && rateLimitEnvelope.error) {
+      request.log.warn({ err: error }, '请求处理失败');
+      return reply.status(statusCode).send({
+        success: false,
+        error: {
+          message: rateLimitEnvelope.error.message ?? '请求过于频繁，请稍后再试',
+          code: rateLimitEnvelope.error.code ?? 'RATE_LIMITED',
+          details: rateLimitEnvelope.error.details,
+        },
+      });
+    }
+
     if (statusCode >= 500) {
       request.log.error({ err: error }, '服务器内部错误');
       return reply

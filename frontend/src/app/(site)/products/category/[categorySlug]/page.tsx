@@ -5,26 +5,33 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { CategoryFilterSidebar } from '@/components/product/CategoryFilterSidebar';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { Pagination } from '@/components/ui/Pagination';
+import { CategoryBuyerGuide } from '@/components/product/CategoryBuyerGuide';
 import { getProductCategoryBySlug, listVisibleProductCategories } from '@/lib/api/products';
+import { paginatedDescription, paginatedPath, paginatedTitle } from '@/lib/seo/pagination';
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ categorySlug: string }>;
+  searchParams: Promise<{ page?: string }>;
 }): Promise<Metadata> {
   const { categorySlug } = await params;
+  const { page: pageParam } = await searchParams;
   const result = await getProductCategoryBySlug(categorySlug);
   if (!result) return {};
+  const enPath = paginatedPath(`/products/category/${categorySlug}`, pageParam);
+  const esPath = paginatedPath(`/es/products/category/${categorySlug}`, pageParam);
 
   return {
-    title: result.category.seoTitle ?? result.category.name,
-    description: result.category.seoDescription ?? result.category.description ?? undefined,
+    title: paginatedTitle(result.category.seoTitle ?? result.category.name, pageParam),
+    description: paginatedDescription(result.category.seoDescription ?? result.category.description ?? undefined, pageParam),
     alternates: {
-      canonical: `/products/category/${categorySlug}`,
+      canonical: enPath,
       languages: {
-        en: `/products/category/${categorySlug}`,
-        es: `/es/products/category/${categorySlug}`,
-        'x-default': `/products/category/${categorySlug}`,
+        en: enPath,
+        es: esPath,
+        'x-default': enPath,
       },
     },
     // 分类当前没有任何已发布产品时不参与索引，但仍允许爬虫顺着链接继续走——
@@ -58,6 +65,7 @@ export default async function ProductCategoryPage({
       />
       <h1 className="mt-4 text-3xl font-semibold text-navy-950">{result.category.name}</h1>
       {result.category.description && <p className="mt-3 max-w-2xl text-grey-500">{result.category.description}</p>}
+      <CategoryBuyerGuide slug={categorySlug} />
 
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]">
         <aside>

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { productJsonLd, articleJsonLd, faqPageJsonLd, websiteJsonLd, breadcrumbListJsonLd } from './jsonld';
+import { productJsonLd, articleJsonLd, faqPageJsonLd, websiteJsonLd, breadcrumbListJsonLd, organizationJsonLd, certificateItemListJsonLd, aboutPageJsonLd } from './jsonld';
 import type { Product } from '@/types/product';
 import type { BlogPost } from '@/types/blog';
 import type { Faq } from '@/types/content';
@@ -59,6 +59,7 @@ const settings: PublicSiteSettings = {
   faviconUrl: null,
   companyAddress: null,
   companyMapImage: null,
+  companyMapMobileImage: null,
   companyEmail: null,
   companyPhone: null,
   whatsappNumber: null,
@@ -86,6 +87,7 @@ const settings: PublicSiteSettings = {
   metaPixelId: null,
   tiktokPixelId: null,
   googlePixelId: null,
+  googleAdsId: null,
   siteBaseUrl: null,
 };
 
@@ -109,6 +111,57 @@ test('productJsonLd: uses the runtime site URL passed in, not a hardcoded value'
   assert.equal(result.url, 'https://koigatetech.com/products/ro-500');
 });
 
+test('productJsonLd: describes the quote-request page without invalid Product rich-result markup', () => {
+  const result = productJsonLd({
+    ...product,
+    galleryImages: [
+      { url: '/uploads/ro-detail.webp', alt: 'RO detail' },
+      { url: '/uploads/ro-500.webp', alt: 'Duplicate main image' },
+    ],
+  }, PROD_SITE_URL);
+  assert.equal(result['@type'], 'WebPage');
+  assert.deepEqual(result.primaryImageOfPage, {
+    '@type': 'ImageObject',
+    url: 'https://koigatetech.com/uploads/ro-500.webp',
+  });
+});
+
+test('productJsonLd: does not claim an offer or rating that is absent from the page', () => {
+  const result = productJsonLd({
+    ...product,
+    category: {
+      id: 2,
+      name: 'Under Sink RO Systems',
+      slug: 'under-sink-ro-systems',
+      description: null,
+      image: null,
+      sortOrder: 0,
+      published: true,
+      seoTitle: null,
+      seoDescription: null,
+      updatedAt: '2026-08-29T00:00:00.000Z',
+    },
+  }, SITE_URL);
+
+  assert.equal('offers' in result, false);
+  assert.equal('review' in result, false);
+  assert.equal('aggregateRating' in result, false);
+});
+
+test('certificateItemListJsonLd omits unverified scope and exposes verified scope only when present', () => {
+  const result = certificateItemListJsonLd([
+    {
+      id: 1, name: 'Test document', certType: null, certNumber: 'CERT-1', issuingAuthority: 'Test issuer',
+      issueDate: '2026-01-01T00:00:00.000Z', expiryDate: null, imageUrl: '/uploads/cert.webp', pdfUrl: null,
+      description: null, applicableProductType: null, applicableModels: [],
+    },
+  ], PROD_SITE_URL, 'Zhongshan Li-Men Technology Co., Ltd.');
+  const item = result.itemListElement[0]!.item;
+  assert.equal(item.identifier, 'CERT-1');
+  assert.equal(item.about, undefined);
+  assert.deepEqual(item.sourceOrganization, { '@type': 'Organization', name: 'Zhongshan Li-Men Technology Co., Ltd.' });
+});
+
 test('articleJsonLd: locale="es" sets inLanguage and links to the /es blog URL', () => {
   const result = articleJsonLd(post, SITE_URL, 'es');
   assert.equal(result.inLanguage, 'es');
@@ -124,6 +177,11 @@ test('articleJsonLd: defaults to English when locale omitted', () => {
 test('articleJsonLd: uses the runtime site URL passed in, not a hardcoded value', () => {
   const result = articleJsonLd(post, PROD_SITE_URL);
   assert.equal(result.url, 'https://koigatetech.com/blog/water-filtration-101');
+  assert.equal(result.dateModified, post.updatedAt);
+  assert.deepEqual(result.mainEntityOfPage, {
+    '@type': 'WebPage',
+    '@id': 'https://koigatetech.com/blog/water-filtration-101',
+  });
 });
 
 test('faqPageJsonLd: inLanguage matches the passed locale', () => {
@@ -146,6 +204,75 @@ test('websiteJsonLd: url points at the localized homepage', () => {
 
 test('websiteJsonLd: uses the runtime site URL passed in, not a hardcoded value', () => {
   assert.equal(websiteJsonLd(settings, PROD_SITE_URL, 'en').url, 'https://koigatetech.com/');
+});
+
+test('aboutPageJsonLd: links localized about pages to the canonical organization entity', () => {
+  const result = aboutPageJsonLd(settings, PROD_SITE_URL, 'es');
+  assert.equal(result.url, 'https://koigatetech.com/es/about');
+  assert.equal(result.inLanguage, 'es');
+  assert.deepEqual(result.about, { '@id': 'https://koigatetech.com/#organization' });
+  assert.deepEqual(result.isPartOf, { '@id': 'https://koigatetech.com/es#website' });
+});
+
+test('faqPageJsonLd: accepts visible page questions without requiring database-only fields', () => {
+  const result = faqPageJsonLd([
+    { question: 'What is the MOQ?', answer: 'MOQ depends on the selected model and project.' },
+  ], 'en');
+
+  assert.equal(result.mainEntity[0]!.name, 'What is the MOQ?');
+  assert.equal(result.mainEntity[0]!.acceptedAnswer.text, 'MOQ depends on the selected model and project.');
+});
+
+test('organizationJsonLd: preserves an already absolute logo URL', () => {
+  const result = organizationJsonLd(
+    { ...settings, companyLogoUrl: 'https://koigatetech.com/uploads/logo.webp' },
+    PROD_SITE_URL,
+  );
+  assert.equal(result.logo, 'https://koigatetech.com/uploads/logo.webp');
+});
+
+test('organizationJsonLd: exposes a stable entity id and only enabled absolute social profiles', () => {
+  const result = organizationJsonLd(
+    {
+      ...settings,
+      socialLinks: [
+        { platform: 'linkedin', label: 'LinkedIn', url: 'https://www.linkedin.com/company/li-men', enabled: true },
+        { platform: 'youtube', label: 'YouTube', url: 'https://www.youtube.com/@limen', enabled: false },
+        { platform: 'instagram', label: 'Instagram', url: '/instagram', enabled: true },
+      ],
+    },
+    PROD_SITE_URL,
+  );
+
+  assert.equal(result['@id'], 'https://koigatetech.com/#organization');
+  assert.deepEqual(result.sameAs, ['https://www.linkedin.com/company/li-men']);
+});
+
+test('organizationJsonLd: exposes factual B2B identity and sales contact details', () => {
+  const result = organizationJsonLd(
+    {
+      ...settings,
+      companyAddress: 'No. 72 Yufeng Road, Zhongshan City, Guangdong Province, China',
+      companyEmail: 'sales@example.com',
+      companyPhone: '+86 123 4567 8901',
+      defaultSeoDescription: 'B2B water purifier manufacturer supporting OEM and ODM projects.',
+    },
+    PROD_SITE_URL,
+  );
+
+  assert.equal(result.description, 'B2B water purifier manufacturer supporting OEM and ODM projects.');
+  assert.deepEqual(result.address, {
+    '@type': 'PostalAddress',
+    streetAddress: 'No. 72 Yufeng Road, Zhongshan City, Guangdong Province, China',
+    addressCountry: 'CN',
+  });
+  assert.deepEqual(result.contactPoint, {
+    '@type': 'ContactPoint',
+    contactType: 'sales',
+    email: 'sales@example.com',
+    telephone: '+86 123 4567 8901',
+    availableLanguage: ['English', 'Spanish'],
+  });
 });
 
 test('breadcrumbListJsonLd: resolves each item href against the runtime site URL', () => {

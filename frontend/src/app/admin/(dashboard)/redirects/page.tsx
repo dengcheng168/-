@@ -17,7 +17,7 @@ export default async function AdminRedirectsPage() {
 
   return (
     <div>
-      <PageHeader title="301 重定向" description="配置旧链接到新链接的跳转规则，避免出现死链。" />
+      <PageHeader title="301 / 302 重定向" description="填写以 / 开头的站内路径，不含域名或查询参数。保存后按路径精确匹配；不允许循环跳转或管理路径。" />
 
       <div className="rounded-lg border border-grey-200 bg-white p-5">
         <NewRedirectForm />

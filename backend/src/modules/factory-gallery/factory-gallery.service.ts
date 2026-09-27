@@ -40,15 +40,41 @@ export function getFactoryGalleryItemById(prisma: PrismaClient, id: number) {
   return prisma.factoryGalleryItem.findFirst({ where: { id, deletedAt: null } });
 }
 
-export function createFactoryGalleryItem(prisma: PrismaClient, input: CreateFactoryGalleryItemInput) {
-  return prisma.factoryGalleryItem.create({ data: input });
+export async function createFactoryGalleryItem(prisma: PrismaClient, input: CreateFactoryGalleryItemInput) {
+  const galleryGroup = input.galleryGroup ?? 'manufacturing';
+  const lastItem = await prisma.factoryGalleryItem.findFirst({
+    where: { galleryGroup, deletedAt: null },
+    orderBy: { sortOrder: 'desc' },
+    select: { sortOrder: true },
+  });
+
+  return prisma.factoryGalleryItem.create({
+    data: {
+      ...input,
+      galleryGroup,
+      // New cards are appended to their selected section. Editors can still
+      // fine-tune their position from the gallery list.
+      sortOrder: input.sortOrder ?? (lastItem?.sortOrder ?? 0) + 1,
+    },
+  });
 }
 
 /** 更新前先确认记录仍然存在且未被软删除，做法同 certificates.service.ts 的 updateCertificate */
 export async function updateFactoryGalleryItem(prisma: PrismaClient, id: number, input: UpdateFactoryGalleryItemInput) {
   const existing = await prisma.factoryGalleryItem.findFirst({ where: { id, deletedAt: null } });
   if (!existing) return null;
-  return prisma.factoryGalleryItem.update({ where: { id }, data: input });
+
+  let sortOrder = input.sortOrder;
+  if (input.galleryGroup && input.galleryGroup !== existing.galleryGroup && sortOrder === undefined) {
+    const lastItem = await prisma.factoryGalleryItem.findFirst({
+      where: { galleryGroup: input.galleryGroup, deletedAt: null, id: { not: id } },
+      orderBy: { sortOrder: 'desc' },
+      select: { sortOrder: true },
+    });
+    sortOrder = (lastItem?.sortOrder ?? 0) + 1;
+  }
+
+  return prisma.factoryGalleryItem.update({ where: { id }, data: { ...input, ...(sortOrder !== undefined ? { sortOrder } : {}) } });
 }
 
 export function softDeleteFactoryGalleryItem(prisma: PrismaClient, id: number) {

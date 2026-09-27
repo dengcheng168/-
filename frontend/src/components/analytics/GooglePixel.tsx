@@ -1,21 +1,19 @@
 import Script from 'next/script';
 import type { Locale } from '@/lib/i18n/locales';
+import { buildGoogleTags } from '@/lib/analytics/google-tags';
 
 /**
- * 通用 gtag.js 接入：ID 可以是 GA4 Measurement ID（G-xxx）也可以是 Google Ads 转化 ID（AW-xxx），
- * gtag.js 会根据 ID 前缀自己识别，这里不用区分两种场景各写一套代码。
+ * GA4 与 Ads 使用独立 ID、共享一个 gtag.js 加载器。
+ * 此处只有基础 config，不发送询盘/购买 conversion 事件。
  */
-export function GooglePixel({ pixelId, locale = 'en' }: { pixelId: string; locale?: Locale }) {
+export function GooglePixel({ ga4Id, adsId, locale = 'en' }: { ga4Id?: string | null; adsId?: string | null; locale?: Locale }) {
+  const tags = buildGoogleTags(ga4Id, adsId, locale);
+  if (!tags) return null;
   return (
     <>
-      <Script src={`https://www.googletagmanager.com/gtag/js?id=${pixelId}`} strategy="afterInteractive" />
-      <Script id="google-pixel" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${pixelId}', { page_language: '${locale}' });
-        `}
+      <Script src={tags.src} strategy="lazyOnload" />
+      <Script id="google-pixel" strategy="lazyOnload">
+        {tags.script}
       </Script>
     </>
   );

@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import { ResponsiveHeroImage } from '@/components/site/ResponsiveHeroImage';
 import { Button } from '@/components/ui/Button';
 import type { PublicSiteSettings } from '@/types/settings';
 import type { Locale } from '@/lib/i18n/locales';
@@ -12,26 +12,7 @@ export function HeroBanner({ settings, locale = 'en' }: { settings: PublicSiteSe
 
   return (
     <section className="relative isolate flex min-h-[560px] items-center overflow-hidden bg-navy-950">
-      {desktopSrc && (
-        <Image
-          src={desktopSrc}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="hidden object-cover sm:block"
-        />
-      )}
-      {mobileSrc && (
-        <Image
-          src={mobileSrc}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="block object-cover sm:hidden"
-        />
-      )}
+      <ResponsiveHeroImage desktop={desktopSrc} mobile={mobileSrc} />
       <div className="absolute inset-0 bg-navy-950/70" />
 
       <div className="relative z-10 mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8">

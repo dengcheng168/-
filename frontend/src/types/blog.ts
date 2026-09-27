@@ -27,4 +27,6 @@ export interface BlogPost {
   seoDescription: string | null;
   tags: BlogTag[];
   updatedAt: string;
+  /** False only when a requested non-English locale has no published translation. */
+  hasLocaleTranslation?: boolean;
 }

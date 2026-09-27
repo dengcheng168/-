@@ -7,8 +7,8 @@ import { listFaqs } from '@/lib/api/content';
 import { faqPageJsonLd } from '@/lib/seo/jsonld';
 
 export const metadata: Metadata = {
-  title: 'FAQ',
-  description: 'Frequently asked questions about our water purifier products and OEM/ODM services.',
+  title: 'Water Purifier OEM & ODM Frequently Asked Questions',
+  description: 'Find answers about Li-Men water purifier products, OEM/ODM customization, minimum orders, quality control, certificates, lead times and global shipping.',
   alternates: { canonical: '/faq', languages: { en: '/faq', es: '/es/faq', 'x-default': '/faq' } },
 };
 

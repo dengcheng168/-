@@ -1,11 +1,12 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { FormField, fieldInputClasses } from '@/components/admin/FormField';
 import { ImageUploader } from '@/components/admin/ImageUploader';
 import { MultiImageUploader } from '@/components/admin/MultiImageUploader';
 import { TranslationMeta } from '@/components/admin/TranslationMeta';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/admin/ui/tabs';
+import { Badge } from '@/components/admin/ui/badge';
 import type { AdminFormState } from '@/lib/actions/admin/categories';
 import type { TranslationFormState } from '@/lib/actions/admin/translations-shared';
 
@@ -63,6 +64,78 @@ function featuresToText(features?: (string | { title: string; description?: stri
 
 function applicationsToText(apps?: { title: string; description?: string }[] | null) {
   return (apps ?? []).map((a) => (a.description ? `${a.title}: ${a.description}` : a.title)).join('\n');
+}
+
+function ProductSeoEditor({
+  idPrefix,
+  title: initialTitle,
+  description: initialDescription,
+  keywords: initialKeywords,
+  languageLabel,
+  sourceTitle,
+  sourceDescription,
+}: {
+  idPrefix: string;
+  title?: string | null;
+  description?: string | null;
+  keywords?: string | null;
+  languageLabel: string;
+  sourceTitle?: string | null;
+  sourceDescription?: string | null;
+}) {
+  const [title, setTitle] = useState(initialTitle ?? '');
+  const [description, setDescription] = useState(initialDescription ?? '');
+  const [keywords, setKeywords] = useState(initialKeywords ?? '');
+  const titleHealthy = title.length >= 30 && title.length <= 60;
+  const descriptionHealthy = description.length >= 120 && description.length <= 160;
+  const keywordCount = keywords.split(',').map((item) => item.trim()).filter(Boolean).length;
+
+  return (
+    <section className="space-y-4 rounded-xl border border-border bg-card p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">产品 SEO（{languageLabel}）</h2>
+          <p className="mt-1 text-xs text-muted-foreground">用于该产品在搜索结果中的标题和摘要；留空时系统会使用产品名称与简短描述。</p>
+        </div>
+        <Badge variant={titleHealthy && descriptionHealthy ? 'success' : 'warning'}>
+          {titleHealthy && descriptionHealthy ? '长度合适' : '需要调整'}
+        </Badge>
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-[1fr_0.9fr]">
+        <div className="space-y-4">
+          <FormField
+            label={<span className="flex items-center justify-between gap-3"><span>SEO 标题</span><Badge variant={titleHealthy ? 'success' : 'warning'}>{title.length}/60</Badge></span>}
+            htmlFor={`${idPrefix}seoTitle`}
+            hint={sourceTitle ? `英文原文：${sourceTitle}` : '建议 30–60 个字符；写明型号、产品类型和核心卖点，避免关键词堆砌。'}
+          >
+            <input id={`${idPrefix}seoTitle`} name="seoTitle" value={title} onChange={(event) => setTitle(event.target.value)} className={fieldInputClasses} />
+          </FormField>
+          <FormField
+            label={<span className="flex items-center justify-between gap-3"><span>SEO 描述</span><Badge variant={descriptionHealthy ? 'success' : 'warning'}>{description.length}/160</Badge></span>}
+            htmlFor={`${idPrefix}seoDescription`}
+            hint={sourceDescription ? `英文原文：${sourceDescription}` : '建议 120–160 个字符；包含规格、应用场景、OEM/ODM 能力和询盘意图。'}
+          >
+            <textarea id={`${idPrefix}seoDescription`} name="seoDescription" rows={4} value={description} onChange={(event) => setDescription(event.target.value)} className={fieldInputClasses} />
+          </FormField>
+          <FormField
+            label={<span className="flex items-center justify-between gap-3"><span>辅助关键词</span><Badge variant={keywordCount <= 8 ? 'muted' : 'warning'}>{keywordCount} 个</Badge></span>}
+            htmlFor={`${idPrefix}seoKeywords`}
+            hint="使用英文逗号分隔，建议 3–8 个。Google 不使用 meta keywords 排名，本字段主要用于内容规划和其他搜索引擎。"
+          >
+            <input id={`${idPrefix}seoKeywords`} name="seoKeywords" value={keywords} onChange={(event) => setKeywords(event.target.value)} className={fieldInputClasses} />
+          </FormField>
+        </div>
+
+        <div className="h-fit rounded-lg border border-border bg-muted/30 p-4">
+          <div className="text-xs font-medium text-foreground">Google 搜索结果预览</div>
+          <div className="mt-3 text-xs text-emerald-700">https://koigatetech.com/products/…</div>
+          <div className="mt-1 line-clamp-2 text-lg leading-6 text-blue-700">{title || '产品 SEO 标题预览'}</div>
+          <p className="mt-1 line-clamp-4 text-sm leading-5 text-muted-foreground">{description || '产品 SEO 描述会在这里实时显示。'}</p>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 export function ProductForm({
@@ -177,15 +250,13 @@ export function ProductForm({
         </div>
       </div>
 
-      <FormField label="SEO 标题" htmlFor="seoTitle">
-        <input id="seoTitle" name="seoTitle" defaultValue={initialValues?.seoTitle ?? ''} className={fieldInputClasses} />
-      </FormField>
-      <FormField label="SEO 描述" htmlFor="seoDescription">
-        <textarea id="seoDescription" name="seoDescription" rows={2} defaultValue={initialValues?.seoDescription ?? ''} className={fieldInputClasses} />
-      </FormField>
-      <FormField label="SEO 关键词" htmlFor="seoKeywords">
-        <input id="seoKeywords" name="seoKeywords" defaultValue={initialValues?.seoKeywords ?? ''} className={fieldInputClasses} />
-      </FormField>
+      <ProductSeoEditor
+        idPrefix=""
+        title={initialValues?.seoTitle}
+        description={initialValues?.seoDescription}
+        keywords={initialValues?.seoKeywords}
+        languageLabel="英文"
+      />
 
       {state.message && <p className={`text-sm ${state.success ? 'text-green-600' : 'text-red-600'}`}>{state.message}</p>}
 
@@ -269,15 +340,15 @@ export function ProductForm({
             </FormField>
           </div>
 
-          <FormField label="SEO 标题（西班牙语）" htmlFor="es_seoTitle" hint={`英文原文：${initialValues?.seoTitle ?? ''}`}>
-            <input id="es_seoTitle" name="seoTitle" defaultValue={translation?.seoTitle ?? ''} className={fieldInputClasses} />
-          </FormField>
-          <FormField label="SEO 描述（西班牙语）" htmlFor="es_seoDescription" hint={`英文原文：${initialValues?.seoDescription ?? ''}`}>
-            <textarea id="es_seoDescription" name="seoDescription" rows={2} defaultValue={translation?.seoDescription ?? ''} className={fieldInputClasses} />
-          </FormField>
-          <FormField label="SEO 关键词（西班牙语）" htmlFor="es_seoKeywords">
-            <input id="es_seoKeywords" name="seoKeywords" defaultValue={translation?.seoKeywords ?? ''} className={fieldInputClasses} />
-          </FormField>
+          <ProductSeoEditor
+            idPrefix="es_"
+            title={translation?.seoTitle}
+            description={translation?.seoDescription}
+            keywords={translation?.seoKeywords}
+            languageLabel="西班牙语"
+            sourceTitle={initialValues?.seoTitle}
+            sourceDescription={initialValues?.seoDescription}
+          />
 
           <FormField label="翻译发布状态" htmlFor="es_translationStatus">
             <select

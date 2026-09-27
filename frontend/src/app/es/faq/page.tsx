@@ -8,8 +8,8 @@ import { faqPageJsonLd } from '@/lib/seo/jsonld';
 import { t } from '@/lib/i18n/site-strings';
 
 export const metadata: Metadata = {
-  title: t('es', 'faqPageTitle'),
-  description: t('es', 'faqPageDescription'),
+  title: 'Preguntas sobre Purificadores de Agua y OEM/ODM',
+  description: 'Respuestas sobre purificadores de agua Li-Men, personalización OEM/ODM, pedidos mínimos, control de calidad, certificados, plazos y envíos.',
   alternates: { canonical: '/es/faq', languages: { en: '/faq', es: '/es/faq', 'x-default': '/faq' } },
 };
 

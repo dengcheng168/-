@@ -52,6 +52,9 @@ services:
         SITE_URL: ${SITE_URL:?SITE_URL is required}
     environment:
       - INTERNAL_API_BASE_URL=http://backend:4000
+      # Enable only after verifying all ingress proxies append real peer addresses
+      # and the frontend is not directly reachable from the public internet.
+      - FORWARD_CLIENT_IP=${FORWARD_CLIENT_IP:-false}
       # 运行时故障回退（不是 NEXT_PUBLIC_*，不会打进构建产物）：后台"SEO 设置 -> 正式站点域名"
       # 优先于这个值；这个值优先于构建时写死的 NEXT_PUBLIC_SITE_URL。修改这里之后只需要
       # docker compose restart frontend，不需要重新 build。见 frontend/src/lib/site/get-site-base-url.ts

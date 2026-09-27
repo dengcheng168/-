@@ -33,6 +33,11 @@ export async function createIsolatedTestDatabase(): Promise<TestDatabaseContext>
   const databaseUrl = toPrismaSqliteUrl(databasePath);
   // 建库之前先自检一遍，如果这里都不满足白名单，后面 Prisma migrate 也不该跑。
   assertSafeTestDatabaseUrl(databaseUrl);
+  // On Windows Prisma 6's schema engine can fail without diagnostics when the
+  // SQLite file does not yet exist. Create only our fresh, isolated empty file;
+  // migrations still build the real schema. wx never overwrites an existing DB.
+  const file = await fs.open(databasePath, 'wx');
+  await file.close();
   return { directoryPath, databasePath, databaseUrl };
 }
 

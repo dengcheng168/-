@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Product } from '@/types/product';
 import type { Locale } from '@/lib/i18n/locales';
 import { localeHref } from '@/lib/i18n/paths';
+import { toThumbnailUrl } from '@/lib/media/thumbnail';
 
 export function ProductCard({ product, locale = 'en' }: { product: Product; locale?: Locale }) {
   return (
@@ -12,7 +13,7 @@ export function ProductCard({ product, locale = 'en' }: { product: Product; loca
     >
       <div className="relative aspect-square w-full min-w-0 overflow-hidden bg-grey-50">
         <Image
-          src={product.mainImage}
+          src={toThumbnailUrl(product.mainImage)}
           alt={product.galleryImages[0]?.alt?.trim() || product.name}
           fill
           sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"

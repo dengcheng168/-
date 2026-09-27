@@ -1,10 +1,13 @@
 import { z } from 'zod';
 import { SUPPORTED_LOCALES } from '../translations/translations.schema.js';
 
+export const galleryGroupSchema = z.enum(['manufacturing', 'quality', 'visits']);
+
 export const createFactoryGalleryItemSchema = z.object({
   title: z.string().min(1, '标题不能为空'),
   imageUrl: z.string().optional(),
   description: z.string().optional(),
+  galleryGroup: galleryGroupSchema.optional(),
   sortOrder: z.number().int().optional(),
   published: z.boolean().optional(),
 });

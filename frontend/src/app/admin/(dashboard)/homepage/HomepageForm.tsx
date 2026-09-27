@@ -4,6 +4,8 @@ import { useActionState } from 'react';
 import { FormField, fieldInputClasses } from '@/components/admin/FormField';
 import { ImageUploader } from '@/components/admin/ImageUploader';
 import { updateHomepageSettingsAction } from '@/lib/actions/admin/settings';
+import { CoreAdvantagesEditor } from '@/components/admin/CoreAdvantagesEditor';
+import type { CoreAdvantage } from '@/types/settings';
 
 interface Values {
   heroHeadline: string;
@@ -15,11 +17,7 @@ interface Values {
   heroDesktopImage: string | null;
   heroMobileImage: string | null;
   homepageVideoUrl: string | null;
-  coreAdvantages: unknown;
-}
-
-function toJsonText(value: unknown) {
-  return JSON.stringify(value ?? [], null, 2);
+  coreAdvantages: CoreAdvantage[];
 }
 
 export function HomepageForm({ initialValues }: { initialValues: Values }) {
@@ -35,7 +33,7 @@ export function HomepageForm({ initialValues }: { initialValues: Values }) {
         <FormField label="副标题" htmlFor="heroSubheadline">
           <textarea id="heroSubheadline" name="heroSubheadline" rows={2} defaultValue={initialValues.heroSubheadline} className={fieldInputClasses} />
         </FormField>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <FormField label="按钮一文字" htmlFor="heroButton1Text">
             <input id="heroButton1Text" name="heroButton1Text" defaultValue={initialValues.heroButton1Text} className={fieldInputClasses} />
           </FormField>
@@ -83,11 +81,8 @@ export function HomepageForm({ initialValues }: { initialValues: Values }) {
         </FormField>
       </section>
 
-      <section className="space-y-4 rounded-lg border border-grey-200 bg-white p-5">
-        <h2 className="font-semibold text-navy-950">核心优势（JSON 格式，谨慎编辑）</h2>
-        <FormField label="核心优势" htmlFor="coreAdvantagesJson" hint='格式：[{"title":"...","description":"..."}]'>
-          <textarea id="coreAdvantagesJson" name="coreAdvantagesJson" rows={4} defaultValue={toJsonText(initialValues.coreAdvantages)} className={`${fieldInputClasses} font-mono text-xs`} />
-        </FormField>
+      <section className="rounded-lg border border-border bg-card p-5">
+        <CoreAdvantagesEditor initialValues={initialValues.coreAdvantages ?? []} disabled={pending} />
       </section>
 
       {state.message && <p className={`text-sm ${state.success ? 'text-green-600' : 'text-red-600'}`}>{state.message}</p>}

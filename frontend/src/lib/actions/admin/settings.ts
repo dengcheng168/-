@@ -6,6 +6,7 @@ import { ApiError } from '@/lib/api/client';
 import { SOCIAL_PLATFORMS } from '@/lib/constants/social-platforms';
 import type { AdminFormState } from './categories';
 import { textOrUndefined } from './form-utils';
+import { parseCoreAdvantages } from '@/lib/admin/core-advantages';
 
 async function patchSettings(
   section: string,
@@ -39,6 +40,7 @@ export async function updateContactSettingsAction(_prevState: AdminFormState, fo
     faviconUrl: textOrUndefined(formData, 'faviconUrl'),
     companyAddress: textOrUndefined(formData, 'companyAddress'),
     companyMapImage: textOrUndefined(formData, 'companyMapImage'),
+    companyMapMobileImage: textOrUndefined(formData, 'companyMapMobileImage'),
     companyEmail: textOrUndefined(formData, 'companyEmail'),
     companyPhone: textOrUndefined(formData, 'companyPhone'),
   });
@@ -83,21 +85,12 @@ export async function testSmtpAction(): Promise<AdminFormState> {
 }
 
 export async function updateHomepageSettingsAction(_prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
-  // 之前这里 JSON.parse 失败会被静默吞掉、直接跳过该字段，导致整份表单显示"已保存"成功提示，
-  // 但填错格式的那个字段其实完全没有写入数据库——用户会以为是 bug（"保存不了"），
-  // 其实是不知道 JSON 语法错在哪。现在改成：任何一个字段解析失败就整体中止保存并指出是哪一项、错在哪。
-  const jsonFields: { key: string; label: string }[] = [{ key: 'coreAdvantagesJson', label: '核心优势' }];
-
-  const parsed: Record<string, unknown> = {};
-  for (const { key, label } of jsonFields) {
-    const raw = textOrUndefined(formData, key);
-    if (!raw) continue;
-    try {
-      parsed[key] = JSON.parse(raw);
-    } catch (err) {
-      const detail = err instanceof Error ? err.message : '';
-      return { message: `"${label}"不是合法的 JSON 格式，未保存任何改动。请检查每个地址/文字是否用英文双引号包裹（${detail}）` };
-    }
+  let coreAdvantages;
+  try {
+    const raw = textOrUndefined(formData, 'coreAdvantagesJson');
+    coreAdvantages = raw === undefined ? undefined : parseCoreAdvantages(raw);
+  } catch (err) {
+    return { message: err instanceof Error ? err.message : '核心优势内容有误，未保存任何改动。' };
   }
 
   return patchSettings('homepage', {
@@ -110,7 +103,7 @@ export async function updateHomepageSettingsAction(_prevState: AdminFormState, f
     heroDesktopImage: textOrUndefined(formData, 'heroDesktopImage'),
     heroMobileImage: textOrUndefined(formData, 'heroMobileImage'),
     homepageVideoUrl: textOrUndefined(formData, 'homepageVideoUrl'),
-    coreAdvantages: parsed.coreAdvantagesJson,
+    coreAdvantages,
   }, '/admin/homepage');
 }
 
@@ -147,7 +140,20 @@ export async function updatePixelSettingsAction(_prevState: AdminFormState, form
     metaPixelId: textOrUndefined(formData, 'metaPixelId'),
     tiktokPixelId: textOrUndefined(formData, 'tiktokPixelId'),
     googlePixelId: textOrUndefined(formData, 'googlePixelId'),
+    googleAdsId: textOrUndefined(formData, 'googleAdsId'),
   });
+}
+
+export async function updateGa4SettingsAction(_prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
+  return patchSettings('ga4', {
+    googlePixelId: textOrUndefined(formData, 'googlePixelId'),
+  }, '/admin/settings/pixels');
+}
+
+export async function updateGoogleAdsSettingsAction(_prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
+  return patchSettings('google-ads', {
+    googleAdsId: textOrUndefined(formData, 'googleAdsId'),
+  }, '/admin/settings/pixels');
 }
 
 /**

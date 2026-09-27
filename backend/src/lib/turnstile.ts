@@ -13,7 +13,9 @@ export async function verifyTurnstileToken(
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body,
+      signal: AbortSignal.timeout(8000),
     });
+    if (!res.ok) return false;
     const data = (await res.json()) as { success: boolean };
     return data.success === true;
   } catch {

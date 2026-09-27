@@ -16,6 +16,7 @@ function buildPayload(formData: FormData) {
     // 用 ?? 而不是 textOrUndefined：清空图片后保存要能真正清空数据库字段（回退到占位图）
     imageUrl: formData.get('imageUrl') ?? undefined,
     description: textOrUndefined(formData, 'description'),
+    galleryGroup: formData.get('galleryGroup'),
     published: formData.get('published') === 'on',
   };
 }

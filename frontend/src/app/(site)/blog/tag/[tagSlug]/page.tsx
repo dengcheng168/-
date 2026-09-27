@@ -5,17 +5,27 @@ import { BlogSidebar } from '@/components/blog/BlogSidebar';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { Pagination } from '@/components/ui/Pagination';
 import { listBlogPosts, listBlogCategories, listBlogTags } from '@/lib/api/blog';
+import { paginatedPath } from '@/lib/seo/pagination';
 
 export async function generateMetadata({
-  params,
+  params, searchParams,
 }: {
   params: Promise<{ tagSlug: string }>;
+  searchParams: Promise<{ page?: string }>;
 }): Promise<Metadata> {
   const { tagSlug } = await params;
+  const { page } = await searchParams;
+  const tags = await listBlogTags();
+  const name = tags.find((tag) => tag.slug === tagSlug)?.name ?? tagSlug;
+  const enPath = paginatedPath(`/blog/tag/${tagSlug}`, page);
+  const esPath = paginatedPath(`/es/blog/tag/${tagSlug}`, page);
   return {
+    title: `${name} Articles | Li-Men`,
+    description: `Li-Men articles filed under ${name}.`,
+    robots: { index: false, follow: true },
     alternates: {
-      canonical: `/blog/tag/${tagSlug}`,
-      languages: { en: `/blog/tag/${tagSlug}`, es: `/es/blog/tag/${tagSlug}`, 'x-default': `/blog/tag/${tagSlug}` },
+      canonical: enPath,
+      languages: { en: enPath, es: esPath, 'x-default': enPath },
     },
   };
 }

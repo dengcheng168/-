@@ -7,13 +7,23 @@ import { Pagination } from '@/components/ui/Pagination';
 import { PageHeroBanner } from '@/components/site/PageHeroBanner';
 import { listProducts, listVisibleProductCategories } from '@/lib/api/products';
 import { getPageBySlug } from '@/lib/api/content';
+import { paginatedDescription, paginatedPath, paginatedTitle } from '@/lib/seo/pagination';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}): Promise<Metadata> {
+  const { page: pageParam } = await searchParams;
   const page = await getPageBySlug('products');
+  const enPath = paginatedPath('/products', pageParam);
+  const esPath = paginatedPath('/es/products', pageParam);
+  const baseTitle = page?.seoTitle ?? page?.title ?? 'Products';
+  const baseDescription = page?.seoDescription ?? 'Browse our full range of OEM/ODM water purifier products.';
   return {
-    title: page?.seoTitle ?? page?.title ?? 'Products',
-    description: page?.seoDescription ?? 'Browse our full range of OEM/ODM water purifier products.',
-    alternates: { canonical: '/products', languages: { en: '/products', es: '/es/products', 'x-default': '/products' } },
+    title: paginatedTitle(baseTitle, pageParam),
+    description: paginatedDescription(baseDescription, pageParam),
+    alternates: { canonical: enPath, languages: { en: enPath, es: esPath, 'x-default': enPath } },
   };
 }
 

@@ -6,6 +6,11 @@ import { AnalyticsPixels } from '@/components/analytics/AnalyticsPixels';
 import { PageViewTracker } from '@/components/analytics/PageViewTracker';
 import { getPublicBaseMetadata } from '@/lib/seo/base-metadata';
 
+// Public pages read their navigation, settings and CMS content from the backend.
+// The backend is intentionally unavailable in the isolated Docker build stage,
+// so rendering these routes statically can persist empty fallback content.
+export const dynamic = 'force-dynamic';
+
 // 独立的根 layout（跟 (site)/layout.tsx 是姐妹关系，app/ 顶层已经没有共享的 layout.tsx 了），
 // 服务端首次响应就直接输出 <html lang="es">——不再需要客户端 hydration 后再改 lang
 // （旧的 SetHtmlLang 组件已删除）。openGraph.locale 也在这里统一设成 'es'，跟 getPublicBaseMetadata

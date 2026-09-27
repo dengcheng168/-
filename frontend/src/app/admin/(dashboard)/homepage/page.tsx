@@ -1,6 +1,7 @@
 import { adminFetch } from '@/lib/api/admin-client';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { HomepageForm } from './HomepageForm';
+import type { CoreAdvantage } from '@/types/settings';
 
 interface Settings {
   heroHeadline: string;
@@ -12,7 +13,7 @@ interface Settings {
   heroDesktopImage: string | null;
   heroMobileImage: string | null;
   homepageVideoUrl: string | null;
-  coreAdvantages: unknown;
+  coreAdvantages: CoreAdvantage[];
 }
 
 export default async function AdminHomepagePage() {

@@ -9,6 +9,8 @@ export interface Certificate {
   imageUrl: string;
   pdfUrl: string | null;
   description: string | null;
+  applicableProductType?: string | null;
+  applicableModels?: string[];
 }
 
 export interface FactoryGalleryItem {
@@ -16,6 +18,7 @@ export interface FactoryGalleryItem {
   imageUrl: string | null;
   title: string;
   description: string | null;
+  galleryGroup: 'manufacturing' | 'quality' | 'visits';
 }
 
 export interface Faq {

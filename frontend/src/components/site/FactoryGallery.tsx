@@ -3,7 +3,7 @@ import { Container } from '@/components/ui/Container';
 import { t } from '@/lib/i18n/site-strings';
 import type { Locale } from '@/lib/i18n/locales';
 import type { FactoryGalleryItem } from '@/types/content';
-import { GALLERY_GROUP_ORDER, GALLERY_GROUP_SEQUENCE, type GalleryGroup } from '@/lib/about/gallery-groups';
+import { GALLERY_GROUP_SEQUENCE, legacyGalleryGroup, type GalleryGroup } from '@/lib/about/gallery-groups';
 
 const GROUP_TITLE_KEY: Record<GalleryGroup, 'aboutGalleryManufacturingTitle' | 'aboutGalleryQualityTitle' | 'aboutGalleryVisitsTitle'> = {
   manufacturing: 'aboutGalleryManufacturingTitle',
@@ -49,14 +49,11 @@ function GalleryGrid({ items }: { items: FactoryGalleryItem[] }) {
 
 export function FactoryGallery({ items, locale = 'en' }: { items: FactoryGalleryItem[]; locale?: Locale }) {
   if (items.length === 0) return null;
-  const byId = new Map(items.map((item) => [item.id, item]));
 
   return (
     <>
       {GALLERY_GROUP_SEQUENCE.map((group) => {
-        const groupItems = GALLERY_GROUP_ORDER[group]
-          .map((id) => byId.get(id))
-          .filter((item): item is FactoryGalleryItem => Boolean(item));
+        const groupItems = items.filter((item) => (item.galleryGroup ?? legacyGalleryGroup(item.id)) === group);
         if (groupItems.length === 0) return null;
 
         return (

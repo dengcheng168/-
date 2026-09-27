@@ -1,18 +1,21 @@
 export type GalleryGroup = 'manufacturing' | 'quality' | 'visits';
 
 /**
- * About 页面 16 组工厂展示图（FactoryGalleryItem）按公司故事重新分组的顺序映射。
- * key 是生产库里真实的 factory_gallery_items.id，按分组内展示顺序排列——不改数据库
- * sortOrder（后台列表仍按原顺序管理），只在前台展示层重新编排。
- * 映射依据：图片原标题逐一核对生产数据库内容，见 2026-08-07 B2B 可信度增强第二批报告。
- *
- * 原本的 Packaging & Shipment（id 2、4）单独成组，用户要求把这两张并入
- * Manufacturing Workflow（放在最后），不再单独展示 Packaging & Shipment 分组。
+ * 展示区块和页面顺序。每张图自身保存 galleryGroup，因此后台新增图片后会直接显示在
+ * 对应区块；同一区块内按照后台的 sortOrder 排列。
  */
-export const GALLERY_GROUP_ORDER: Record<GalleryGroup, number[]> = {
-  manufacturing: [12, 8, 11, 5, 6, 1, 2, 4],
-  quality: [9, 10, 7, 3],
-  visits: [13, 15, 14, 16],
+export const GALLERY_GROUP_SEQUENCE: GalleryGroup[] = ['manufacturing', 'quality', 'visits'];
+
+export const GALLERY_GROUP_LABEL: Record<GalleryGroup, string> = {
+  manufacturing: '生产流程',
+  quality: '质量检测',
+  visits: '客户到访',
 };
 
-export const GALLERY_GROUP_SEQUENCE: GalleryGroup[] = ['manufacturing', 'quality', 'visits'];
+// Rolling-deploy compatibility: the public site may briefly return legacy rows
+// before the database migration adds galleryGroup.
+export function legacyGalleryGroup(itemId: number): GalleryGroup {
+  if ([3, 7, 9, 10].includes(itemId)) return 'quality';
+  if ([13, 14, 15, 16].includes(itemId)) return 'visits';
+  return 'manufacturing';
+}

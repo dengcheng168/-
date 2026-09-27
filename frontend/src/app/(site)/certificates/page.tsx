@@ -7,6 +7,10 @@ import { CertificateCard } from '@/components/site/CertificateCard';
 import { listCertificates, getPageBySlug } from '@/lib/api/content';
 import { t } from '@/lib/i18n/site-strings';
 import { getCertificateDisplayMeta, dedupeByRule } from '@/lib/certificates/display-config';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { certificateItemListJsonLd } from '@/lib/seo/jsonld';
+import { getPublicSettings } from '@/lib/api/settings';
+import { getSiteUrl } from '@/lib/seo/site';
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getPageBySlug('certificates');
@@ -21,7 +25,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CertificatesPage() {
-  const [allCertificates, page] = await Promise.all([listCertificates(), getPageBySlug('certificates')]);
+  const [allCertificates, page, settings, siteUrl] = await Promise.all([
+    listCertificates(), getPageBySlug('certificates'), getPublicSettings(), getSiteUrl(),
+  ]);
   const hasHero = Boolean(page?.heroImage || page?.heroImageMobile);
 
   // listCertificates() 只返回 published=true 的记录；这里再按证书业务字段（证书编号/
@@ -42,6 +48,7 @@ export default async function CertificatesPage() {
 
   return (
     <>
+      <JsonLd data={certificateItemListJsonLd(certificates, siteUrl, settings.companyName, 'en')} />
       {hasHero && (
         <PageHeroBanner
           image={page?.heroImage}

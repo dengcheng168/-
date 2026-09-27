@@ -21,11 +21,12 @@ interface AuditLogEntry {
 }
 
 export default async function AdminSeoSettingsPage() {
-  const [{ data }, admin, resolved, sitemapUrl] = await Promise.all([
+  const [{ data }, admin, resolved, sitemapUrl, robotsUrl] = await Promise.all([
     adminFetch<Settings>('/settings'),
     getCurrentAdmin(),
     getSiteBaseUrl(),
     absoluteUrl('/sitemap.xml'),
+    absoluteUrl('/robots.txt'),
   ]);
   const canEditSiteDomain = admin?.role === 'SUPER_ADMIN';
 
@@ -53,7 +54,7 @@ export default async function AdminSeoSettingsPage() {
           lastModifiedBy={lastModified?.adminEmail ?? null}
           lastModifiedAt={lastModified?.createdAt ?? null}
         />
-        <SitemapStatus sitemapUrl={sitemapUrl} />
+        <SitemapStatus sitemapUrl={sitemapUrl} robotsUrl={robotsUrl} />
         <SeoSettingsForm initialValues={data} />
       </div>
     </div>
