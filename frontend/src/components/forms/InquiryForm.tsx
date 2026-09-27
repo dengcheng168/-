@@ -6,6 +6,7 @@ import { submitInquiryAction, type InquiryFormState } from '@/lib/actions/inquir
 import { t } from '@/lib/i18n/site-strings';
 import type { Locale } from '@/lib/i18n/locales';
 import { Honeypot } from './Honeypot';
+import { waitForMetaPixelReady } from '@/lib/analytics/meta-events';
 
 const initialState: InquiryFormState = {};
 
@@ -36,16 +37,30 @@ export function InquiryForm({
   const [token, setToken] = useState('');
 
   useEffect(() => {
-    if (state.success && typeof window.fbq === 'function') {
-      if (!state.metaEventId) return;
+    if (!state.success || !state.metaEventId) return;
+
+    const send = () => {
+      if (typeof window.fbq !== 'function') return;
       window.fbq(
         'track',
         'Lead',
-        { lead_type: 'B2B_inquiry_form_submission' },
+        {
+          lead_type: 'B2B_inquiry_form_submission',
+          content_name: defaultProductName || 'general_inquiry',
+          page_language: locale,
+          source_page: sourcePage,
+        },
         { eventID: state.metaEventId },
       );
-    }
-  }, [state.success, state.metaEventId]);
+    };
+
+    return waitForMetaPixelReady({
+      isReady: () => !!window.__META_PIXEL_READY__ && typeof window.fbq === 'function',
+      addReadyListener: (listener) => window.addEventListener('meta-pixel-ready', listener, { once: true }),
+      removeReadyListener: (listener) => window.removeEventListener('meta-pixel-ready', listener),
+      send,
+    });
+  }, [defaultProductName, locale, sourcePage, state.success, state.metaEventId]);
 
   if (state.success) {
     return (

@@ -79,10 +79,12 @@ export async function sendMetaInquiryEvents(
 
   const userData: Record<string, string | string[]> = {
     em: [hashEmail(input.email)],
+    external_id: [hashEmail(input.email)],
   };
   const optionalHashed = {
     ph: hashPhone(input.phone),
     fn: hashFirstName(input.firstName),
+    ln: hashLastName(input.firstName),
     country: hashCountry(input.country),
   };
   for (const [key, value] of Object.entries(optionalHashed)) {

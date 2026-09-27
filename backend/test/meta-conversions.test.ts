@@ -43,8 +43,8 @@ test('sends one deduplicated Lead with normalized hashed customer data', async (
   assert.deepEqual(body.data[0].user_data.em, [sha256('buyer@example.com')]);
   assert.deepEqual(body.data[0].user_data.ph, [sha256('8613800138000')]);
   assert.deepEqual(body.data[0].user_data.fn, [sha256('alice')]);
-  assert.equal(body.data[0].user_data.ln, undefined);
-  assert.equal(body.data[0].user_data.external_id, undefined);
+  assert.deepEqual(body.data[0].user_data.ln, [sha256('zhang')]);
+  assert.deepEqual(body.data[0].user_data.external_id, [sha256('buyer@example.com')]);
   assert.deepEqual(body.data[0].user_data.country, [sha256('cn')]);
   assert.equal(body.data[0].user_data.client_ip_address, '203.0.113.9');
   assert.equal(body.data[0].user_data.client_user_agent, 'Example Browser');
@@ -72,7 +72,7 @@ test('normalizes common country names for Meta advanced matching', async () => {
 
   const body = JSON.parse(requestBody);
   assert.deepEqual(body.data[0].user_data.country, [sha256('cn')]);
-  assert.equal(body.data[0].user_data.ln, undefined);
+  assert.deepEqual(body.data[0].user_data.ln, [sha256('zhang')]);
 });
 
 test('does nothing without valid server-side credentials', async () => {
