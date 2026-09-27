@@ -17,6 +17,7 @@ declare global {
   interface Window {
     fbq?: (...args: unknown[]) => void;
     __META_PIXEL_ID__?: string;
+    __META_PIXEL_READY__?: boolean;
   }
 }
 
